@@ -5,7 +5,9 @@ import { getImageUrl } from "@/lib/utils";
 
 // Home Components
 import { Hero } from "@/components/Hero";
+import { AboutMocsSection } from "@/components/AboutMocsSection";
 import { TrendingProducts } from "@/components/TrendingProducts";
+
 import { NewArrivals } from "@/components/NewArrivals";
 import { CategoriesSection } from "@/components/CategoriesSection";
 import { ProductsCarousel } from "@/components/ProductsCarousel";
@@ -297,7 +299,9 @@ function Home() {
   return (
     <>
       <Hero />
+      <AboutMocsSection />
       <TrendingProducts products={trendingProducts} />
+
       <NewArrivals products={newArrivals} />
       <CategoriesSection categoriesBanners={categoriesBanners} />
       <ProductsCarousel products={processedProducts} />
