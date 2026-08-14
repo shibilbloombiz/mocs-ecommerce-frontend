@@ -164,7 +164,67 @@ function Shop() {
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    setAllProducts(products);
+    let isMounted = true;
+    const fetchFreshProducts = async () => {
+      try {
+        const res = await apiClient.products.list("limit=100");
+        if (isMounted && res && res.items) {
+          const apiProducts = res.items.map((p: any) => ({
+            id: p._id,
+            artNumber: p.artNumber || "",
+            name: p.name,
+            category: (p.category?.name || p.category || "Men") as any,
+            collection: (p.collection || "Casual") as any,
+            type: "Running",
+            price: p.price,
+            oldPrice: p.oldPrice,
+            rating: p.rating || 5,
+            reviews: p.reviewCount || 0,
+            stock: p.stock || 0,
+            image: getImageUrl(p.coverImage),
+            colors: p.colors && p.colors.length > 0
+              ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
+              : [{ name: "Default", hex: "#000000" }],
+            sizes: p.sizes || [7, 8, 9, 10, 11, 12],
+            description: p.description,
+            isNew: p.isNew,
+            isTrending: p.isTrending,
+            views: p.additionalImages && p.additionalImages.length > 0
+              ? [
+                { label: "Front", src: getImageUrl(p.coverImage) },
+                ...p.additionalImages.map((img: any) => ({
+                  label: img.label || "Side",
+                  src: getImageUrl(img.url)
+                }))
+              ]
+              : [{ label: "Front", src: getImageUrl(p.coverImage) }]
+          }));
+          setAllProducts(apiProducts);
+        }
+      } catch (err) {
+        console.warn("Failed to load products from API", err);
+      }
+    };
+
+    fetchFreshProducts();
+
+    const handleFocus = () => {
+      fetchFreshProducts();
+    };
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("visibilitychange", handleFocus);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("visibilitychange", handleFocus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setAllProducts(products);
+    }
   }, [products]);
 
   useEffect(() => {

@@ -17,42 +17,47 @@ import { SandalsCarousel } from "@/components/SandalsCarousel";
 import { QualityPromise } from "@/components/QualityPromise";
 import { ReviewsMarquee } from "@/components/ReviewsMarquee";
 
+export function formatApiProducts(items: any[]) {
+  if (!items || !Array.isArray(items)) return [];
+  return items.map((p: any) => ({
+    id: p._id,
+    _id: p._id,
+    artNumber: p.artNumber || "",
+    name: p.name,
+    category: (p.category?.name || p.category || "Men") as any,
+    collection: (p.collection || "Casual") as any,
+    type: "Running",
+    price: p.price,
+    oldPrice: p.oldPrice,
+    rating: p.rating || 5,
+    reviews: p.reviewCount || 0,
+    stock: p.stock || 0,
+    image: getImageUrl(p.coverImage),
+    colors: p.colors && p.colors.length > 0
+      ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
+      : [{ name: "Default", hex: "#000000" }],
+    sizes: p.sizes || [7, 8, 9, 10, 11, 12],
+    description: p.description,
+    isNew: p.isNew,
+    isTrending: p.isTrending,
+    views: p.additionalImages && p.additionalImages.length > 0
+      ? [
+        { label: "Front", src: getImageUrl(p.coverImage) },
+        ...p.additionalImages.map((img: any) => ({
+          label: img.label || "Side",
+          src: getImageUrl(img.url)
+        }))
+      ]
+      : [{ label: "Front", src: getImageUrl(p.coverImage) }]
+  }));
+}
+
 export const Route = createFileRoute("/")({
   loader: async () => {
     try {
       const res = await apiClient.products.list("limit=100");
       if (res && res.items) {
-        const apiProducts = res.items.map((p: any) => ({
-          id: p._id,
-          artNumber: p.artNumber || "",
-          name: p.name,
-          category: (p.category?.name || p.category || "Men") as any,
-          collection: (p.collection || "Casual") as any,
-          type: "Running",
-          price: p.price,
-          oldPrice: p.oldPrice,
-          rating: p.rating || 5,
-          reviews: p.reviewCount || 0,
-          stock: p.stock || 0,
-          image: getImageUrl(p.coverImage),
-          colors: p.colors && p.colors.length > 0
-            ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
-            : [{ name: "Default", hex: "#000000" }],
-          sizes: p.sizes || [7, 8, 9, 10, 11, 12],
-          description: p.description,
-          isNew: p.isNew,
-          isTrending: p.isTrending,
-          views: p.additionalImages && p.additionalImages.length > 0
-            ? [
-              { label: "Front", src: getImageUrl(p.coverImage) },
-              ...p.additionalImages.map((img: any) => ({
-                label: img.label || "Side",
-                src: getImageUrl(img.url)
-              }))
-            ]
-            : [{ label: "Front", src: getImageUrl(p.coverImage) }]
-        }));
-        return { products: apiProducts };
+        return { products: formatApiProducts(res.items) };
       }
     } catch (err) {
       console.warn("Failed to load products for homepage", err);
@@ -207,8 +212,41 @@ function Home() {
     fetchAdsSettings();
   }, []);
 
+  // Always sync latest products from the database dynamically
   useEffect(() => {
-    setAllProducts(products);
+    let isMounted = true;
+    const fetchFreshProducts = async () => {
+      try {
+        const res = await apiClient.products.list("limit=100");
+        if (isMounted && res && res.items) {
+          setAllProducts(formatApiProducts(res.items));
+        }
+      } catch (err) {
+        console.warn("Dynamic product fetch failed, keeping fallback/loader data", err);
+      }
+    };
+
+    // Fetch on initial client mount
+    fetchFreshProducts();
+
+    // Re-fetch automatically whenever the user returns to this tab
+    const handleFocus = () => {
+      fetchFreshProducts();
+    };
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("visibilitychange", handleFocus);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("visibilitychange", handleFocus);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (products && products.length > 0) {
+      setAllProducts(products);
+    }
   }, [products]);
 
   const trendingProducts = useMemo(() => {
