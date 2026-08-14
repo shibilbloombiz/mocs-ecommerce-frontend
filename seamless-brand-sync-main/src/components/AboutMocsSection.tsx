@@ -9,7 +9,7 @@ import {
   useReducedMotion,
 } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
-import homeAboutShoe from "C:/Users/user/.gemini/antigravity-ide/brain/c3592418-1454-4703-9e91-e98c79461a6b/media__1786102964931.png";
+import homeAboutShoe from "@/assets/media__1786102964931.png";
 import blackSandals from "@/assets/black sandals.png";
 
 export function AboutMocsSection() {

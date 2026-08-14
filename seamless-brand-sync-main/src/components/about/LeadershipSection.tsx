@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import azharRmPhoto from "C:/Users/user/.gemini/antigravity-ide/brain/13f69f8c-9e3c-4ae7-926d-54875340adad/azhar_rm_portrait_1786339245557.png";
+import azharRmPhoto from "@/assets/azhar_rm_portrait_1786339245557.png";
 
 export function LeadershipSection() {
   const containerRef = useRef<HTMLDivElement>(null);
