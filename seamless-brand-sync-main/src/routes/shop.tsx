@@ -7,7 +7,8 @@ import {
   sortOptions,
   type Product,
 } from "@/lib/products";
-import { ProductCard, ProductCardSkeleton } from "@/components/ProductCard";
+import { ProductCard } from "@/components/ProductCard";
+import { SkeletonCard } from "@/components/SkeletonCard";
 import { cn, getImageUrl } from "@/lib/utils";
 import { apiClient, API_BASE_URL } from "@/lib/api";
 import { useStore } from "@/lib/store";
@@ -362,14 +363,11 @@ function Shop() {
             </div>
           </div>
 
-          <motion.div
-            layout
-            className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4"
-          >
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
             {loading
-              ? Array.from({ length: 6 }).map((_, i) => <ProductCardSkeleton key={i} />)
+              ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
               : filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
-          </motion.div>
+          </div>
 
           {!loading && filtered.length === 0 && (
             <p className="py-20 text-center text-muted-foreground">

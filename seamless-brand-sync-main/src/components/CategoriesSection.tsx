@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { Reveal, Stagger } from "@/components/Reveal";
 import { getImageUrl } from "@/lib/utils";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 interface CategoriesSectionProps {
   categoriesBanners: any[];
@@ -26,14 +27,16 @@ export function CategoriesSection({ categoriesBanners }: CategoriesSectionProps)
         {/* Left Large Column (Hexashop style banner) */}
         <motion.div
           variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }}
-          className="lg:col-span-6 relative group overflow-hidden rounded-none bg-stone-900 shadow-soft min-h-[420px] lg:min-h-full h-full flex flex-col justify-end text-left border border-border/10"
+          style={{ willChange: "transform, opacity" }}
+          className="lg:col-span-6 relative group overflow-hidden rounded-none bg-stone-900 shadow-soft min-h-[420px] lg:min-h-full h-full flex flex-col justify-end text-left border border-border/10 gpu-accelerated"
         >
           <div className="absolute inset-0 h-full w-full">
             {categoriesBanners[0]?.bg ? (
-              <img
+              <OptimizedImage
                 src={getImageUrl(categoriesBanners[0].bg)}
                 alt={categoriesBanners[0].title}
-                className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                containerClassName="h-full w-full"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             ) : (
               <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest">
@@ -74,14 +77,16 @@ export function CategoriesSection({ categoriesBanners }: CategoriesSectionProps)
               <motion.div
                 key={cat.title}
                 variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0 } }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="relative group aspect-square overflow-hidden rounded-none bg-muted shadow-soft flex items-center justify-center border border-border/10"
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                style={{ willChange: "transform, opacity" }}
+                className="relative group aspect-square overflow-hidden rounded-none bg-muted shadow-soft flex items-center justify-center border border-border/10 gpu-accelerated"
               >
                 {cat.bg ? (
-                  <img
+                  <OptimizedImage
                     src={getImageUrl(cat.bg)}
                     alt={cat.title}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                    containerClassName="absolute inset-0 h-full w-full"
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center text-zinc-500 text-xs font-mono uppercase tracking-widest">

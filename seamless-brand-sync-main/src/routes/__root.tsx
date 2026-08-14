@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -7,7 +8,6 @@ import {
   useRouterState,
   HeadContent,
   Scripts,
-  ScrollRestoration,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -107,6 +107,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/png", href: "/favicon.png" },
       { rel: "apple-touch-icon", href: "/favicon.png" },
+      { rel: "dns-prefetch", href: "https://images.unsplash.com" },
+      { rel: "dns-prefetch", href: "https://res.cloudinary.com" },
+      { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" },
+      { rel: "preconnect", href: "https://res.cloudinary.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -128,8 +132,10 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
-        <Scripts />
+        <ClerkProvider>
+          {children}
+          <Scripts />
+        </ClerkProvider>
       </body>
     </html>
   );
@@ -146,7 +152,6 @@ function RootComponent() {
   const renderContent = () => (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        <ScrollRestoration />
         {!isAdminRoute && <Navbar />}
         <main className={isAdminRoute ? "" : isHome ? "" : isAuthPage ? "pt-14 sm:pt-16" : "pt-16"}>
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}

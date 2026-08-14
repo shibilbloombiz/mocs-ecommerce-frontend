@@ -6,6 +6,7 @@ import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import { cn, getImageUrl } from "@/lib/utils";
 import { isAuthed } from "@/lib/auth";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 export function ProductCard({
   product,
@@ -25,36 +26,31 @@ export function ProductCard({
 
   if (variant === "simple") {
     return (
-      <motion.div
-        variants={{
-          hidden: { opacity: 0, y: 30 },
-          show: { opacity: 1, y: 0 },
-        }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="group relative font-sans"
-      >
+      <div className="group relative font-sans">
         <Link
           to="/product/$id"
           params={{ id: product.id }}
-          className="relative block w-full aspect-square overflow-hidden rounded-3xl shadow-soft transition-all duration-500 ease-out hover:scale-105 hover:-translate-y-2 hover:shadow-xl bg-[#eaeaea] border border-black/5"
+          className="relative block w-full aspect-square overflow-hidden rounded-3xl shadow-soft transition-all duration-300 ease-out hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-xl bg-[#eaeaea] border border-black/5"
         >
           {/* Base Image */}
-          <img
+          <OptimizedImage
             src={getImageUrl(product.image)}
             alt={product.name}
-            loading="lazy"
+            aspectRatio="1/1"
+            containerClassName="h-full w-full"
             className={cn(
-              "h-full w-full object-cover transition-all duration-700 ease-out mix-blend-multiply absolute inset-0",
+              "h-full w-full object-cover transition-all duration-500 ease-out mix-blend-multiply absolute inset-0",
               product.views && product.views.length > 1 ? "group-hover:opacity-0" : ""
             )}
           />
           {/* Hover Image */}
           {product.views && product.views.length > 1 && (
-            <img
+            <OptimizedImage
               src={getImageUrl(product.views[1].src)}
               alt={`${product.name} Hover`}
-              loading="lazy"
-              className="h-full w-full object-cover transition-all duration-700 ease-out opacity-0 group-hover:opacity-100 mix-blend-multiply absolute inset-0"
+              aspectRatio="1/1"
+              containerClassName="h-full w-full"
+              className="h-full w-full object-cover transition-all duration-500 ease-out opacity-0 group-hover:opacity-100 mix-blend-multiply absolute inset-0"
             />
           )}
 
@@ -119,34 +115,24 @@ export function ProductCard({
             </button>
           </div>
         </Link>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 30 },
-        show: { opacity: 1, y: 0 },
-      }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative"
-    >
+    <div className="group relative">
       <Link
         to="/product/$id"
         params={{ id: product.id }}
-        className="block overflow-hidden rounded-2xl bg-white border border-orange-500 lg:border-orange-500/12 shadow-[0_0_15px_rgba(244,106,30,0.18)] lg:shadow-soft transition-all duration-350 group-hover:-translate-y-2 group-hover:border-primary group-hover:shadow-[0_12px_40px_rgba(244,106,30,0.15)] text-stone-900"
+        className="block overflow-hidden rounded-2xl bg-white border border-orange-500 lg:border-orange-500/12 shadow-[0_0_15px_rgba(244,106,30,0.18)] lg:shadow-soft transition-all duration-300 group-hover:-translate-y-1.5 group-hover:border-primary group-hover:shadow-[0_12px_40px_rgba(244,106,30,0.15)] text-stone-900"
       >
-        <div
-          className="relative aspect-square overflow-hidden bg-white"
-        >
-          <img
+        <div className="relative aspect-square overflow-hidden bg-white">
+          <OptimizedImage
             src={getImageUrl(product.image)}
             alt={product.name}
-            loading="lazy"
-            width={800}
-            height={800}
-            className="relative h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+            aspectRatio="1/1"
+            containerClassName="h-full w-full"
+            className="relative h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
 
           <div className="absolute left-3 top-3 flex flex-col gap-2 pointer-events-none">
@@ -237,7 +223,7 @@ export function ProductCard({
           </div>
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 

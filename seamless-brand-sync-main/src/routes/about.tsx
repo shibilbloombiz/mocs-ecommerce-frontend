@@ -61,7 +61,10 @@ function About() {
   const { products } = Route.useLoaderData();
 
   return (
-    <div className="relative min-h-screen bg-[#070707] text-[#F5F5F2] selection:bg-[#F26522] selection:text-white overflow-x-hidden">
+    <div
+      id="about-page-root"
+      className="relative min-h-screen bg-[#070707] text-[#F5F5F2] selection:bg-[#F26522] selection:text-white overflow-x-hidden"
+    >
       {/* Floating Vertical Desktop Progress Indicator */}
       <AboutPageNav />
 

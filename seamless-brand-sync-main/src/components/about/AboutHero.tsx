@@ -10,15 +10,15 @@ export function AboutHero({ products }: { products?: any[] }) {
   // Primary hero sneaker image from the uploaded asset
   const heroShoeImg = userUploadedShoe || (products && products.length > 0 && products[0]?.image) || blackSandals;
 
-  // Scroll Parallax Effect
+  // Scroll Parallax — use smaller ranges so transforms stay cheap
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"],
   });
 
-  const textY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -60]);
-  const shoeY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -140]);
-  const bgTextY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -30]);
+  const textY   = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -50]);
+  const shoeY   = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -110]);
+  const bgTextY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -25]);
 
   return (
     <section
@@ -27,18 +27,22 @@ export function AboutHero({ products }: { products?: any[] }) {
       aria-label="About MOCS Hero"
       className="relative min-h-[90vh] lg:min-h-screen bg-[#070707] text-[#F5F5F2] flex items-center overflow-hidden pt-28 pb-20 lg:py-32"
     >
-      {/* Ambient Lighting & Gradients */}
-      <div className="absolute inset-0 pointer-events-none z-0">
+      {/* Ambient Lighting & Gradients — static, no blur animation for perf */}
+      <div className="absolute inset-0 pointer-events-none z-0" aria-hidden>
+        {/* Use a CSS conic/radial gradient instead of blur filter to avoid GPU overdraw */}
         <div
-          className="absolute top-1/3 left-2/3 -translate-y-1/2 w-[650px] h-[650px] rounded-full opacity-25 blur-[140px]"
-          style={{ background: "radial-gradient(circle, #F26522 0%, transparent 70%)" }}
+          className="absolute top-1/3 left-2/3 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20"
+          style={{
+            background: "radial-gradient(circle at center, rgba(242,101,34,0.55) 0%, rgba(242,101,34,0.15) 45%, transparent 70%)",
+            transform: "translate(-50%, -50%) translateZ(0)",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#070707]/60 to-[#070707]" />
       </div>
 
-      {/* Huge Low-Opacity Background Typography "MOCS" */}
+      {/* Huge Low-Opacity Background Typography "MOCS" — GPU composited */}
       <motion.div
-        style={{ y: bgTextY }}
+        style={{ y: bgTextY, willChange: "transform", transform: "translateZ(0)" }}
         className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden"
       >
         <span className="font-black text-[140px] sm:text-[220px] md:text-[300px] lg:text-[380px] xl:text-[450px] tracking-tighter uppercase leading-none text-white/[0.03]">
@@ -50,7 +54,7 @@ export function AboutHero({ products }: { products?: any[] }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Column: Editorial Copy */}
-          <motion.div style={{ y: textY }} className="lg:col-span-7 z-10">
+          <motion.div style={{ y: textY, willChange: "transform" }} className="lg:col-span-7 z-10">
             {/* Orange Eyebrow */}
             <motion.div
               initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
@@ -107,7 +111,7 @@ export function AboutHero({ products }: { products?: any[] }) {
 
           {/* Right Column: Pure Floating Animated Footwear */}
           <motion.div
-            style={{ y: shoeY }}
+            style={{ y: shoeY, willChange: "transform" }}
             className="lg:col-span-5 relative flex items-center justify-center min-h-[360px] sm:min-h-[460px]"
           >
             <motion.div
@@ -120,43 +124,45 @@ export function AboutHero({ products }: { products?: any[] }) {
               transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
               className="relative z-10 w-full max-w-[440px] sm:max-w-[520px] lg:max-w-[600px] p-4 flex items-center justify-center select-none"
             >
-              {/* Continuous Levitation Float Wrapper */}
+              {/* Continuous Levitation Float Wrapper — only translateY for GPU compositing, no rotateZ to avoid repaints */}
               <motion.div
                 animate={
                   prefersReducedMotion
                     ? {}
-                    : {
-                        y: [0, -22, 0],
-                        rotateZ: [0, 2, 0],
-                      }
+                    : { y: [0, -20, 0] }
                 }
                 transition={{
                   duration: 5.5,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
+                style={{ willChange: "transform" }}
                 className="relative flex items-center justify-center w-full"
               >
-                {/* Dynamic Floating Ground Shadow */}
+                {/* Floating Ground Shadow — use opacity-only to avoid blurring every frame */}
                 <motion.div
                   animate={
                     prefersReducedMotion
                       ? {}
-                      : {
-                          scale: [1, 0.82, 1],
-                          opacity: [0.65, 0.35, 0.65],
-                        }
+                      : { opacity: [0.55, 0.22, 0.55] }
                   }
                   transition={{
                     duration: 5.5,
                     repeat: Infinity,
                     ease: "easeInOut",
                   }}
-                  className="absolute -bottom-10 w-4/5 h-14 bg-black/95 rounded-[100%] filter blur-2xl z-0 pointer-events-none"
+                  style={{ willChange: "opacity" }}
+                  className="absolute -bottom-10 w-4/5 h-14 bg-black/90 rounded-[100%] blur-2xl z-0 pointer-events-none"
                 />
 
-                {/* Ambient Orange Glow Ring */}
-                <div className="absolute w-[340px] h-[340px] rounded-full bg-[#F26522]/20 filter blur-3xl opacity-70 pointer-events-none" />
+                {/* Ambient Orange Glow Ring — static radial gradient, no filter blur */}
+                <div
+                  className="absolute w-[340px] h-[340px] rounded-full opacity-60 pointer-events-none"
+                  style={{
+                    background: "radial-gradient(circle, rgba(242,101,34,0.28) 0%, rgba(242,101,34,0.08) 55%, transparent 75%)",
+                    transform: "translateZ(0)",
+                  }}
+                />
 
                 {/* Pure Floating Footwear Image */}
                 <img

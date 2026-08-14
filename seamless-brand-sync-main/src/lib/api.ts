@@ -48,6 +48,17 @@ export const apiClient = {
         method: "POST",
         body: JSON.stringify({ ...data, email: data.email.trim() }),
       }),
+
+    clerkSync: (data: { email: string; name?: string; clerkId: string; avatar?: string; mode?: "login" | "signup" }) =>
+      api<{ token: string; user: any }>("/api/auth/clerk-sync", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    googleAuth: (idToken: string, mode?: "login" | "signup") =>
+      api<{ token: string; user: any }>("/api/auth/google", {
+        method: "POST",
+        body: JSON.stringify({ idToken, mode }),
+      }),
     me: () => api<{ user: any }>("/api/auth/me"),
   },
   users: {

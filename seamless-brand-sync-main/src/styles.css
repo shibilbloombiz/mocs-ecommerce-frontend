@@ -174,6 +174,14 @@
     font-family: var(--font-display);
     letter-spacing: -0.02em;
   }
+
+  /* Hide browser default password reveal icons (e.g., Edge) */
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none !important;
+    width: 0;
+    height: 0;
+  }
 }
 
 @utility text-gradient {
@@ -330,3 +338,61 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif !important;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif !important;
 }
+
+/* ─── About-page Performance ──────────────────────────────────────────────── */
+
+/* Promote the about-page wrapper to its own stacking context so repaints
+   inside don't invalidate the rest of the page */
+#about-page-root {
+  isolation: isolate;
+  contain: layout style;
+}
+
+/* Promote sections that do heavy scroll-driven work to their own GPU layers
+   so the compositor can move them without re-painting the background */
+@media (prefers-reduced-motion: no-preference) {
+  [data-motion-section] {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  /* Motion elements (framer creates these) get GPU compositing hint */
+  [style*="--motion-translateY"],
+  [style*="transform: matrix"] {
+    backface-visibility: hidden;
+  }
+}
+
+/* CSS filter is expensive — only allow blur on static (non-animated) elements.
+   Animated blur is always painted on CPU; this comment documents the pattern. */
+
+/* ─── Global Performance & Hardware Acceleration Enhancements ─────────────── */
+
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+@layer utilities {
+  .smooth-gpu-transition {
+    transition-property: transform, opacity;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 300ms;
+    will-change: transform, opacity;
+  }
+}
+
+/* Accessibility: Respect user reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

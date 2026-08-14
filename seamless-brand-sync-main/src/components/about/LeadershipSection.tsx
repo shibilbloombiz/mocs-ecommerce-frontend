@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform, useSpring, useReducedMotion } from "motion/react";
+import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import azharRmPhoto from "C:/Users/user/.gemini/antigravity-ide/brain/13f69f8c-9e3c-4ae7-926d-54875340adad/azhar_rm_portrait_1786339245557.png";
 
 export function LeadershipSection() {
@@ -11,9 +11,9 @@ export function LeadershipSection() {
     offset: ["start end", "end start"],
   });
 
-  const portraitScaleRaw = useTransform(scrollYProgress, [0.1, 0.8], prefersReducedMotion ? [1, 1] : [0.93, 1.04]);
-  const portraitScale = useSpring(portraitScaleRaw, { stiffness: 70, damping: 22 });
-  const bgTextX = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [-60, 60]);
+  // Direct transform — no spring to avoid frame-lag overshoot
+  const portraitScale = useTransform(scrollYProgress, [0.1, 0.8], prefersReducedMotion ? [1, 1] : [0.96, 1.03]);
+  const bgTextX = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [-50, 50]);
 
   return (
     <section
@@ -22,9 +22,9 @@ export function LeadershipSection() {
       aria-label="Leadership"
       className="relative py-24 sm:py-32 bg-[#070707] text-[#F5F5F2] overflow-hidden"
     >
-      {/* Background Outlined Typography */}
+      {/* Background Outlined Typography — GPU composited */}
       <motion.div
-        style={{ x: bgTextX }}
+        style={{ x: bgTextX, willChange: "transform" }}
         className="absolute top-1/2 -translate-y-1/2 left-0 w-full flex justify-center pointer-events-none select-none z-0 overflow-hidden"
       >
         <span className="font-black text-[100px] sm:text-[180px] md:text-[240px] lg:text-[300px] tracking-tighter uppercase leading-none text-transparent stroke-text opacity-10">
@@ -106,15 +106,18 @@ export function LeadershipSection() {
 
           {/* Right Column: Azhar RM Portrait Card */}
           <motion.div
-            style={{ scale: portraitScale }}
+            style={{ scale: portraitScale, willChange: "transform" }}
             initial={prefersReducedMotion ? false : { opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 relative flex items-center justify-center"
           >
-            {/* Outer glow ring */}
-            <div className="absolute inset-0 rounded-3xl bg-[#F26522]/10 blur-3xl scale-110 pointer-events-none" />
+            {/* Outer glow ring — static gradient to avoid blur recalculation inside a scaled container */}
+            <div
+              className="absolute inset-0 rounded-3xl scale-110 pointer-events-none"
+              style={{ background: "radial-gradient(ellipse, rgba(242,101,34,0.12) 0%, transparent 70%)" }}
+            />
 
             {/* Portrait card */}
             <div className="relative w-full max-w-[400px] sm:max-w-[440px] rounded-3xl overflow-hidden border border-white/10 shadow-[0_32px_80px_rgba(0,0,0,0.7)] bg-[#111]">

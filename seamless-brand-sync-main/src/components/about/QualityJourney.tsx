@@ -2,7 +2,7 @@ import { useRef } from "react";
 import {
   motion,
   useScroll,
-  useSpring,
+  useTransform,
   useInView,
   useReducedMotion,
 } from "motion/react";
@@ -85,21 +85,9 @@ function StepRow({
           animate={isInView ? "visible" : "hidden"}
           className="relative z-10 flex items-center justify-center"
         >
-          {/* Outer pulse ring */}
+          {/* Outer pulse ring — single CSS keyframe instead of JS-driven motion to cut overhead */}
           {isInView && !prefersReducedMotion && (
-            <motion.div
-              animate={{ scale: [1, 1.7, 1], opacity: [0.5, 0, 0.5] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute w-8 h-8 rounded-full border border-[#F26522]/50"
-            />
-          )}
-          {/* Inner glow ring */}
-          {isInView && !prefersReducedMotion && (
-            <motion.div
-              animate={{ scale: [1, 1.35, 1], opacity: [0.4, 0, 0.4] }}
-              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-              className="absolute w-5 h-5 rounded-full border border-[#F26522]/70"
-            />
+            <div className="absolute w-8 h-8 rounded-full border border-[#F26522]/50 animate-ping" style={{ animationDuration: "2s", willChange: "transform, opacity" }} />
           )}
           {/* Solid node */}
           <div className="w-4 h-4 rounded-full bg-[#F26522] shadow-[0_0_14px_rgba(242,101,34,0.7)] z-10" />
@@ -213,12 +201,12 @@ export function QualityJourney() {
   const lineRef    = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  /* Scroll-driven line fill */
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start 0.9", "end 0.1"],
   });
-  const lineScaleY = useSpring(scrollYProgress, { stiffness: 45, damping: 16 });
+  // Direct transform — avoid useSpring which adds JS overhead on every scroll event
+  const lineScaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   return (
     <section
@@ -292,16 +280,16 @@ export function QualityJourney() {
           {/* Centre vertical line track (ghost) */}
           <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-white/[0.06] rounded-full" />
 
-          {/* Scroll-driven orange fill line */}
+          {/* Scroll-driven orange fill line — GPU composited via will-change */}
           <motion.div
-            style={{ scaleY: lineScaleY, transformOrigin: "top" }}
-            className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] rounded-full pointer-events-none"
             style={{
               scaleY: lineScaleY,
               transformOrigin: "top",
               background: "linear-gradient(to bottom, #F26522, #f97316, #F26522aa)",
               boxShadow: "0 0 12px 2px rgba(242,101,34,0.35)",
+              willChange: "transform",
             } as any}
+            className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] rounded-full pointer-events-none"
           />
 
           {/* Steps */}

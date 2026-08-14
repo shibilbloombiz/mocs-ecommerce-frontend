@@ -25,7 +25,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function cleanErrorMessage(err: any): string {
-  let msg = err?.message || "";
+  let msg = err?.message || (typeof err === "string" ? err : "");
   if (msg.includes("API ")) {
     const jsonStart = msg.indexOf("{");
     if (jsonStart !== -1) {
@@ -46,6 +46,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const { redirect, mode: initialMode } = useSearch({ from: "/auth" });
   const { login, user } = useStore();
+
   const [mode, setMode] = useState<"login" | "signup">(initialMode ?? "login");
   const [loading, setLoading] = useState(false);
   const [errorModal, setErrorModal] = useState<{ isOpen: boolean; title: string; message: string }>({
@@ -58,16 +59,12 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-
-
   // Dynamic Auth Visual Slides Config
   const [authSlides, setAuthSlides] = useState<any[]>([
     { image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800", title: "Discover Your Style", subtitle: "Explore premium MOCS collections tailored just for you." },
     { image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800", title: "Create Your Vision", subtitle: "Join our community to unlock custom footwear and personalized styles." },
     { image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800", title: "Crafted For Comfort", subtitle: "Every pair is built for active lifestyles and durable comfort." }
   ]);
-
-
 
   // Load Auth custom settings / slideshow fallbacks / product fallbacks
   useEffect(() => {
@@ -80,41 +77,6 @@ function AuthPage() {
             setAuthSlides(val.slides);
             return;
           }
-          if (val.loginImage || val.signupImage) {
-            // Old format fallback
-            setAuthSlides([
-              { image: val.loginImage || "", title: val.loginTitle || "Discover Your Style", subtitle: val.loginSubtitle || "Explore premium MOCS collections tailored just for you." },
-              { image: val.signupImage || "", title: val.signupTitle || "Create Your Vision", subtitle: val.signupSubtitle || "Join our community to unlock custom footwear and personalized styles." },
-              { image: "", title: "Crafted For Comfort", subtitle: "Every pair is built for active lifestyles and durable comfort." }
-            ]);
-            return;
-          }
-        }
-
-        const heroRes = await apiClient.settings.get("hero_slides").catch(() => null);
-        const slides = heroRes && (Array.isArray(heroRes) ? heroRes : (heroRes.value && Array.isArray(heroRes.value) ? heroRes.value : null));
-        if (slides && slides.length > 0) {
-          const lImg = getImageUrl(slides[0]?.bg) || authSlides[0].image;
-          const sImg = getImageUrl(slides[1]?.bg || slides[0]?.bg) || authSlides[1].image;
-          const tImg = getImageUrl(slides[2]?.bg || slides[0]?.bg) || authSlides[2].image;
-          setAuthSlides([
-            { image: lImg, title: "Discover Your Style", subtitle: "Explore premium MOCS collections tailored just for you." },
-            { image: sImg, title: "Create Your Vision", subtitle: "Join our community to unlock custom footwear and personalized styles." },
-            { image: tImg, title: "Crafted For Comfort", subtitle: "Every pair is built for active lifestyles and durable comfort." }
-          ]);
-          return;
-        }
-
-        const prodRes = await apiClient.products.list("limit=3").catch(() => null);
-        if (prodRes && prodRes.items && prodRes.items.length > 0) {
-          const lImg = getImageUrl(prodRes.items[0]?.coverImage) || authSlides[0].image;
-          const sImg = getImageUrl(prodRes.items[1]?.coverImage || prodRes.items[0]?.coverImage) || authSlides[1].image;
-          const tImg = getImageUrl(prodRes.items[2]?.coverImage || prodRes.items[0]?.coverImage) || authSlides[2].image;
-          setAuthSlides([
-            { image: lImg, title: "Discover Your Style", subtitle: "Explore premium MOCS collections tailored just for you." },
-            { image: sImg, title: "Create Your Vision", subtitle: "Join our community to unlock custom footwear and personalized styles." },
-            { image: tImg, title: "Crafted For Comfort", subtitle: "Every pair is built for active lifestyles and durable comfort." }
-          ]);
         }
       } catch (err) {
         console.warn("Failed to load auth settings, using defaults.", err);
@@ -131,24 +93,105 @@ function AuthPage() {
   }, [authSlides]);
 
   // Handle local state redirects
+  const targetRedirect = redirect && redirect !== "/auth" ? redirect : "/";
+
   useEffect(() => {
     if (user) {
       if (user.role === "admin" || user.role === "superadmin") {
         navigate({ to: "/admin/dashboard" });
       } else {
-        navigate({ to: redirect ?? "/" });
+        navigate({ to: targetRedirect });
       }
     }
-  }, [user, navigate, redirect]);
+  }, [user, navigate, targetRedirect]);
 
-  // Social Login handler
-  const handleSocialLogin = async (strategy: "oauth_google" | "oauth_facebook" | "oauth_apple") => {
-    setErrorModal({
-      isOpen: true,
-      title: "Social Logins Disabled",
-      message: "Configure Clerk in your .env file to enable social logins."
-    });
+  // Load Google GSI Client Script
+  useEffect(() => {
+    const scriptId = "google-gsi-client";
+    if (!document.getElementById(scriptId)) {
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  }, []);
+
+  // REAL Google Account Chooser Popup Handler (No typing, opens real Google popup)
+  const handleGoogleSignIn = () => {
+    const googleClientId = (import.meta as any).env?.VITE_GOOGLE_CLIENT_ID || "44245383395-mturmuberljno376tmp99as975b8l9oo.apps.googleusercontent.com";
+    const windowGoogle = (window as any).google;
+
+    if (!windowGoogle?.accounts?.oauth2) {
+      toast.error("Google Sign-In is initializing. Please click again in a second.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Launch Google's REAL official Account Chooser Popup
+      const tokenClient = windowGoogle.accounts.oauth2.initTokenClient({
+        client_id: googleClientId,
+        scope: "email profile openid",
+        callback: async (tokenResponse: any) => {
+          if (tokenResponse && tokenResponse.access_token) {
+            try {
+              // Fetch user profile from Google using the access token
+              const userRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+                headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+              });
+              const profile = await userRes.json();
+
+              if (profile && profile.email) {
+                const email = profile.email;
+                const name = profile.name || profile.given_name || "Google User";
+                const avatar = profile.picture || "";
+                const clerkId = `google-${profile.sub || Date.now()}`;
+
+                // Verify account state with backend
+                const res = await apiClient.auth.clerkSync({ email, name, clerkId, avatar, mode });
+                if (res && res.token && res.user) {
+                  login(res.token, res.user);
+                  toast.success("Signed in with Google!", { id: "auth-toast" });
+                  window.location.href = targetRedirect;
+                }
+              }
+            } catch (err: any) {
+              const msg = cleanErrorMessage(err);
+              if (mode === "login" && (msg.includes("No account found") || msg.includes("404"))) {
+                setMode("signup");
+                setErrorModal({
+                  isOpen: true,
+                  title: "Account Not Found",
+                  message: msg || `No account exists for this Google email. We have switched you to the Sign Up tab so you can create your account.`,
+                });
+              } else {
+                setErrorModal({
+                  isOpen: true,
+                  title: "Google Sign-In Error",
+                  message: msg || "Failed to sign in with Google.",
+                });
+              }
+            } finally {
+              setLoading(false);
+            }
+          } else {
+            setLoading(false);
+          }
+        },
+      });
+
+      tokenClient.requestAccessToken({ prompt: "select_account" });
+    } catch (err: any) {
+      console.error("Google Popup error:", err);
+      toast.error("Failed to open Google sign in popup.");
+      setLoading(false);
+    }
   };
+
+
 
 
   // Submit Handler
@@ -210,12 +253,14 @@ function AuthPage() {
       
       login(res.token, res.user);
       toast.success(mode === "login" ? "Welcome back" : "Account created", { id: "auth-toast" });
+      navigate({ to: targetRedirect });
     } catch (err: any) {
       const msg = err?.message ?? "Sign-in failed";
       if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
         const dummyUser = { id: `guest-${Date.now()}`, name: "Guest User", email: "guest@example.com", role: "user" };
         login(`guest-${Date.now()}`, dummyUser);
         toast.success("Signed in (offline mode)", { id: "auth-toast" });
+        navigate({ to: targetRedirect });
       } else {
         setErrorModal({
           isOpen: true,
@@ -397,53 +442,48 @@ function AuthPage() {
                 </button>
               </form>
 
-              {/* OR Social Login Divider */}
-              <div className="relative my-4 flex items-center justify-center">
+              {/* Divider */}
+              <div className="relative my-3.5 flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-stone-200"></div>
+                  <div className="w-full border-t border-stone-200" />
                 </div>
-                <span className="relative bg-white px-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">Or</span>
+                <span className="relative bg-white px-3 text-[10px] font-bold uppercase text-stone-400 tracking-wider">
+                  Or continue with
+                </span>
               </div>
 
-              {/* Social Login Buttons (Google, Facebook, Apple) */}
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin("oauth_google")}
-                  className="bg-stone-50 border border-stone-200 hover:border-stone-300 hover:bg-stone-100/60 rounded-xl py-2 flex justify-center items-center cursor-pointer transition"
-                  title="Sign in with Google"
-                >
-                  {/* Google Custom Clean Icon */}
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin("oauth_facebook")}
-                  className="bg-stone-50 border border-stone-200 hover:border-stone-300 hover:bg-stone-100/60 rounded-xl py-2 flex justify-center items-center cursor-pointer transition"
-                  title="Sign in with Facebook"
-                >
-                  {/* Facebook Clean Icon */}
-                  <svg className="h-4.5 w-4.5 text-[#1877F2]" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin("oauth_apple")}
-                  className="bg-stone-50 border border-stone-200 hover:border-stone-300 hover:bg-stone-100/60 rounded-xl py-2 flex justify-center items-center cursor-pointer transition"
-                  title="Sign in with Apple"
-                >
-                  {/* Apple Clean Icon */}
-                  <svg className="h-4.5 w-4.5 text-stone-900" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.05-2.033.03-3.905 1.185-4.953 3.004-2.112 3.663-.54 9.07 1.511 12.032 1.003 1.45 2.188 3.072 3.757 3.013 1.512-.06 2.083-.974 3.91-.974 1.824 0 2.342.974 3.92.943 1.606-.03 2.637-1.464 3.628-2.903 1.139-1.666 1.61-3.276 1.637-3.357-.036-.015-3.151-1.21-3.183-4.786-.027-2.983 2.44-4.417 2.55-4.484-1.397-2.05-3.553-2.28-4.316-2.336-1.99-.163-3.504 1.078-4.502 1.078zm3.013-3.69c.846-1.025 1.41-2.455 1.254-3.876-1.22.05-2.697.81-3.57 1.836-.763.882-1.43 2.33-1.25 3.722 1.36.106 2.72-.756 3.566-1.682z"/>
-                  </svg>
-                </button>
-              </div>
+              {/* Google Sign In via Clerk Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-stone-200/90 bg-stone-50 hover:bg-stone-100 active:scale-[0.98] transition-all text-xs font-bold uppercase tracking-wider text-stone-700 shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24">
+                  <path
+                    fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+                  />
+                  <path
+                    fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+                  />
+                </svg>
+                <span>Google Account</span>
+              </button>
+
+
+
+
+
 
               <p className="mt-4 text-center text-[10px] text-stone-400 leading-normal font-medium">
                 By continuing you agree to the MOCS{" "}

@@ -11,29 +11,26 @@ export function BrandStory() {
     offset: ["start end", "end start"],
   });
 
-  const storyY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [30, -30]);
+  const storyY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [24, -24]);
 
-  // Animated Counter for 13+
+  // rAF-based counter: cooperates with browser paint cycle instead of fighting it
   const [yearsCount, setYearsCount] = useState(0);
   useEffect(() => {
-    if (isStatsInView) {
-      let start = 0;
-      const end = 13;
-      const duration = 1200;
-      const increment = end / (duration / 16);
+    if (!isStatsInView) return;
+    const end = 13;
+    const duration = 1100; // ms
+    let start: number | null = null;
 
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= end) {
-          setYearsCount(end);
-          clearInterval(timer);
-        } else {
-          setYearsCount(Math.floor(start));
-        }
-      }, 16);
+    const step = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      setYearsCount(Math.floor(progress * end));
+      if (progress < 1) requestAnimationFrame(step);
+      else setYearsCount(end);
+    };
 
-      return () => clearInterval(timer);
-    }
+    const raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
   }, [isStatsInView]);
 
   return (
@@ -80,7 +77,7 @@ export function BrandStory() {
           </div>
 
           {/* Right Column: Editorial Paragraphs */}
-          <motion.div style={{ y: storyY }} className="lg:col-span-7 flex flex-col items-start pt-2 lg:pt-4">
+          <motion.div style={{ y: storyY, willChange: "transform" }} className="lg:col-span-7 flex flex-col items-start pt-2 lg:pt-4">
             {/* Statement */}
             <motion.div
               initial={prefersReducedMotion ? false : { opacity: 0, y: 24 }}

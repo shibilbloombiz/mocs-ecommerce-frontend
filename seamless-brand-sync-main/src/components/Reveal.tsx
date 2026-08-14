@@ -33,12 +33,13 @@ export function Reveal({
 }) {
   return (
     <motion.div
-      className={className}
+      className={`gpu-accelerated ${className || ""}`}
       variants={variants[variant]}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      viewport={{ once: true, margin: "-40px", amount: 0.1 }}
+      style={{ willChange: "transform, opacity" }}
+      transition={{ duration: 0.4, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </motion.div>
@@ -54,13 +55,14 @@ export function Stagger({
 }) {
   return (
     <motion.div
-      className={className}
+      className={`gpu-accelerated ${className || ""}`}
       initial="hidden"
       whileInView="show"
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, margin: "-40px", amount: 0.1 }}
+      style={{ willChange: "transform, opacity" }}
       variants={{
         hidden: {},
-        show: { transition: { staggerChildren: 0.1 } },
+        show: { transition: { staggerChildren: 0.08 } },
       }}
     >
       {children}
