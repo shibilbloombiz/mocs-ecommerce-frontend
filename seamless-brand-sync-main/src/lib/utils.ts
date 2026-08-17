@@ -6,21 +6,28 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getImageUrl(url?: any): string {
+export function getImageUrl(url?: any, options: { width?: number; quality?: number } = {}): string {
   if (typeof url !== "string" || !url) return "";
   let normalizedUrl = url.trim().replace(/\\/g, "/");
+  const targetWidth = options.width || 700;
+  const targetQuality = options.quality || 75;
+
   if (normalizedUrl.startsWith("http://") || normalizedUrl.startsWith("https://") || normalizedUrl.startsWith("data:")) {
     if (normalizedUrl.includes("images.unsplash.com")) {
       try {
         const u = new URL(normalizedUrl);
-        u.searchParams.set("w", "1920");
-        u.searchParams.set("q", "90");
+        u.searchParams.set("auto", "format");
         u.searchParams.set("fit", "crop");
+        u.searchParams.set("w", String(targetWidth));
+        u.searchParams.set("q", String(targetQuality));
         normalizedUrl = u.toString();
       } catch (e) {}
     } else if (normalizedUrl.includes("res.cloudinary.com") && normalizedUrl.includes("/image/upload/")) {
-      if (!normalizedUrl.includes("/q_")) {
-        normalizedUrl = normalizedUrl.replace("/image/upload/", "/image/upload/q_auto:best,f_auto,w_1920,c_limit/");
+      if (!normalizedUrl.includes("/q_") && !normalizedUrl.includes("/f_auto")) {
+        normalizedUrl = normalizedUrl.replace(
+          "/image/upload/",
+          `/image/upload/f_auto,q_auto,w_${targetWidth},c_limit/`
+        );
       }
     }
     return normalizedUrl;

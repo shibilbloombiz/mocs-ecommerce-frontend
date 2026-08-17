@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate, useBlocker } from "@tanstack/react-
 import { useEffect, useState, useMemo } from "react";
 import { Lock, Check, ShieldCheck, Building2, Truck, CreditCard, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { showNotification } from "@/lib/notifications";
 import { useStore } from "@/lib/store";
 import { apiClient } from "@/lib/api";
 import { isAuthed } from "@/lib/auth";
@@ -216,6 +217,22 @@ function Checkout() {
       postalCode: String(fd.get("postal") ?? ""),
       country: "India",
     };
+
+    if (!shippingAddress.name || !shippingAddress.phone || !shippingAddress.address || !shippingAddress.city || !shippingAddress.state || !shippingAddress.pincode) {
+      showNotification({
+        type: "error",
+        title: "Missing Information",
+        message: "Please complete your contact & shipping details.",
+        actionLabel: "Review details",
+        onAction: () => {
+          setIsEditingProfile(true);
+          const el = document.querySelector("input[name='first']") || document.querySelector("form");
+          (el as HTMLElement)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        },
+        duration: 0,
+      });
+      return;
+    }
 
     setTempAddress(shippingAddress);
     setTempEmail(shippingAddress.email);
@@ -532,7 +549,18 @@ function Checkout() {
                     type="button"
                     onClick={() => {
                       if (!firstName || !lastName || !email || !phone || !addressVal || !cityVal || !stateVal || !postalVal) {
-                        toast.error("Please fill in all the contact & shipping fields.");
+                        showNotification({
+                          type: "error",
+                          title: "Missing Information",
+                          message: "Please complete your contact & shipping details.",
+                          actionLabel: "Review details",
+                          onAction: () => {
+                            setIsEditingProfile(true);
+                            const el = document.querySelector("input[name='first']") || document.querySelector("input[placeholder*='First']");
+                            (el as HTMLElement)?.focus();
+                          },
+                          duration: 0,
+                        });
                         return;
                       }
                       const addressStr = `${addressVal}, ${cityVal}, ${stateVal}, ${postalVal}, India`;

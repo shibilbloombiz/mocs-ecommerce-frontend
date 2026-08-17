@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Sparkles } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Reveal } from "@/components/Reveal";
+import { OptimizedImage } from "@/components/OptimizedImage";
+import { getImageUrl } from "@/lib/utils";
 
 interface NewArrivalsProps {
   products: any[];
@@ -116,12 +118,13 @@ export function NewArrivals({ products }: NewArrivalsProps) {
                     </div>
 
                     {/* Shoe Image Box */}
-                    <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-stone-50 flex items-center justify-center p-3">
-                      <img
-                        src={product.image}
+                    <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-stone-100/80 flex items-center justify-center p-2">
+                      <OptimizedImage
+                        src={getImageUrl(product.image, { width: 500, quality: 75 })}
                         alt={product.name}
-                        loading="lazy"
-                        className="h-full w-full object-contain transition-transform duration-500 ease-out group-hover:scale-108"
+                        aspectRatio="1/1"
+                        containerClassName="h-full w-full"
+                        className="h-full w-full object-contain transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110"
                       />
                     </div>
 

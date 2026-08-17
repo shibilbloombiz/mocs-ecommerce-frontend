@@ -14,6 +14,9 @@ import {
   Check,
   ChevronRight,
   ChevronLeft,
+  X,
+  Sparkles,
+  MessageSquare,
 } from "lucide-react";
 import {
   getProduct,
@@ -28,7 +31,8 @@ import { toast } from "sonner";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal, Stagger } from "@/components/Reveal";
 import { cn, getImageUrl } from "@/lib/utils";
-import { apiClient, API_BASE_URL } from "@/lib/api";
+import { apiClient, API_BASE_URL, formatUserError } from "@/lib/api";
+import { formatApiProducts } from "@/routes/index";
 
 export const Route = createFileRoute("/product/$id")({
   shouldReload: true,
@@ -157,27 +161,7 @@ function ProductDetail() {
       try {
         const res = await apiClient.products.list("limit=100");
         if (res && res.items) {
-          const apiProducts = res.items.map((p: any) => ({
-            id: p._id,
-            artNumber: p.artNumber || "",
-            name: p.name,
-            category: (p.category?.name || p.category || "Men") as any,
-            collection: (p.collection || "Casual") as any,
-            type: "Running",
-            price: p.price,
-            oldPrice: p.oldPrice,
-            rating: p.rating || 5,
-            reviews: p.reviewCount || 0,
-            stock: p.stock || 0,
-            image: getImageUrl(p.coverImage),
-            colors: p.colors && p.colors.length > 0
-              ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
-              : [{ name: "Default", hex: "#000000" }],
-            sizes: p.sizes || [7, 8, 9, 10, 11, 12],
-            description: p.description,
-            isNew: p.isNew,
-          }));
-          setAllBackendProducts(apiProducts);
+          setAllBackendProducts(formatApiProducts(res.items));
         }
       } catch (err) {
         console.warn("Failed to load products for detail page fallback", err);
@@ -283,10 +267,24 @@ function ProductDetail() {
       size?: number | null;
     }[]
   >([]);
-  const [rvName, setRvName] = useState("");
-  const [rvText, setRvText] = useState("");
+  const [reviewsLoaded, setReviewsLoaded] = useState(false);
+  const [writeReviewModalOpen, setWriteReviewModalOpen] = useState(false);
   const [rvRating, setRvRating] = useState(5);
+  const [rvHoverRating, setRvHoverRating] = useState<number | null>(null);
+  const [rvText, setRvText] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+
+  // Live review count & average rating reactively computed from userReviews state!
+  const liveReviews = userReviews;
+  const liveReviewCount = reviewsLoaded ? liveReviews.length : (product.reviews || 0);
+  const liveRating = useMemo(() => {
+    if (liveReviews.length > 0) {
+      const sum = liveReviews.reduce((acc, r) => acc + (Number(r.rating) || 5), 0);
+      return Math.round((sum / liveReviews.length) * 10) / 10;
+    }
+    return product.rating || 5;
+  }, [liveReviews, product.rating]);
 
   useEffect(() => {
     pushRecentlyViewed(product.id);
@@ -296,33 +294,86 @@ function ProductDetail() {
     setActive(0);
     setZoom(false);
     setCurrentReviewIndex(0);
+    setReviewsLoaded(false);
 
     const fetchReviews = async () => {
       try {
         const res = await apiClient.reviews.list(product.id);
-        if (res) {
+        if (res && Array.isArray(res)) {
           const mapped = res.map((r: any) => ({
-            name: r.user?.name || r.name || "Anonymous",
-            rating: r.rating,
+            name: r.user?.name || r.name || "Customer",
+            rating: Number(r.rating) || 5,
             text: r.comment || r.text || "",
             days: Math.round((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)) || 0,
             color: r.color || "Default",
-            verified: r.isVerifiedPurchase || false,
-            size: r.size || null
+            verified: r.isVerifiedPurchase ?? r.verifiedPurchase ?? true,
+            size: r.size || null,
           }));
           setUserReviews(mapped);
+          setReviewsLoaded(true);
         }
       } catch (err) {
-        console.warn("Failed to load reviews from API", err);
+        console.warn("Could not load reviews for product", err);
+        setReviewsLoaded(true);
       }
     };
     fetchReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
 
-  const reviews = [
-    ...userReviews,
-  ];
+  const handleDirectReviewSubmit = async () => {
+    if (!isAuthed()) {
+      navigate({ to: "/auth", search: { redirect: `/product/${product.id}` } });
+      return;
+    }
+    if (!rvText.trim()) {
+      toast.error("Please enter a short review comment before submitting.");
+      return;
+    }
+    setSubmittingReview(true);
+    try {
+      const res = await apiClient.reviews.create({
+        productId: product.id,
+        rating: rvRating,
+        text: rvText.trim(),
+        color: color || product.colors[0]?.name || "Default",
+        size: size || undefined,
+      });
+
+      toast.success("Thank you! Your review was submitted successfully.");
+      setWriteReviewModalOpen(false);
+      setRvText("");
+      setRvRating(5);
+
+      // Instantly update reviews live without reloading
+      setUserReviews((prev) => {
+        const newEntry = {
+          name: res?.user?.name || "You",
+          rating: rvRating,
+          text: rvText.trim(),
+          days: 0,
+          color: color || product.colors[0]?.name || "Default",
+          verified: true,
+          size: size || null,
+        };
+        const existingIdx = prev.findIndex(
+          (r) => r.name === (res?.user?.name || "You") || r.name === "You"
+        );
+        if (existingIdx >= 0) {
+          const updated = [...prev];
+          updated[existingIdx] = newEntry;
+          return updated;
+        }
+        return [newEntry, ...prev];
+      });
+    } catch (err: any) {
+      toast.error(formatUserError(err, "Failed to submit review. Please try again."));
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const reviews = userReviews;
 
   useEffect(() => {
     setCurrentReviewIndex(0);
@@ -464,16 +515,16 @@ function ProductDetail() {
                 <Star
                   key={i}
                   className={cn(
-                    "h-4 w-4",
-                    i < Math.round(product.rating)
+                    "h-4 w-4 transition-colors",
+                    i < Math.round(liveRating)
                       ? "fill-primary text-primary"
-                      : "text-muted-foreground",
+                      : "text-muted-foreground/40",
                   )}
                 />
               ))}
             </span>
-            <span className="text-sm font-medium">{product.rating}</span>
-            <span className="text-sm text-muted-foreground">({product.reviews} reviews)</span>
+            <span className="text-sm font-bold text-foreground">{liveRating}</span>
+            <span className="text-sm text-muted-foreground">({liveReviewCount} {liveReviewCount === 1 ? "review" : "reviews"})</span>
           </div>
 
           <div className="mt-5 flex items-baseline gap-3">
@@ -631,18 +682,62 @@ function ProductDetail() {
       </div>
 
       <section className="mt-20 text-left">
-        <Reveal className="mb-8 flex items-end justify-between">
-          <h2 className="font-display text-3xl font-extrabold">Customer Reviews</h2>
-          <div className="flex items-center gap-2">
-            <Star className="h-6 w-6 fill-primary text-primary" />
-            <span className="font-display text-2xl font-bold">{product.rating}</span>
-            <span className="text-muted-foreground">/ 5</span>
+        <Reveal className="mb-8 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h2 className="font-display text-3xl font-extrabold text-foreground">Customer Reviews</h2>
+            <div className="mt-2 flex items-center gap-2.5">
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={cn(
+                      "h-5 w-5 transition-colors",
+                      i < Math.round(liveRating)
+                        ? "fill-primary text-primary"
+                        : "text-muted-foreground/30",
+                    )}
+                  />
+                ))}
+              </div>
+              <span className="font-display text-xl font-bold text-foreground">{liveRating}</span>
+              <span className="text-sm text-muted-foreground">/ 5 ({liveReviewCount} {liveReviewCount === 1 ? "review" : "reviews"})</span>
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (!isAuthed()) {
+                navigate({ to: "/auth", search: { redirect: `/product/${product.id}` } });
+                return;
+              }
+              setWriteReviewModalOpen(true);
+            }}
+            className="flex items-center gap-2 rounded-full bg-stone-900 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-sm transition hover:bg-primary hover:shadow-md cursor-pointer"
+          >
+            <Star className="h-4 w-4 fill-white text-white" />
+            Write a Review
+          </button>
         </Reveal>
 
         {reviews.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">No reviews yet.</p>
+          <div className="rounded-3xl border border-dashed border-stone-200 bg-stone-50/50 py-12 text-center">
+            <MessageSquare className="mx-auto h-8 w-8 text-stone-300" />
+            <p className="mt-3 font-semibold text-stone-700">No reviews yet for this product</p>
+            <p className="mt-1 text-xs text-muted-foreground">Be the first to share your thoughts!</p>
+            <button
+              type="button"
+              onClick={() => {
+                if (!isAuthed()) {
+                  navigate({ to: "/auth", search: { redirect: `/product/${product.id}` } });
+                  return;
+                }
+                setWriteReviewModalOpen(true);
+              }}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2 text-xs font-bold uppercase tracking-wide text-white hover:bg-primary-glow transition cursor-pointer shadow-sm"
+            >
+              Write First Review
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl py-4 text-left">
@@ -659,18 +754,20 @@ function ProductDetail() {
                       ))}
                     </div>
                     {review.verified && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-semibold text-success">
-                        <Check className="h-3 w-3" /> Verified
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 text-[10px] font-semibold">
+                        <Check className="h-3 w-3" /> Verified Buyer
                       </span>
                     )}
                   </div>
-                  <p className="mt-3 text-sm text-stone-600 font-medium">"{review.text}"</p>
+                  <p className="mt-3 text-sm text-stone-700 font-medium leading-relaxed">"{review.text}"</p>
                 </div>
-                <div className="mt-4 pt-3 border-t border-stone-100">
-                  <p className="text-xs font-bold text-stone-900">{review.name}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">
-                    {review.days} days ago {review.color ? `· ${review.color}` : ""}{review.size ? ` · Size ${review.size}` : ""}
-                  </p>
+                <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-stone-900">{review.name}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {review.days === 0 ? "Today" : `${review.days} days ago`} {review.color ? `· ${review.color}` : ""}{review.size ? ` · Size ${review.size}` : ""}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -787,14 +884,23 @@ function ProductDetail() {
 
       {/* Select Size Prompt Modal */}
       {showSizePrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-card space-y-5 text-left animate-in zoom-in-95 duration-200">
-            <div>
-              <h3 className="font-display text-lg font-bold text-foreground">Select Size</h3>
-              <p className="text-xs text-muted-foreground mt-1">Please select a size for {product.name} to continue.</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 p-4 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-3xl border border-stone-200/80 bg-white p-7 shadow-2xl space-y-5 text-left animate-in zoom-in-95 duration-200 text-stone-900">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-display text-lg font-bold text-stone-900">Select Size</h3>
+                <p className="text-xs text-stone-500 mt-1">Please pick your size for {product.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowSizePrompt(false)}
+                className="grid h-8 w-8 place-items-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
             </div>
             
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2.5">
               {product.sizes.map((s) => {
                 const isOutOfStock = product.outOfStockSizes?.includes(s);
                 return (
@@ -811,25 +917,126 @@ function ProductDetail() {
                       }
                     }}
                     className={cn(
-                      "grid h-12 place-items-center rounded-xl border-2 text-sm font-semibold transition cursor-pointer",
+                      "grid h-12 place-items-center rounded-2xl border-2 text-sm font-semibold transition cursor-pointer",
                       isOutOfStock
-                        ? "border-dashed border-stone-200/60 text-stone-400 line-through bg-stone-50/50 cursor-not-allowed opacity-50"
-                        : "border-border hover:border-primary hover:bg-primary/5"
+                        ? "border-dashed border-stone-200 text-stone-300 line-through bg-stone-50/50 cursor-not-allowed opacity-50"
+                        : "border-stone-200 bg-white hover:border-primary hover:bg-primary/5 hover:text-primary hover:scale-[1.02] shadow-xs"
                     )}
                   >
-                    {s}
+                    UK {s}
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex justify-end pt-2 border-t border-border">
+            <div className="flex justify-end pt-3 border-t border-stone-100">
               <button
                 type="button"
                 onClick={() => setShowSizePrompt(false)}
-                className="rounded-full bg-secondary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-secondary-foreground transition hover:bg-secondary/80 cursor-pointer"
+                className="rounded-full px-5 py-2 text-xs font-bold text-stone-600 hover:bg-stone-100 transition cursor-pointer"
               >
-                Close Window
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Minimal & Unique Write Review Modal */}
+      {writeReviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/50 p-4 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl border border-stone-200/80 bg-white p-7 shadow-2xl text-stone-900 text-left animate-in zoom-in-95 duration-200">
+            <button
+              type="button"
+              onClick={() => setWriteReviewModalOpen(false)}
+              className="absolute right-5 top-5 grid h-8 w-8 place-items-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-amber-50 text-amber-500 border border-amber-100">
+                <Sparkles className="h-5 w-5 fill-amber-400" />
+              </div>
+              <div>
+                <h3 className="font-display text-lg font-bold text-stone-900">Review {product.name}</h3>
+                <p className="text-xs text-stone-500">Rate your experience with this footwear.</p>
+              </div>
+            </div>
+
+            {/* Interactive Rating Picker */}
+            <div className="mt-6 rounded-2xl border border-amber-100 bg-amber-50/40 p-4 text-center">
+              <div className="flex items-center justify-center gap-2">
+                {[1, 2, 3, 4, 5].map((s) => {
+                  const active = rvHoverRating || rvRating;
+                  return (
+                    <button
+                      key={s}
+                      type="button"
+                      onMouseEnter={() => setRvHoverRating(s)}
+                      onMouseLeave={() => setRvHoverRating(null)}
+                      onClick={() => setRvRating(s)}
+                      className="p-1 transition-transform hover:scale-125 focus:outline-none cursor-pointer"
+                    >
+                      <Star
+                        className={cn(
+                          "h-8 w-8 transition-colors duration-150",
+                          s <= active
+                            ? "fill-amber-400 text-amber-400 drop-shadow-xs"
+                            : "text-stone-300 hover:text-amber-200"
+                        )}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="mt-2 text-xs font-extrabold uppercase tracking-wider text-amber-900">
+                {(() => {
+                  const cur = rvHoverRating || rvRating;
+                  if (cur === 5) return "5 ★ — Excellent";
+                  if (cur === 4) return "4 ★ — Very Good";
+                  if (cur === 3) return "3 ★ — Good";
+                  if (cur === 2) return "2 ★ — Fair";
+                  return "1 ★ — Poor";
+                })()}
+              </p>
+            </div>
+
+            {/* Review Comment Field */}
+            <div className="mt-5 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                  Your Review
+                </label>
+                <span className="text-[10px] text-stone-400 font-medium">
+                  {rvText.length}/500
+                </span>
+              </div>
+              <textarea
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50/50 p-3.5 text-sm text-stone-800 placeholder:text-stone-400 focus:border-primary focus:bg-white focus:outline-none transition-all resize-none"
+                placeholder="How does it fit? Is the cushioning comfortable? Tell others about your experience..."
+                rows={4}
+                maxLength={500}
+                value={rvText}
+                onChange={(e) => setRvText(e.target.value)}
+              />
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5 pt-2 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={() => setWriteReviewModalOpen(false)}
+                className="rounded-full px-5 py-2.5 text-xs font-bold text-stone-600 hover:bg-stone-100 transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={submittingReview}
+                onClick={handleDirectReviewSubmit}
+                className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-xs font-bold uppercase tracking-wide text-white hover:bg-primary-glow hover:shadow-md transition cursor-pointer disabled:opacity-50"
+              >
+                {submittingReview ? "Submitting..." : "Submit Review"}
               </button>
             </div>
           </div>

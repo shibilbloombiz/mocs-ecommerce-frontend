@@ -17,7 +17,7 @@ import { SandalsCarousel } from "@/components/SandalsCarousel";
 import { QualityPromise } from "@/components/QualityPromise";
 import { ReviewsMarquee } from "@/components/ReviewsMarquee";
 
-export function formatApiProducts(items: any[]) {
+export function formatApiProducts(items: any[]): import("@/lib/products").Product[] {
   if (!items || !Array.isArray(items)) return [];
   return items.map((p: any) => ({
     id: p._id,
@@ -26,11 +26,11 @@ export function formatApiProducts(items: any[]) {
     name: p.name,
     category: (p.category?.name || p.category || "Men") as any,
     collection: (p.collection || "Casual") as any,
-    type: "Running",
+    type: "Running" as const,
     price: p.price,
     oldPrice: p.oldPrice,
-    rating: p.rating || 5,
-    reviews: p.reviewCount || 0,
+    rating: Number(p.rating || 5),
+    reviews: Number(p.reviewCount ?? p.reviews ?? 0),
     stock: p.stock || 0,
     image: getImageUrl(p.coverImage),
     colors: p.colors && p.colors.length > 0
@@ -42,13 +42,13 @@ export function formatApiProducts(items: any[]) {
     isTrending: p.isTrending,
     views: p.additionalImages && p.additionalImages.length > 0
       ? [
-        { label: "Front", src: getImageUrl(p.coverImage) },
+        { label: "Front" as const, src: getImageUrl(p.coverImage) },
         ...p.additionalImages.map((img: any) => ({
-          label: img.label || "Side",
+          label: (img.label || "Side") as any,
           src: getImageUrl(img.url)
         }))
       ]
-      : [{ label: "Front", src: getImageUrl(p.coverImage) }]
+      : [{ label: "Front" as const, src: getImageUrl(p.coverImage) }]
   }));
 }
 
@@ -215,6 +215,7 @@ function Home() {
   // Always sync latest products from the database dynamically
   useEffect(() => {
     let isMounted = true;
+
     const fetchFreshProducts = async () => {
       try {
         const res = await apiClient.products.list("limit=100");
@@ -226,7 +227,6 @@ function Home() {
       }
     };
 
-    // Fetch on initial client mount
     fetchFreshProducts();
 
     // Re-fetch automatically whenever the user returns to this tab

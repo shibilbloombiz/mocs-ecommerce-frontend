@@ -12,6 +12,7 @@ import { SkeletonCard } from "@/components/SkeletonCard";
 import { cn, getImageUrl } from "@/lib/utils";
 import { apiClient, API_BASE_URL } from "@/lib/api";
 import { useStore } from "@/lib/store";
+import { formatApiProducts } from "@/routes/index";
 
 // Styled custom dropdown that animates open/close instead of using native <select>.
 function FancyDropdown<T extends string>({
@@ -99,36 +100,7 @@ export const Route = createFileRoute("/shop")({
     try {
       const res = await apiClient.products.list("limit=100");
       if (res && res.items) {
-        const apiProducts = res.items.map((p: any) => ({
-          id: p._id,
-          artNumber: p.artNumber || "",
-          name: p.name,
-          category: (p.category?.name || p.category || "Men") as any,
-          collection: (p.collection || "Casual") as any,
-          type: "Running",
-          price: p.price,
-          oldPrice: p.oldPrice,
-          rating: p.rating || 5,
-          reviews: p.reviewCount || 0,
-          stock: p.stock || 0,
-          image: getImageUrl(p.coverImage),
-          colors: p.colors && p.colors.length > 0
-            ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
-            : [{ name: "Default", hex: "#000000" }],
-          sizes: p.sizes || [7, 8, 9, 10, 11, 12],
-          description: p.description,
-          isNew: p.isNew,
-          views: p.additionalImages && p.additionalImages.length > 0
-            ? [
-              { label: "Front", src: getImageUrl(p.coverImage) },
-              ...p.additionalImages.map((img: any) => ({
-                label: img.label || "Side",
-                src: getImageUrl(img.url)
-              }))
-            ]
-            : [{ label: "Front", src: getImageUrl(p.coverImage) }]
-        }));
-        return { products: apiProducts };
+        return { products: formatApiProducts(res.items) };
       }
     } catch (err) {
       console.warn("Failed to load products from API", err);
@@ -169,37 +141,7 @@ function Shop() {
       try {
         const res = await apiClient.products.list("limit=100");
         if (isMounted && res && res.items) {
-          const apiProducts = res.items.map((p: any) => ({
-            id: p._id,
-            artNumber: p.artNumber || "",
-            name: p.name,
-            category: (p.category?.name || p.category || "Men") as any,
-            collection: (p.collection || "Casual") as any,
-            type: "Running",
-            price: p.price,
-            oldPrice: p.oldPrice,
-            rating: p.rating || 5,
-            reviews: p.reviewCount || 0,
-            stock: p.stock || 0,
-            image: getImageUrl(p.coverImage),
-            colors: p.colors && p.colors.length > 0
-              ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
-              : [{ name: "Default", hex: "#000000" }],
-            sizes: p.sizes || [7, 8, 9, 10, 11, 12],
-            description: p.description,
-            isNew: p.isNew,
-            isTrending: p.isTrending,
-            views: p.additionalImages && p.additionalImages.length > 0
-              ? [
-                { label: "Front", src: getImageUrl(p.coverImage) },
-                ...p.additionalImages.map((img: any) => ({
-                  label: img.label || "Side",
-                  src: getImageUrl(img.url)
-                }))
-              ]
-              : [{ label: "Front", src: getImageUrl(p.coverImage) }]
-          }));
-          setAllProducts(apiProducts);
+          setAllProducts(formatApiProducts(res.items));
         }
       } catch (err) {
         console.warn("Failed to load products from API", err);

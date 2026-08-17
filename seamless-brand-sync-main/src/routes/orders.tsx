@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Package } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { toast } from "sonner";
-import { apiClient } from "@/lib/api";
+import { apiClient, formatUserError } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { getImageUrl, cn, formatDate } from "@/lib/utils";
 import { isAuthed } from "@/lib/auth";
@@ -62,11 +62,9 @@ const isItemRefundedOrReturned = (item: any, order: any) => {
   return reason.includes(item.name.toLowerCase());
 };
 
-
-
 function OrdersPage() {
   const navigate = useNavigate();
-  const { orders: localOrders } = useStore();
+  const { user } = useStore();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -103,11 +101,11 @@ function OrdersPage() {
       if (Array.isArray(backendOrders)) {
         setOrders(backendOrders);
       } else {
-        setOrders(localOrders);
+        setOrders([]);
       }
     } catch (err) {
-      console.warn("Failed to fetch backend orders, falling back:", err);
-      setOrders(localOrders);
+      console.warn("Failed to fetch backend orders:", err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -119,7 +117,7 @@ function OrdersPage() {
       return;
     }
     fetchOrders();
-  }, [localOrders, navigate]);
+  }, [user, navigate]);
 
   const handleCancelOrder = async () => {
     if (!cancelOrderId) return;
@@ -131,14 +129,14 @@ function OrdersPage() {
       setDetailModalOpen(false);
       fetchOrders();
     } catch (err: any) {
-      toast.error(err?.message || "Failed to cancel order");
+      toast.error(formatUserError(err, "Failed to cancel order. Please try again."));
     }
   };
 
   const handleReturnOrder = async () => {
     if (!returnOrderId) return;
     if (selectedOrder && selectedOrder.items?.length > 1 && returnItems.length === 0) {
-      toast.error("Please select at least one item to return", { id: "auth-toast" });
+      toast.error("Please select at least one item to return");
       return;
     }
     try {
@@ -160,25 +158,29 @@ function OrdersPage() {
       setDetailModalOpen(false);
       fetchOrders();
     } catch (err: any) {
-      toast.error(err?.message || "Failed to submit return request");
+      toast.error(formatUserError(err, "Failed to submit return request. Please try again."));
     }
   };
 
   const handleCreateReview = async () => {
-    if (!reviewProduct || !reviewOrder) return;
+    if (!reviewProduct) return;
+    if (!reviewText.trim()) {
+      toast.error("Please write a short review before submitting.");
+      return;
+    }
     try {
       await apiClient.reviews.create({
         productId: reviewProduct,
         rating: reviewRating,
-        text: reviewText,
+        text: reviewText.trim(),
         color: reviewColor,
         size: reviewSize || undefined,
       });
-      toast.success("Review submitted successfully!");
+      toast.success("Thank you! Your review was submitted successfully.");
       setReviewModal(false);
       setReviewText("");
     } catch (err: any) {
-      toast.error(err?.message || "Failed to submit review");
+      toast.error(formatUserError(err, "Failed to submit review. Please try again."));
     }
   };
 

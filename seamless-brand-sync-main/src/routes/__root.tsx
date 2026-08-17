@@ -10,7 +10,8 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { Toaster } from "sonner";
+import { FloatingNotificationContainer } from "../components/ui/FloatingNotificationContainer";
+import "@/lib/notifications";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -163,7 +164,7 @@ function RootComponent() {
         {!isAdminRoute && <CartDrawer />}
         {!isAdminRoute && <SearchModal />}
         {!isAuthPage && !isAdminRoute && <ScrollTagline />}
-        <Toaster position="top-right" richColors closeButton duration={3000} visibleToasts={1} />
+        <FloatingNotificationContainer />
         {!isAuthPage && !isAdminRoute && <div className="h-14 lg:hidden" />}
       </StoreProvider>
     </QueryClientProvider>

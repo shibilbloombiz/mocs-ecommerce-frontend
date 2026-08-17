@@ -70,6 +70,13 @@ const read = <T,>(key: string, fallback: T): T => {
   }
 };
 
+const getStorageKey = (prefix: string, user: any) => {
+  if (user && (user._id || user.id)) {
+    return `${prefix}_${user._id || user.id}`;
+  }
+  return `${prefix}_guest`;
+};
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
@@ -100,15 +107,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     fetchCollections();
   }, []);
 
-
-
   const fetchUserProfile = async () => {
     const token = getToken();
     if (token) {
       try {
         const res = await apiClient.auth.me();
-        setUser(res.user);
-        setRoleState(res.user.role === "admin" || res.user.role === "superadmin" ? "admin" : "user");
+        if (res && res.user) {
+          setUser(res.user);
+          setRoleState(res.user.role === "admin" || res.user.role === "superadmin" ? "admin" : "user");
+          // Load user-scoped data
+          const cartKey = getStorageKey("mocs-cart", res.user);
+          const wishlistKey = getStorageKey("mocs-wishlist", res.user);
+          setCart(read<CartItem[]>(cartKey, []));
+          setWishlist(read<string[]>(wishlistKey, []));
+          return;
+        }
       } catch (err) {
         console.error("Token verification failed, logging out:", err);
         setToken(null);
@@ -116,36 +129,37 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setRoleState("user");
       }
     }
+    // Guest fallback
+    setCart(read<CartItem[]>("mocs-cart_guest", []));
+    setWishlist(read<string[]>("mocs-wishlist_guest", []));
   };
 
   useEffect(() => {
-    setCart(read<CartItem[]>("mocs-cart", []));
-    setWishlist(read<string[]>("mocs-wishlist", []));
     setRecentlyViewed(read<string[]>("mocs-recent", []));
-    setOrders(read<Order[]>("mocs-orders", []));
     setRoleState(read<Role>("mocs-role", "user"));
     fetchUserProfile();
   }, []);
 
+  // Save cart per user session
   useEffect(() => {
-    if (typeof window !== "undefined")
-      localStorage.setItem("mocs-cart", JSON.stringify(cart));
-  }, [cart]);
+    if (typeof window !== "undefined") {
+      const key = getStorageKey("mocs-cart", user);
+      localStorage.setItem(key, JSON.stringify(cart));
+    }
+  }, [cart, user]);
 
+  // Save wishlist per user session
   useEffect(() => {
-    if (typeof window !== "undefined")
-      localStorage.setItem("mocs-wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+    if (typeof window !== "undefined") {
+      const key = getStorageKey("mocs-wishlist", user);
+      localStorage.setItem(key, JSON.stringify(wishlist));
+    }
+  }, [wishlist, user]);
 
   useEffect(() => {
     if (typeof window !== "undefined")
       localStorage.setItem("mocs-recent", JSON.stringify(recentlyViewed));
   }, [recentlyViewed]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined")
-      localStorage.setItem("mocs-orders", JSON.stringify(orders));
-  }, [orders]);
 
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem("mocs-role", JSON.stringify(role));
@@ -154,7 +168,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const addToCart: StoreContextType["addToCart"] = (
     product,
     size = product.sizes[2],
-    color = product.colors[0].name,
+    color = product.colors[0]?.name || "Default",
     qty = 1,
   ) => {
     setCart((prev) => {
@@ -222,17 +236,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setUser(userData);
     const userRole = userData.role === "admin" || userData.role === "superadmin" ? "admin" : "user";
     setRoleState(userRole);
+
+    // Switch cart and wishlist to this user's scoped storage
+    const cartKey = getStorageKey("mocs-cart", userData);
+    const wishlistKey = getStorageKey("mocs-wishlist", userData);
+    setCart(read<CartItem[]>(cartKey, []));
+    setWishlist(read<string[]>(wishlistKey, []));
+    setOrders([]);
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
     setRoleState("user");
+    setCart([]);
+    setWishlist([]);
+    setOrders([]);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("mocs-cart");
+      localStorage.removeItem("mocs-wishlist");
+      localStorage.removeItem("mocs-orders");
+      localStorage.removeItem("mocs-cart_guest");
+      localStorage.removeItem("mocs-wishlist_guest");
+      localStorage.removeItem("mocs-role");
+    }
     toast.success("Successfully logged out");
   };
 
   const clearCart = () => {
     setCart([]);
+    if (typeof window !== "undefined") {
+      const key = getStorageKey("mocs-cart", user);
+      localStorage.removeItem(key);
+    }
   };
 
   const value = useMemo<StoreContextType>(

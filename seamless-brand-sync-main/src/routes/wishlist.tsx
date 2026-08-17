@@ -5,8 +5,8 @@ import type { Product } from "@/lib/products";
 import { useStore } from "@/lib/store";
 import { ProductCard } from "@/components/ProductCard";
 import { Stagger } from "@/components/Reveal";
-import { getImageUrl } from "@/lib/utils";
-import { apiClient, API_BASE_URL } from "@/lib/api";
+import { apiClient } from "@/lib/api";
+import { formatApiProducts } from "@/routes/index";
 
 export const Route = createFileRoute("/wishlist")({
   head: () => ({
@@ -29,26 +29,7 @@ function Wishlist() {
         setLoading(true);
         const res = await apiClient.products.list("limit=100");
         if (res && res.items) {
-          const apiProducts: Product[] = res.items.map((p: any) => ({
-            id: p._id,
-            artNumber: p.artNumber || "",
-            name: p.name,
-            category: (p.category?.name || p.category || "Men") as any,
-            collection: (p.collection || "Casual") as any,
-            type: "Running",
-            price: p.price,
-            oldPrice: p.oldPrice,
-            rating: p.rating || 5,
-            reviews: p.reviewCount || 0,
-            stock: p.stock || 0,
-            image: getImageUrl(p.coverImage),
-            colors: p.colors && p.colors.length > 0
-              ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
-              : [{ name: "Default", hex: "#000000" }],
-            sizes: p.sizes || [7, 8, 9, 10, 11, 12],
-            description: p.description,
-            isNew: p.isNew,
-          }));
+          const apiProducts: Product[] = formatApiProducts(res.items);
           setSaved(apiProducts.filter((p) => wishlist.includes(p.id)));
         }
       } catch (err) {

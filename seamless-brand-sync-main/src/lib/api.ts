@@ -16,6 +16,69 @@ export function setToken(token: string | null) {
   else window.localStorage.removeItem(TOKEN_KEY);
 }
 
+/**
+ * Cleans developer-facing error messages and transforms them into friendly user text.
+ */
+export function formatUserError(err: unknown, fallback = "Something went wrong. Please try again."): string {
+  if (!err) return fallback;
+  const raw = typeof err === "string" ? err : (err as any)?.message || String(err);
+
+  // Strip API status prefixes like "API 404: " or "Error: "
+  let cleaned = raw.replace(/^API\s*\d+:\s*/i, "").replace(/^Error:\s*/i, "").trim();
+
+  // Try to parse JSON if message is stringified JSON
+  if (cleaned.startsWith("{") && cleaned.endsWith("}")) {
+    try {
+      const parsed = JSON.parse(cleaned);
+      if (parsed?.message) cleaned = parsed.message;
+      else if (parsed?.error) cleaned = parsed.error;
+    } catch {
+      // Ignore JSON parse error
+    }
+  }
+
+  const lower = cleaned.toLowerCase();
+
+  // Network / Connection errors
+  if (lower.includes("failed to fetch") || lower.includes("networkerror") || lower.includes("econnrefused")) {
+    return "Unable to connect to the server. Please check your internet connection.";
+  }
+
+  // Not found / 404 errors
+  if (lower.includes("not found") || lower.includes("404") || lower.includes("cannot get") || lower.includes("route")) {
+    return "The requested information could not be found.";
+  }
+
+  // Auth / Permission errors
+  if (lower.includes("jwt") || lower.includes("token") || lower.includes("unauthorized") || lower.includes("401") || lower.includes("not authorized")) {
+    return "Please sign in to continue.";
+  }
+  if (lower.includes("forbidden") || lower.includes("permission") || lower.includes("403")) {
+    return "You do not have permission to perform this action.";
+  }
+
+  // Duplicate / Conflict errors
+  if (lower.includes("e11000") || lower.includes("duplicate key") || lower.includes("already exists")) {
+    return "You have already submitted this entry.";
+  }
+
+  // Technical database / server jargon
+  if (
+    lower.includes("cast to objectid") ||
+    lower.includes("internal server error") ||
+    lower.includes("syntaxerror") ||
+    lower.includes("typeerror") ||
+    lower.includes("cannot read properties") ||
+    lower.includes("500") ||
+    lower.includes("502") ||
+    lower.includes("503")
+  ) {
+    return "Something went wrong on our end. Please try again shortly.";
+  }
+
+  return cleaned || fallback;
+}
+
 export async function api<T = unknown>(
   path: string,
   options: RequestInit = {},
@@ -27,14 +90,41 @@ export async function api<T = unknown>(
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    cache: "no-store",
-    ...options,
-    headers,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      cache: "no-store",
+      ...options,
+      headers,
+    });
+  } catch {
+    throw new Error("Unable to connect to the server. Please check your internet connection.");
+  }
+
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`API ${res.status}: ${text || res.statusText}`);
+    let errorText = "";
+    try {
+      const json = await res.json();
+      errorText = json?.message || json?.error || "";
+    } catch {
+      errorText = await res.text().catch(() => "");
+    }
+    
+    if (res.status === 404) {
+      throw new Error(errorText && !errorText.includes("/api/") ? errorText : "The requested item or page could not be found.");
+    }
+    if (res.status === 401) {
+      throw new Error("Please sign in to continue.");
+    }
+    if (res.status === 403) {
+      throw new Error("You do not have permission to perform this action.");
+    }
+    if (res.status >= 500) {
+      throw new Error("Our servers encountered an issue. Please try again shortly.");
+    }
+
+    const friendly = formatUserError(errorText || res.statusText);
+    throw new Error(friendly);
   }
   return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
 }
@@ -94,6 +184,7 @@ export const apiClient = {
   products: {
     list: (q = "") => api<any>(`/api/products${q ? `?${q}` : ""}`),
     get: (id: string, q = "") => api<any>(`/api/products/${id}${q ? `?${q}` : ""}`),
+    syncReviewCounts: () => api<any>("/api/products/sync-review-counts", { method: "POST" }),
     create: (data: any) =>
       api("/api/products", {
         method: "POST",
