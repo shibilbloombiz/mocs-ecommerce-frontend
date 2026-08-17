@@ -125,12 +125,10 @@ export function Hero() {
             )}
             style={{ 
               willChange: "transform",
-              backfaceVisibility: "hidden",
-              imageRendering: "high-quality" as any,
+              backfaceVisibility: "hidden"
             }}
             fetchPriority="high"
             loading="eager"
-            decoding="sync"
           />
         </AnimatePresence>
         

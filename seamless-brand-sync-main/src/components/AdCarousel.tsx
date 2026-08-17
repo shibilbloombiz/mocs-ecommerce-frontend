@@ -26,7 +26,7 @@ export function AdCarousel({ advertisements }: AdCarouselProps) {
           // Single image: static center card
           <div className="w-[90%] sm:w-[85%] lg:w-[80%] h-full rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden bg-stone-950 shadow-soft">
             <img
-              src={getImageUrl(advertisements[0])}
+              src={getImageUrl(advertisements[0], { width: 1400, quality: 85 })}
               alt="Advertisement Banner"
               className="w-full h-full object-cover"
             />
@@ -82,7 +82,7 @@ export function AdCarousel({ advertisements }: AdCarouselProps) {
                     )}
                   >
                     <img
-                      src={getImageUrl(advertisements[slide.idx])}
+                      src={getImageUrl(advertisements[slide.idx], { width: 1400, quality: 85 })}
                       alt={`Advertisement Banner #${slide.idx + 1}`}
                       className="w-full h-full object-cover pointer-events-none"
                     />

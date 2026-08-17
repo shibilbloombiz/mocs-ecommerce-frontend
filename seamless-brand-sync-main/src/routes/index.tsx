@@ -263,8 +263,7 @@ function Home() {
   const processedProducts = useMemo(() => {
     const newProducts = allProducts.filter((p: any) => p.isNew);
     const regularProducts = allProducts.filter((p: any) => !p.isNew);
-    const shuffled = [...regularProducts].sort(() => Math.random() - 0.5);
-    return [...newProducts, ...shuffled];
+    return [...newProducts, ...regularProducts];
   }, [allProducts]);
 
   const newArrivals = useMemo(() => {

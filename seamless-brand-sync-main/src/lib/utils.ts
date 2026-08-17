@@ -23,12 +23,22 @@ export function getImageUrl(url?: any, options: { width?: number; quality?: numb
         normalizedUrl = u.toString();
       } catch (e) {}
     } else if (normalizedUrl.includes("res.cloudinary.com") && normalizedUrl.includes("/image/upload/")) {
-      // Always inject/replace width+quality transformation for Cloudinary URLs.
-      // Strip any existing transformation segment (e.g. f_auto,q_auto,w_700) and apply fresh params.
-      normalizedUrl = normalizedUrl.replace(
-        /\/image\/upload\/((?:[a-z_,0-9]+\/)*)/i,
-        `/image/upload/f_auto,q_${targetQuality},w_${targetWidth},c_limit/`
-      );
+      const uploadMarker = "/image/upload/";
+      const uploadIdx = normalizedUrl.indexOf(uploadMarker);
+      if (uploadIdx !== -1) {
+        const prefix = normalizedUrl.substring(0, uploadIdx + uploadMarker.length);
+        let rest = normalizedUrl.substring(uploadIdx + uploadMarker.length);
+
+        // Transformation segments always contain key_value pairs like w_700, q_auto, f_auto, c_limit
+        // (they contain underscores). Version numbers (v1234567890/) and folders (mocs/uploads/) do not.
+        const transformSegmentRegex = /^([a-z]{1,4}_[a-zA-Z0-9_.:-]+(?:,[a-z]{1,4}_[a-zA-Z0-9_.:-]+)*\/)/i;
+        if (transformSegmentRegex.test(rest)) {
+          rest = rest.replace(transformSegmentRegex, "");
+        }
+
+        const transformParams = `f_auto,q_${targetQuality},w_${targetWidth},c_limit`;
+        normalizedUrl = `${prefix}${transformParams}/${rest}`;
+      }
     }
     return normalizedUrl;
   }
