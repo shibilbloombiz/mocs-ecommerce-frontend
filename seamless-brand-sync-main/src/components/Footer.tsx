@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram, Facebook, Linkedin, Phone, Mail, MapPin } from "lucide-react";
+import { Instagram, Facebook, Linkedin, Phone, Mail, MapPin, ShieldCheck, FileText, Truck } from "lucide-react";
 import logo from "@/assets/mocs-logo.png";
 
 const footerNav = [
@@ -24,12 +24,13 @@ const footerNav = [
     ]
   },
   {
-    title: "Company",
+    title: "Company & Policies",
     links: [
-      { label: "About", to: "/about" },
-      { label: "Why Choose MOCS", to: "/about" },
-      { label: "Contact", to: "/contact" },
-      { label: "Press", to: "/contact" },
+      { label: "About MOCS", to: "/about" },
+      { label: "Contact Us", to: "/contact" },
+      { label: "Privacy Policy", to: "/privacy" },
+      { label: "Terms of Service", to: "/terms" },
+      { label: "Shipping & Returns", to: "/shipping" },
     ]
   }
 ];
@@ -149,17 +150,38 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-secondary-foreground/10 pt-6 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-secondary-foreground/10 pt-6 sm:flex-row">
           <p className="text-xs text-secondary-foreground/60">
             © {new Date().getFullYear()} MOCS Footwear. All rights reserved.
           </p>
-          <div className="flex gap-4 text-xs text-secondary-foreground/60">
-            <a href="#" className="hover:text-primary">Privacy</a>
-            <a href="#" className="hover:text-primary">Terms</a>
-            <a href="#" className="hover:text-primary">Shipping</a>
+          
+          {/* 3 Prominent Policy Action Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+            <Link
+              to="/privacy"
+              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-foreground/15 bg-secondary/80 px-3.5 py-1.5 text-secondary-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+            >
+              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+              <span>Privacy Policy</span>
+            </Link>
+            <Link
+              to="/terms"
+              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-foreground/15 bg-secondary/80 px-3.5 py-1.5 text-secondary-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+            >
+              <FileText className="h-3.5 w-3.5 text-primary" />
+              <span>Terms of Service</span>
+            </Link>
+            <Link
+              to="/shipping"
+              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-foreground/15 bg-secondary/80 px-3.5 py-1.5 text-secondary-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+            >
+              <Truck className="h-3.5 w-3.5 text-primary" />
+              <span>Shipping & Returns</span>
+            </Link>
           </div>
         </div>
       </div>
     </footer>
   );
 }
+

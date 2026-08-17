@@ -487,8 +487,9 @@ function AuthPage() {
 
               <p className="mt-4 text-center text-[10px] text-stone-400 leading-normal font-medium">
                 By continuing you agree to the MOCS{" "}
-                <Link to="/about" className="font-semibold text-primary underline">Terms of Use</Link> and{" "}
-                <a href="/about" className="font-semibold text-primary underline">Privacy Policy</a>.
+                <Link to="/terms" className="font-semibold text-primary hover:underline">Terms of Service</Link>,{" "}
+                <Link to="/privacy" className="font-semibold text-primary hover:underline">Privacy Policy</Link>, and{" "}
+                <Link to="/shipping" className="font-semibold text-primary hover:underline">Shipping Policy</Link>.
               </p>
             </div>
       </div>

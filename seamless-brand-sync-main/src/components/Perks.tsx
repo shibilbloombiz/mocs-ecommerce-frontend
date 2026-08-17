@@ -1,10 +1,10 @@
 import { Truck, RotateCcw, ShieldCheck, Headphones } from "lucide-react";
 
 const perks = [
-  { icon: Truck, title: "Bulk Shipping", text: "Worldwide export" },
-  { icon: RotateCcw, title: "Easy Returns", text: "3-day policy" },
-  { icon: ShieldCheck, title: "Quality Assured", text: "Premium build" },
-  { icon: Headphones, title: "24/7 Support", text: "We're here to help" },
+  { icon: Truck, title: "Fast Shipping", text: "Pan-India delivery" },
+  { icon: RotateCcw, title: "Easy Returns", text: "7-day exchange" },
+  { icon: ShieldCheck, title: "Quality Assured", text: "Direct factory build" },
+  { icon: Headphones, title: "Customer Support", text: "We're here to help" },
 ];
 
 export function Perks() {
