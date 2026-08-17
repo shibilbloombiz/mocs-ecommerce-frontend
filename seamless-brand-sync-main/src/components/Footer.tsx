@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Instagram, Facebook, Linkedin, Phone, Mail, MapPin, ShieldCheck, FileText, Truck } from "lucide-react";
+import { Instagram, Facebook, Linkedin, Phone, Mail, MapPin } from "lucide-react";
 import logo from "@/assets/mocs-logo.png";
 
 const footerNav = [
@@ -150,33 +150,30 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-secondary-foreground/10 pt-6 sm:flex-row">
+        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-secondary-foreground/10 pt-6 sm:flex-row">
           <p className="text-xs text-secondary-foreground/60">
             © {new Date().getFullYear()} MOCS Footwear. All rights reserved.
           </p>
           
-          {/* 3 Prominent Policy Action Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+          {/* Policy Text Links */}
+          <div className="flex flex-wrap items-center gap-6 text-xs text-secondary-foreground/60">
             <Link
               to="/privacy"
-              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-foreground/15 bg-secondary/80 px-3.5 py-1.5 text-secondary-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+              className="transition-colors hover:text-primary"
             >
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>Privacy Policy</span>
+              Privacy Policy
             </Link>
             <Link
               to="/terms"
-              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-foreground/15 bg-secondary/80 px-3.5 py-1.5 text-secondary-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+              className="transition-colors hover:text-primary"
             >
-              <FileText className="h-3.5 w-3.5 text-primary" />
-              <span>Terms of Service</span>
+              Terms of Service
             </Link>
             <Link
               to="/shipping"
-              className="inline-flex items-center gap-1.5 rounded-full border border-secondary-foreground/15 bg-secondary/80 px-3.5 py-1.5 text-secondary-foreground/70 transition-all hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+              className="transition-colors hover:text-primary"
             >
-              <Truck className="h-3.5 w-3.5 text-primary" />
-              <span>Shipping & Returns</span>
+              Shipping Policy
             </Link>
           </div>
         </div>
