@@ -296,7 +296,15 @@ export const apiClient = {
       }),
   },
   reviews: {
-    list: (productId: string) => api<any[]>(`/api/reviews/${productId}`),
+    list: async (productId: string): Promise<any[]> => {
+      if (!productId) return [];
+      try {
+        const result = await api<any[]>(`/api/reviews/${productId}`);
+        return Array.isArray(result) ? result : [];
+      } catch {
+        return [];
+      }
+    },
     create: (data: { productId: string; rating: number; text: string; color?: string; size?: number }) =>
       api<any>("/api/reviews", {
         method: "POST",

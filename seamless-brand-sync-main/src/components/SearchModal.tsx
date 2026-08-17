@@ -137,7 +137,7 @@ export function SearchModal() {
                     <Link
                       key={p.id}
                       to="/product/$id"
-                      params={{ id: p.id }}
+                      params={{ id: p.id || (p as any)._id || "" }}
                       onClick={() => setSearchOpen(false)}
                       className="flex items-center gap-4 rounded-xl p-2 transition hover:bg-accent"
                     >

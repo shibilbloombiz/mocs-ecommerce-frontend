@@ -3,9 +3,9 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import blackSandals from "@/assets/black sandals.png";
-import shoe1 from "../../../../admin dashboard/e-commerce-admin-redesign/src/assets/shoe-1.jpg";
-import shoe2 from "../../../../admin dashboard/e-commerce-admin-redesign/src/assets/shoe-2.jpg";
-import shoe3 from "../../../../admin dashboard/e-commerce-admin-redesign/src/assets/shoe-3.jpg";
+const shoe1 = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800";
+const shoe2 = "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800";
+const shoe3 = "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800";
 
 export function ProductCategories({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);

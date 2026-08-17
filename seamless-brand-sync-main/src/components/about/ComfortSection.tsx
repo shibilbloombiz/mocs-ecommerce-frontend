@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import lifestyleWomen from "../../../../admin dashboard/e-commerce-admin-redesign/src/assets/lifestyle-women.jpg";
+const lifestyleWomen = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800";
 
 export function ComfortSection({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);

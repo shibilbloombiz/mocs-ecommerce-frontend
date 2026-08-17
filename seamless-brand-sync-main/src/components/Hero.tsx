@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiClient, API_BASE_URL } from "@/lib/api";
 import { cn, getImageUrl } from "@/lib/utils";
-import heroShoe from "@/assets/hero-shoe.png";
 
 type Slide = {
   bg: string;

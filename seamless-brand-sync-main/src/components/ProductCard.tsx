@@ -27,7 +27,7 @@ export function ProductCard({
       <div className="group relative font-sans">
         <Link
           to="/product/$id"
-          params={{ id: product.id }}
+          params={{ id: product.id || (product as any)._id || "" }}
           className="relative block w-full aspect-square overflow-hidden rounded-3xl border border-stone-200/80 bg-stone-100 shadow-sm"
         >
           {/* Product Image with Pure Scale Animation on Hover */}
@@ -113,7 +113,7 @@ export function ProductCard({
     <div className="group relative font-sans">
       <Link
         to="/product/$id"
-        params={{ id: product.id }}
+        params={{ id: product.id || (product as any)._id || "" }}
         className="block overflow-hidden rounded-3xl bg-white border border-stone-200/80 shadow-soft text-stone-900"
       >
         <div className="relative aspect-square overflow-hidden bg-stone-100">

@@ -42,7 +42,8 @@ export const Route = createFileRoute("/product/$id")({
       const p = await apiClient.products.get(params.id);
       if (p) {
         const mappedProduct: Product = {
-          id: p._id,
+          id: p._id || p.id || params.id,
+          _id: p._id,
           artNumber: p.artNumber || "",
           name: p.name,
           category: (p.category?.name || p.category || "Men") as any,
@@ -176,7 +177,7 @@ function ProductDetail() {
     if (allVariants.length > 0) {
       const options: { name: string; hex: string; productId: string }[] = [];
       allVariants.forEach((v) => {
-        v.colors.forEach((c) => {
+        (v.colors || []).forEach((c) => {
           if (!options.some((opt) => opt.name === c.name)) {
             options.push({ name: c.name, hex: c.hex, productId: v.id });
           }
@@ -184,7 +185,7 @@ function ProductDetail() {
       });
       return options;
     } else {
-      return product.colors.map((c) => ({ name: c.name, hex: c.hex, productId: product.id }));
+      return (product.colors || []).map((c) => ({ name: c.name, hex: c.hex, productId: product.id }));
     }
   }, [allVariants, product]);
 
@@ -202,7 +203,7 @@ function ProductDetail() {
 
   const [active, setActive] = useState(0);
   const [size, setSize] = useState<number | null>(null);
-  const [color, setColor] = useState(product.colors[0]?.name || "Default");
+  const [color, setColor] = useState(product.colors?.[0]?.name || "Default");
   const [qty, setQty] = useState(1);
   const [zoom, setZoom] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
@@ -288,7 +289,7 @@ function ProductDetail() {
 
   useEffect(() => {
     pushRecentlyViewed(product.id);
-    setColor(product.colors[0]?.name || "Default");
+    setColor(product.colors?.[0]?.name || "Default");
     setSize(null);
     setQty(1);
     setActive(0);
@@ -299,7 +300,7 @@ function ProductDetail() {
     const fetchReviews = async () => {
       try {
         const res = await apiClient.reviews.list(product.id);
-        if (res && Array.isArray(res)) {
+        if (res && Array.isArray(res) && res.length > 0) {
           const mapped = res.map((r: any) => ({
             name: r.user?.name || r.name || "Customer",
             rating: Number(r.rating) || 5,
@@ -311,11 +312,16 @@ function ProductDetail() {
           }));
           setUserReviews(mapped);
           setReviewsLoaded(true);
+          return;
         }
       } catch (err) {
-        console.warn("Could not load reviews for product", err);
-        setReviewsLoaded(true);
+        // Handled silently with local fallback
       }
+      const localReviews = getReviews(product.id);
+      if (localReviews && localReviews.length > 0) {
+        setUserReviews(localReviews);
+      }
+      setReviewsLoaded(true);
     };
     fetchReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -458,8 +464,8 @@ function ProductDetail() {
             <AnimatePresence mode="wait">
               <motion.img
                 key={active}
-                src={getImageUrl(gallery[active].src)}
-                alt={`${product.name} — ${gallery[active].label}`}
+                src={getImageUrl(gallery[active]?.src || product.image)}
+                alt={`${product.name} — ${gallery[active]?.label || "Front"}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -484,19 +490,19 @@ function ProductDetail() {
                 type="button"
                 onClick={() => setActive(i)}
                 onMouseEnter={() => setActive(i)}
-                aria-label={view.label}
+                aria-label={view?.label || "View"}
                 className={cn(
                   "group relative aspect-square overflow-hidden rounded-xl border-2 bg-muted transition cursor-pointer",
                   active === i ? "border-primary" : "border-transparent hover:border-border",
                 )}
               >
                 <img
-                  src={getImageUrl(view.src)}
-                  alt={view.label}
+                  src={getImageUrl(view?.src || product.image)}
+                  alt={view?.label || "View"}
                   className="h-full w-full object-cover"
                 />
                 <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent py-1 text-center text-[10px] font-semibold uppercase tracking-wide">
-                  {view.label}
+                  {view?.label || "View"}
                 </span>
               </button>
             ))}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import blackSandals from "@/assets/black sandals.png";
-import heroShoe from "../../../../admin dashboard/e-commerce-admin-redesign/src/assets/hero-shoe.png";
+const heroShoe = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800";
 
 const puSoleSpecs = [
   "Lightweight & flexible",
