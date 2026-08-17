@@ -38,7 +38,7 @@ export function Hero() {
             cta: slide.cta || "Shop Now",
             to: (slide.to || "/shop") as any,
             mobileFocus: slide.mobileFocus || "center",
-            bg: getImageUrl(slide.bg) || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1920",
+            bg: getImageUrl(slide.bg, { width: 1920, quality: 95 }) || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=95&w=1920",
           }));
           setHeroSlides(mapped);
         } else {
@@ -125,8 +125,12 @@ export function Hero() {
             )}
             style={{ 
               willChange: "transform",
-              backfaceVisibility: "hidden"
+              backfaceVisibility: "hidden",
+              imageRendering: "high-quality" as any,
             }}
+            fetchPriority="high"
+            loading="eager"
+            decoding="sync"
           />
         </AnimatePresence>
         

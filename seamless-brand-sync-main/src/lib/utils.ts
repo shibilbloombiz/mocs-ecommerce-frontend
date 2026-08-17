@@ -23,15 +23,16 @@ export function getImageUrl(url?: any, options: { width?: number; quality?: numb
         normalizedUrl = u.toString();
       } catch (e) {}
     } else if (normalizedUrl.includes("res.cloudinary.com") && normalizedUrl.includes("/image/upload/")) {
-      if (!normalizedUrl.includes("/q_") && !normalizedUrl.includes("/f_auto")) {
-        normalizedUrl = normalizedUrl.replace(
-          "/image/upload/",
-          `/image/upload/f_auto,q_auto,w_${targetWidth},c_limit/`
-        );
-      }
+      // Always inject/replace width+quality transformation for Cloudinary URLs.
+      // Strip any existing transformation segment (e.g. f_auto,q_auto,w_700) and apply fresh params.
+      normalizedUrl = normalizedUrl.replace(
+        /\/image\/upload\/((?:[a-z_,0-9]+\/)*)/i,
+        `/image/upload/f_auto,q_${targetQuality},w_${targetWidth},c_limit/`
+      );
     }
     return normalizedUrl;
   }
+
   const cleanBase = API_BASE_URL.replace(/\/+$/, "");
   let cleanUrl = normalizedUrl.replace(/^\/+/, "");
   if (cleanUrl.startsWith("src/uploads/")) {
