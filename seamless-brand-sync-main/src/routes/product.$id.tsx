@@ -74,8 +74,8 @@ export const Route = createFileRoute("/product/$id")({
         };
         return { product: mappedProduct };
       }
-    } catch (err) {
-      console.warn("Product not found on backend MERN server, loading fallback mock data...", err);
+    } catch {
+      // Backend unavailable or returned error — silently fall back to local data
     }
 
     const product = getProduct(params.id);
