@@ -33,9 +33,11 @@ export function ProductCard({
           {/* Product Image with Pure Scale Animation on Hover */}
           <div className="relative h-full w-full overflow-hidden bg-stone-100">
             <OptimizedImage
-              src={getImageUrl(product.image, { width: 650, quality: 75 })}
+              src={getImageUrl(product.image, { width: 450, quality: 75 })}
               alt={product.name}
               aspectRatio="1/1"
+              priority={index < 4}
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               containerClassName="h-full w-full"
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
             />
@@ -119,9 +121,11 @@ export function ProductCard({
         <div className="relative aspect-square overflow-hidden bg-stone-100">
           {/* Main Product Image with Smooth Scale on Hover */}
           <OptimizedImage
-            src={getImageUrl(product.image, { width: 650, quality: 75 })}
+            src={getImageUrl(product.image, { width: 450, quality: 75 })}
             alt={product.name}
             aspectRatio="1/1"
+            priority={index < 4}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             containerClassName="h-full w-full"
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
           />

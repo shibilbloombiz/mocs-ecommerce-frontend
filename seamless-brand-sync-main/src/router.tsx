@@ -9,7 +9,9 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
-    defaultPreloadStaleTime: 0,
+    defaultPreload: "intent",       // preload data on link hover
+    defaultPreloadStaleTime: 60_000, // don't re-fetch if data < 60s old
+    defaultStaleTime: 60_000,        // loader data stays fresh for 60s after navigation
   });
 
   return router;

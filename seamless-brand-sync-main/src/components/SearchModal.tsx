@@ -1,11 +1,12 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { Search, X, TrendingUp, Loader2, Tag, Package } from "lucide-react";
+import { Search, X, TrendingUp, Loader2, Tag, Package, IndianRupee, Filter } from "lucide-react";
 import { useStore } from "@/lib/store";
 import { getImageUrl } from "@/lib/utils";
 import type { Product } from "@/lib/products";
 import { apiClient } from "@/lib/api";
+import { parseSearchQuery } from "@/lib/search-parser";
 
 const trending = ["Sandals", "Ladies", "Kids", "Men", "Casual", "Sports", "Formal"];
 
@@ -144,17 +145,32 @@ export function SearchModal() {
     load();
   }, [searchOpen]);
 
-  /* Live search: client-side scoring + optional backend search for edge cases */
+  const parsedQuery = useMemo(() => parseSearchQuery(query), [query]);
+
+  /* Live search: client-side scoring + natural language price filtering + backend query */
   const search = useCallback(
     async (q: string) => {
       const term = q.trim();
-      if (!term) { setResults([]); setLoading(false); return; }
+      if (!term) {
+        setResults([]);
+        setLoading(false);
+        return;
+      }
 
       setLoading(true);
+      const parsed = parseSearchQuery(term);
 
-      // 1. Instant client-side results from cached product list
+      // 1. Instant client-side results from cached product list with price constraints applied
       const clientResults = allProducts
-        .map((p) => ({ p, score: scoreProduct(p, term) }))
+        .filter((p) => {
+          if (parsed.priceMin !== undefined && p.price < parsed.priceMin) return false;
+          if (parsed.priceMax !== undefined && p.price > parsed.priceMax) return false;
+          return true;
+        })
+        .map((p) => ({
+          p,
+          score: parsed.keyword ? scoreProduct(p, parsed.keyword) : 10,
+        }))
         .filter(({ score }) => score > 0)
         .sort((a, b) => b.score - a.score)
         .map(({ p }) => p);
@@ -163,26 +179,42 @@ export function SearchModal() {
 
       // 2. Also hit backend search API to catch products not yet in cache
       try {
-        const res = await apiClient.products.list(
-          `search=${encodeURIComponent(term)}&limit=50`
-        );
+        const params = new URLSearchParams();
+        if (parsed.keyword) params.set("search", parsed.keyword);
+        if (parsed.priceMin !== undefined) params.set("minPrice", String(parsed.priceMin));
+        if (parsed.priceMax !== undefined) params.set("maxPrice", String(parsed.priceMax));
+        params.set("limit", "50");
+
+        const res = await apiClient.products.list(params.toString());
         if (res?.items) {
           const apiMapped = res.items.map(mapProduct);
           // Merge: add any products from API not already in client results
-          const seen = new Set(clientResults.map((p) => p.id));
-          const extra = apiMapped.filter((p) => !seen.has(p.id));
+          const seen = new Set(clientResults.map((p: Product) => p.id));
+          const extra = apiMapped
+            .filter((p: Product) => !seen.has(p.id))
+            .filter((p: Product) => {
+              if (parsed.priceMin !== undefined && p.price < parsed.priceMin) return false;
+              if (parsed.priceMax !== undefined && p.price > parsed.priceMax) return false;
+              return true;
+            });
+
           // Re-score and sort all merged results
           const merged = [...clientResults, ...extra]
-            .map((p) => ({ p, score: scoreProduct(p, term) }))
+            .map((p: Product) => ({
+              p,
+              score: parsed.keyword ? scoreProduct(p, parsed.keyword) : 10,
+            }))
             .filter(({ score }) => score > 0)
             .sort((a, b) => b.score - a.score)
             .map(({ p }) => p);
+
           setResults(merged);
+
           // Also update cache with any new products
           if (extra.length > 0) {
             setAllProducts((prev) => {
-              const existingIds = new Set(prev.map((p) => p.id));
-              return [...prev, ...extra.filter((p) => !existingIds.has(p.id))];
+              const existingIds = new Set(prev.map((p: Product) => p.id));
+              return [...prev, ...extra.filter((p: Product) => !existingIds.has(p.id))];
             });
           }
         }
@@ -208,6 +240,8 @@ export function SearchModal() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [setSearchOpen]);
+
+  const hasPriceFilter = parsedQuery.priceMin !== undefined || parsedQuery.priceMax !== undefined;
 
   return (
     <AnimatePresence>
@@ -240,7 +274,7 @@ export function SearchModal() {
                   ref={inputRef}
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search products, categories, colors, art number…"
+                  placeholder="Search products, e.g. 'shoes under 500' or 'red sandals'…"
                   className="flex-1 bg-transparent text-lg outline-none placeholder:text-muted-foreground"
                   autoComplete="off"
                   spellCheck={false}
@@ -264,6 +298,26 @@ export function SearchModal() {
                   <X className="h-5 w-5" />
                 </button>
               </div>
+
+              {/* Active Natural Language Filter Badges */}
+              {hasPriceFilter && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+                    <Filter className="h-3 w-3" />
+                    Price:{" "}
+                    {parsedQuery.priceMin !== undefined && parsedQuery.priceMax !== undefined
+                      ? `₹${parsedQuery.priceMin} – ₹${parsedQuery.priceMax}`
+                      : parsedQuery.priceMin !== undefined
+                      ? `Above ₹${parsedQuery.priceMin}`
+                      : `Under ₹${parsedQuery.priceMax}`}
+                  </span>
+                  {parsedQuery.keyword && (
+                    <span className="text-xs text-muted-foreground">
+                      Searching for &ldquo;{parsedQuery.keyword}&rdquo;
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Trending pills — shown when no query */}
               {!query && (

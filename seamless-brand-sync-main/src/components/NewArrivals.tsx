@@ -120,9 +120,10 @@ export function NewArrivals({ products }: NewArrivalsProps) {
                     {/* Shoe Image Box */}
                     <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-stone-100/80 flex items-center justify-center p-2">
                       <OptimizedImage
-                        src={getImageUrl(product.image, { width: 500, quality: 75 })}
+                        src={getImageUrl(product.image, { width: 450, quality: 75 })}
                         alt={product.name}
                         aspectRatio="1/1"
+                        sizes="(max-width: 640px) 70vw, (max-width: 1024px) 40vw, 25vw"
                         containerClassName="h-full w-full"
                         className="h-full w-full object-contain transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-110"
                       />

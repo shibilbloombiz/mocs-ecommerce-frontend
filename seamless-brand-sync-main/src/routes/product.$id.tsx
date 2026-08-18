@@ -21,7 +21,6 @@ import {
 import {
   getProduct,
   getRelated,
-  getReviews,
   products as mockProducts,
   type Product,
   type ProductView,
@@ -33,6 +32,7 @@ import { Reveal, Stagger } from "@/components/Reveal";
 import { cn, getImageUrl } from "@/lib/utils";
 import { apiClient, API_BASE_URL, formatUserError } from "@/lib/api";
 import { formatApiProducts } from "@/routes/index";
+import { ProductSkeleton } from "@/components/skeletons/ProductSkeleton";
 
 export const Route = createFileRoute("/product/$id")({
   shouldReload: true,
@@ -72,7 +72,66 @@ export const Route = createFileRoute("/product/$id")({
               ]
             : [{ label: "Front", src: getImageUrl(p.coverImage) }]
         };
-        return { product: mappedProduct };
+
+        // Fetch variants, related products, and reviews in parallel now that we have the artNumber.
+        const [variantsRes, allProductsRes, reviewsRes] = await Promise.all([
+          p.artNumber
+            ? apiClient.products
+                .list(`artNumber=${encodeURIComponent(p.artNumber)}&limit=50`)
+                .catch(() => null)
+            : Promise.resolve(null),
+          apiClient.products.list("limit=100").catch(() => null),
+          apiClient.reviews.list(params.id),
+        ]);
+
+        const allVariants: Product[] = variantsRes?.items
+          ? variantsRes.items
+              .filter((v: any) => v.artNumber === p.artNumber)
+              .map((v: any) => ({
+                id: v._id,
+                _id: v._id,
+                artNumber: v.artNumber || "",
+                name: v.name,
+                category: (v.category?.name || v.category || "Men") as any,
+                collection: (v.collection || "Casual") as any,
+                type: "Running" as const,
+                price: v.price,
+                oldPrice: v.oldPrice,
+                rating: v.rating || 5,
+                reviews: v.reviewCount || 0,
+                stock: v.stock || 0,
+                image: getImageUrl(v.coverImage),
+                colors: v.colors && v.colors.length > 0
+                  ? v.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
+                  : [{ name: "Default", hex: "#000000" }],
+                sizes: v.sizes || [7, 8, 9, 10, 11, 12],
+                description: v.description,
+                isNew: v.isNew,
+                views: [{ label: "Front" as const, src: getImageUrl(v.coverImage) }],
+              }))
+          : [];
+
+        const allBackendProducts: Product[] = allProductsRes?.items
+          ? formatApiProducts(allProductsRes.items)
+          : [];
+
+        const initialReviews =
+          Array.isArray(reviewsRes) && reviewsRes.length > 0
+            ? reviewsRes.map((r: any) => ({
+                name: r.user?.name || r.name || "Customer",
+                rating: Number(r.rating) || 5,
+                text: r.comment || r.text || "",
+                days:
+                  Math.round(
+                    (Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+                  ) || 0,
+                color: r.color || "Default",
+                verified: r.isVerifiedPurchase ?? r.verifiedPurchase ?? true,
+                size: r.size || null,
+              }))
+            : [];
+
+        return { product: mappedProduct, allVariants, allBackendProducts, initialReviews };
       }
     } catch {
       // Backend unavailable or returned error — silently fall back to local data
@@ -80,7 +139,7 @@ export const Route = createFileRoute("/product/$id")({
 
     const product = getProduct(params.id);
     if (!product) throw notFound();
-    return { product };
+    return { product, allVariants: [], allBackendProducts: [], initialReviews: [] };
   },
   head: ({ loaderData }) => {
     const p = loaderData?.product;
@@ -93,10 +152,21 @@ export const Route = createFileRoute("/product/$id")({
         },
         { property: "og:title", content: p ? `${p.name} — MOCS` : "MOCS" },
         { property: "og:description", content: p?.description ?? "Premium MOCS footwear." },
-        ...(p ? [{ property: "og:image", content: p.image }] : []),
+        ...(p?.image ? [{ property: "og:image", content: p.image }] : []),
       ],
+      links: p?.image
+        ? [
+            {
+              rel: "preload",
+              as: "image",
+              href: p.image,
+              fetchPriority: "high" as const,
+            },
+          ]
+        : [],
     };
   },
+  pendingComponent: ProductSkeleton,
   component: ProductDetail,
   notFoundComponent: () => (
     <div className="grid min-h-[60vh] place-items-center px-4 text-center">
@@ -111,7 +181,12 @@ export const Route = createFileRoute("/product/$id")({
 });
 
 function ProductDetail() {
-  const { product }: { product: Product } = Route.useLoaderData();
+  const { product, allVariants, allBackendProducts, initialReviews }: {
+    product: Product;
+    allVariants: Product[];
+    allBackendProducts: Product[];
+    initialReviews: any[];
+  } = Route.useLoaderData() as any;
   const {
     addToCart,
     toggleWishlist,
@@ -121,57 +196,8 @@ function ProductDetail() {
     recentlyViewed,
   } = useStore();
 
-  const [allVariants, setAllVariants] = useState<Product[]>([]);
-  const [allBackendProducts, setAllBackendProducts] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const fetchVariants = async () => {
-      if (!product.artNumber) return;
-      try {
-        const res = await apiClient.products.list(`artNumber=${encodeURIComponent(product.artNumber)}&limit=50`);
-        if (res && res.items) {
-          const apiVariants = res.items
-            .filter((p: any) => p.artNumber === product.artNumber)
-            .map((p: any) => ({
-              id: p._id,
-              artNumber: p.artNumber || "",
-              name: p.name,
-              category: p.category?.name || p.category || "Men",
-              collection: p.collection || "Casual",
-              price: p.price,
-              oldPrice: p.oldPrice,
-              rating: p.rating || 5,
-              reviews: p.reviewCount || 0,
-              stock: p.stock || 0,
-              image: getImageUrl(p.coverImage),
-              colors: p.colors && p.colors.length > 0
-                ? p.colors.map((c: any) => ({ name: c.name, hex: c.hex }))
-                : [{ name: "Default", hex: "#000000" }],
-              sizes: p.sizes || [7, 8, 9, 10, 11, 12],
-              description: p.description,
-              isNew: p.isNew,
-            }));
-          setAllVariants(apiVariants);
-        }
-      } catch (err) {
-        console.warn("Failed to fetch variants for art number", err);
-      }
-    };
-
-    const loadAllProducts = async () => {
-      try {
-        const res = await apiClient.products.list("limit=100");
-        if (res && res.items) {
-          setAllBackendProducts(formatApiProducts(res.items));
-        }
-      } catch (err) {
-        console.warn("Failed to load products for detail page fallback", err);
-      }
-    };
-
-    fetchVariants();
-    loadAllProducts();
-  }, [product.artNumber]);
+  // allVariants, allBackendProducts, and initialReviews come from the server-side
+  // loader — no client-side fetch needed for these on first render.
 
   const colorOptions = useMemo(() => {
     if (allVariants.length > 0) {
@@ -257,6 +283,7 @@ function ProductDetail() {
       (product as any).promo3 || "3-months warranty"
     ]);
   }, [product]);
+  // Reviews seeded from loader; user can still submit new reviews client-side.
   const [userReviews, setUserReviews] = useState<
     {
       name: string;
@@ -267,8 +294,8 @@ function ProductDetail() {
       verified: boolean;
       size?: number | null;
     }[]
-  >([]);
-  const [reviewsLoaded, setReviewsLoaded] = useState(false);
+  >(initialReviews);
+  const [reviewsLoaded, setReviewsLoaded] = useState(initialReviews.length > 0);
   const [writeReviewModalOpen, setWriteReviewModalOpen] = useState(false);
   const [rvRating, setRvRating] = useState(5);
   const [rvHoverRating, setRvHoverRating] = useState<number | null>(null);
@@ -287,6 +314,8 @@ function ProductDetail() {
     return product.rating || 5;
   }, [liveReviews, product.rating]);
 
+  // Reset UI state when navigating between products.
+  // Reviews and product data come from the loader, so no fetch needed here.
   useEffect(() => {
     pushRecentlyViewed(product.id);
     setColor(product.colors?.[0]?.name || "Default");
@@ -295,35 +324,8 @@ function ProductDetail() {
     setActive(0);
     setZoom(false);
     setCurrentReviewIndex(0);
-    setReviewsLoaded(false);
-
-    const fetchReviews = async () => {
-      try {
-        const res = await apiClient.reviews.list(product.id);
-        if (res && Array.isArray(res) && res.length > 0) {
-          const mapped = res.map((r: any) => ({
-            name: r.user?.name || r.name || "Customer",
-            rating: Number(r.rating) || 5,
-            text: r.comment || r.text || "",
-            days: Math.round((Date.now() - new Date(r.createdAt).getTime()) / (1000 * 60 * 60 * 24)) || 0,
-            color: r.color || "Default",
-            verified: r.isVerifiedPurchase ?? r.verifiedPurchase ?? true,
-            size: r.size || null,
-          }));
-          setUserReviews(mapped);
-          setReviewsLoaded(true);
-          return;
-        }
-      } catch (err) {
-        // Handled silently with local fallback
-      }
-      const localReviews = getReviews(product.id);
-      if (localReviews && localReviews.length > 0) {
-        setUserReviews(localReviews);
-      }
-      setReviewsLoaded(true);
-    };
-    fetchReviews();
+    setReviewsLoaded(initialReviews.length > 0);
+    setUserReviews(initialReviews);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product.id]);
 

@@ -1,5 +1,5 @@
-import { useState, ImgHTMLAttributes } from "react";
-import { cn } from "@/lib/utils";
+import { useState, useMemo, ImgHTMLAttributes } from "react";
+import { cn, getImageUrl } from "@/lib/utils";
 
 interface OptimizedImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -9,6 +9,7 @@ interface OptimizedImageProps extends ImgHTMLAttributes<HTMLImageElement> {
   priority?: boolean;
   aspectRatio?: string;
   fallbackSrc?: string;
+  sizes?: string;
 }
 
 export function OptimizedImage({
@@ -18,38 +19,50 @@ export function OptimizedImage({
   containerClassName,
   priority = false,
   aspectRatio,
-  fallbackSrc = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600",
+  sizes,
+  fallbackSrc = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=75&w=480&auto=format&fit=crop",
   ...props
 }: OptimizedImageProps) {
-  const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  const imgSrc = error || !src ? fallbackSrc : src;
+  const rawSrc = error || !src ? fallbackSrc : src;
+
+  // Optimized base URL (default ~480px width for fast 10-25KB transfer)
+  const optimizedSrc = useMemo(() => {
+    return getImageUrl(rawSrc, { width: priority ? 800 : 480, quality: 75 });
+  }, [rawSrc, priority]);
+
+  // Multi-density responsive srcSet for instant sharp rendering on all screens
+  const srcSet = useMemo(() => {
+    if (!rawSrc || rawSrc.startsWith("data:")) return undefined;
+    if (rawSrc.includes("images.unsplash.com") || rawSrc.includes("res.cloudinary.com")) {
+      const widths = [320, 480, 720, 1080];
+      return widths
+        .map((w) => `${getImageUrl(rawSrc, { width: w, quality: 75 })} ${w}w`)
+        .join(", ");
+    }
+    return undefined;
+  }, [rawSrc]);
 
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-stone-100/80 dark:bg-stone-800/50",
+        "relative overflow-hidden bg-stone-100/90 dark:bg-stone-850",
         containerClassName
       )}
       style={aspectRatio ? { aspectRatio } : undefined}
     >
-      {/* Shimmer skeleton placeholder */}
-      {!isLoaded && (
-        <div className="absolute inset-0 z-10 animate-pulse bg-gradient-to-r from-stone-200 via-stone-100 to-stone-200 dark:from-stone-800 dark:via-stone-700 dark:to-stone-800" />
-      )}
-
-      {/* Optimized image tag */}
       <img
-        src={imgSrc}
+        src={optimizedSrc}
+        srcSet={srcSet}
+        sizes={sizes || "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"}
         alt={alt}
         loading={priority ? "eager" : "lazy"}
         decoding={priority ? "sync" : "async"}
-        onLoad={() => setIsLoaded(true)}
+        fetchPriority={priority ? "high" : "auto"}
         onError={() => setError(true)}
         className={cn(
-          "h-full w-full object-cover transition-opacity duration-300 ease-out will-change-[opacity,transform]",
-          isLoaded ? "opacity-100" : "opacity-0",
+          "h-full w-full object-cover transition-transform duration-300",
           className
         )}
         {...props}
@@ -57,3 +70,4 @@ export function OptimizedImage({
     </div>
   );
 }
+

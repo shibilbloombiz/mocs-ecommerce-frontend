@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Reveal } from "@/components/Reveal";
 import { cn, getImageUrl } from "@/lib/utils";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 export function ScrollBrandReveal({ collections }: { collections: any[] }) {
   const [showAll, setShowAll] = useState(false);
@@ -49,11 +50,12 @@ export function ScrollBrandReveal({ collections }: { collections: any[] }) {
         >
           {/* Background Image */}
           {bgUrl ? (
-            <img
+            <OptimizedImage
               src={bgUrl}
               alt={item.title}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 20vw"
+              containerClassName="absolute inset-0 h-full w-full"
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 pointer-events-none"
             />
           ) : null}
           {/* Dark Overlay */}

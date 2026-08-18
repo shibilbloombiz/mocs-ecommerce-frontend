@@ -5,6 +5,7 @@ import {
   useTransform,
   useInView,
   useReducedMotion,
+  type Variants,
 } from "motion/react";
 import {
   FlaskConical, Ruler, Zap, Heart,
@@ -37,7 +38,7 @@ function StepRow({
   const isLeft = step.side === "left";
   const Icon = step.icon;
 
-  const cardVariants = {
+  const cardVariants: Variants = {
     hidden: { opacity: 0, x: isLeft ? -56 : 56, scale: 0.94 },
     visible: {
       opacity: 1, x: 0, scale: 1,
@@ -45,7 +46,7 @@ function StepRow({
     },
   };
 
-  const nodeVariants = {
+  const nodeVariants: Variants = {
     hidden: { scale: 0, opacity: 0 },
     visible: { scale: 1, opacity: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
   };

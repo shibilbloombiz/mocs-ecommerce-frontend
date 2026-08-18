@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import { apiClient } from "@/lib/api";
 import { getImageUrl } from "@/lib/utils";
+import type { Slide } from "@/components/Hero";
+import { HomeSkeleton } from "@/components/skeletons/HomeSkeleton";
 
 // Home Components
 import { Hero } from "@/components/Hero";
@@ -55,31 +57,109 @@ export function formatApiProducts(items: any[]): import("@/lib/products").Produc
 export const Route = createFileRoute("/")({
   loader: async () => {
     try {
-      const res = await apiClient.products.list("limit=100");
-      if (res && res.items) {
-        return { products: formatApiProducts(res.items) };
-      }
+      // All settings + products fetched in parallel on the server before first paint.
+      // Using .catch(() => null) so one failing endpoint never blocks the whole page.
+      const [
+        productsRes,
+        heroRes,
+        categoryBannersRes,
+        collectionBannersRes,
+        promiseRes,
+        adsRes,
+      ] = await Promise.all([
+        apiClient.products.list("limit=100").catch(() => null),
+        apiClient.settings.get("hero_slides").catch(() => null),
+        apiClient.settings.get("categories_banners").catch(() => null),
+        apiClient.settings.get("collections_banners").catch(() => null),
+        apiClient.settings.get("promise_collage").catch(() => null),
+        apiClient.settings.get("advertisements").catch(() => null),
+      ]);
+
+      // Map hero slides to the Slide shape with full image URLs (done server-side
+      // so the browser receives complete URLs in the HTML — no client transform needed).
+      const heroSlides: Slide[] =
+        heroRes?.value && Array.isArray(heroRes.value) && heroRes.value.length > 0
+          ? heroRes.value.map((slide: any) => ({
+              eyebrow: slide.eyebrow || "",
+              title: slide.title || "",
+              subtitle: slide.subtitle || "",
+              cta: slide.cta || "Shop Now",
+              to: (slide.to || "/shop") as Slide["to"],
+              mobileFocus: slide.mobileFocus || "center",
+              bg:
+                getImageUrl(slide.bg, { width: 1920, quality: 95 }) ||
+                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=95&w=1920",
+            }))
+          : [];
+
+      return {
+        products: productsRes?.items ? formatApiProducts(productsRes.items) : [],
+        heroSlides,
+        categoriesBanners:
+          categoryBannersRes?.value &&
+          Array.isArray(categoryBannersRes.value) &&
+          categoryBannersRes.value.length === 5
+            ? categoryBannersRes.value
+            : null,
+        collectionsBanners:
+          collectionBannersRes?.value &&
+          Array.isArray(collectionBannersRes.value) &&
+          collectionBannersRes.value.length > 0
+            ? collectionBannersRes.value
+            : null,
+        promiseCollage:
+          promiseRes?.value &&
+          Array.isArray(promiseRes.value) &&
+          promiseRes.value.length > 0
+            ? promiseRes.value
+            : null,
+        advertisements:
+          adsRes?.value && Array.isArray(adsRes.value) && adsRes.value.length > 0
+            ? adsRes.value
+            : [],
+      };
     } catch (err) {
-      console.warn("Failed to load products for homepage", err);
+      console.warn("Homepage loader failed, using empty fallback", err);
+      return {
+        products: [],
+        heroSlides: [] as Slide[],
+        categoriesBanners: null,
+        collectionsBanners: null,
+        promiseCollage: null,
+        advertisements: [],
+      };
     }
-    return { products: [] };
   },
   shouldReload: true,
-  head: () => ({
-    meta: [
-      { title: "MOCS — Premium Footwear" },
-      {
-        name: "description",
-        content:
-          "MOCS — premium footwear for Men, Women and Kids. Engineered for performance, crafted for everyday style.",
-      },
-      { property: "og:title", content: "MOCS — Premium Footwear" },
-      {
-        property: "og:description",
-        content: "Premium footwear engineered for performance.",
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const firstHeroBg = loaderData?.heroSlides?.[0]?.bg;
+    return {
+      meta: [
+        { title: "MOCS — Premium Footwear" },
+        {
+          name: "description",
+          content:
+            "MOCS — premium footwear for Men, Women and Kids. Engineered for performance, crafted for everyday style.",
+        },
+        { property: "og:title", content: "MOCS — Premium Footwear" },
+        {
+          property: "og:description",
+          content: "Premium footwear engineered for performance.",
+        },
+      ],
+      links: firstHeroBg
+        ? [
+            {
+              rel: "preload",
+              as: "image",
+              href: firstHeroBg,
+              fetchPriority: "high" as const,
+            },
+          ]
+        : [],
+    };
+  },
+  pendingComponent: HomeSkeleton,
   component: Home,
 });
 
@@ -106,148 +186,95 @@ const reviews = [
   },
 ];
 
+// Fallback category banners shown when the admin hasn't configured images in Settings.
+// Replace bg: "" with Unsplash URLs in Step 3, or configure via the admin panel.
+const DEFAULT_CATEGORY_BANNERS = [
+  {
+    key: "main",
+    title: "We Are MOCS",
+    desc: "Awesome, clean & creative footwear collections engineered for everyday agility, comfort, and style.",
+    cta: "Purchase Now!",
+    to: "/shop",
+    bg: "https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=1200&auto=format&fit=crop",
+  },
+  {
+    key: "women",
+    title: "Women",
+    desc: "Best Footwear For Women",
+    cta: "Discover More",
+    to: "/shop",
+    search: { category: "Women" },
+    bg: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    key: "men",
+    title: "Men",
+    desc: "Best Collections For Men",
+    cta: "Discover More",
+    to: "/shop",
+    search: { category: "Men" },
+    bg: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    key: "kids",
+    title: "Kids",
+    desc: "Best Shoes For Kids",
+    cta: "Discover More",
+    to: "/shop",
+    search: { category: "Kids" },
+    bg: "https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&w=800&auto=format&fit=crop",
+  },
+  {
+    key: "trending",
+    title: "Trending",
+    desc: "Best Trend Collections",
+    cta: "Discover More",
+    to: "/shop",
+    search: { collection: "Trending" },
+    bg: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800&auto=format&fit=crop",
+  },
+];
+
+const DEFAULT_COLLECTION_BANNERS = [
+  {
+    key: "sports",
+    title: "SPORTS",
+    bg: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=70&auto=format&fit=crop&w=400",
+    to: "/shop",
+    search: { collection: "Sports" },
+  },
+  {
+    key: "casual",
+    title: "CASUAL",
+    bg: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=70&auto=format&fit=crop&w=400",
+    to: "/shop",
+    search: { collection: "Casual" },
+  },
+  {
+    key: "formal",
+    title: "FORMAL",
+    bg: "https://images.unsplash.com/photo-1486308512493-ae6a625e368a?q=70&auto=format&fit=crop&w=400",
+    to: "/shop",
+    search: { collection: "Formal" },
+  },
+];
+
 function Home() {
-  const { products } = Route.useLoaderData();
-  const [allProducts, setAllProducts] = useState<any[]>(products);
-  const [categoriesBanners, setCategoriesBanners] = useState<any[]>([
-    {
-      key: "main",
-      title: "We Are MOCS",
-      desc: "Awesome, clean & creative footwear collections engineered for everyday agility, comfort, and style.",
-      cta: "Purchase Now!",
-      to: "/shop",
-      bg: ""
-    },
-    {
-      key: "women",
-      title: "Women",
-      desc: "Best Footwear For Women",
-      cta: "Discover More",
-      to: "/shop",
-      search: { category: "Women" },
-      bg: ""
-    },
-    {
-      key: "men",
-      title: "Men",
-      desc: "Best Collections For Men",
-      cta: "Discover More",
-      to: "/shop",
-      search: { category: "Men" },
-      bg: ""
-    },
-    {
-      key: "kids",
-      title: "Kids",
-      desc: "Best Shoes For Kids",
-      cta: "Discover More",
-      to: "/shop",
-      search: { category: "Kids" },
-      bg: ""
-    },
-    {
-      key: "trending",
-      title: "Trending",
-      desc: "Best Trend Collections",
-      cta: "Discover More",
-      to: "/shop",
-      search: { collection: "Trending" },
-      bg: ""
-    }
-  ]);
+  // All data comes from the server-side loader — no client-side fetches.
+  const {
+    products,
+    heroSlides,
+    categoriesBanners: rawCategoryBanners,
+    collectionsBanners: rawCollectionBanners,
+    promiseCollage: rawPromise,
+    advertisements,
+  } = Route.useLoaderData();
 
-  const [collectionsBanners, setCollectionsBanners] = useState<any[]>([
-    { key: "sports", title: "SPORTS", bg: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=70&auto=format&fit=crop&w=400", to: "/shop", search: { collection: "Sports" } },
-    { key: "casual", title: "CASUAL", bg: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=70&auto=format&fit=crop&w=400", to: "/shop", search: { collection: "Casual" } },
-    { key: "formal", title: "FORMAL", bg: "https://images.unsplash.com/photo-1486308512493-ae6a625e368a?q=70&auto=format&fit=crop&w=400", to: "/shop", search: { collection: "Formal" } }
-  ]);
-
-  const [promiseCollage, setPromiseCollage] = useState<any[]>([]);
-  const [advertisements, setAdvertisements] = useState<string[]>([]);
-
-  useEffect(() => {
-    const fetchBannersSettings = async () => {
-      try {
-        const res = await apiClient.settings.get("categories_banners");
-        if (res && res.value && Array.isArray(res.value) && res.value.length === 5) {
-          setCategoriesBanners(res.value);
-        }
-      } catch (err) {
-        console.warn("Failed to load categories banners settings", err);
-      }
-    };
-    const fetchCollectionsSettings = async () => {
-      try {
-        const res = await apiClient.settings.get("collections_banners");
-        if (res && res.value && Array.isArray(res.value) && res.value.length > 0) {
-          setCollectionsBanners(res.value);
-        }
-      } catch (err) {
-        console.warn("Failed to load collections banners settings", err);
-      }
-    };
-    const fetchPromiseSettings = async () => {
-      try {
-        const res = await apiClient.settings.get("promise_collage");
-        if (res && res.value && Array.isArray(res.value) && res.value.length > 0) {
-          setPromiseCollage(res.value);
-        }
-      } catch (err) {
-        console.warn("Failed to load collage settings", err);
-      }
-    };
-    const fetchAdsSettings = async () => {
-      try {
-        const res = await apiClient.settings.get("advertisements");
-        if (res && res.value && Array.isArray(res.value) && res.value.length > 0) {
-          setAdvertisements(res.value);
-        }
-      } catch (err) {
-        console.warn("Failed to load advertisements settings", err);
-      }
-    };
-    fetchBannersSettings();
-    fetchCollectionsSettings();
-    fetchPromiseSettings();
-    fetchAdsSettings();
-  }, []);
-
-  // Always sync latest products from the database dynamically
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchFreshProducts = async () => {
-      try {
-        const res = await apiClient.products.list("limit=100");
-        if (isMounted && res && res.items) {
-          setAllProducts(formatApiProducts(res.items));
-        }
-      } catch (err) {
-        console.warn("Dynamic product fetch failed, keeping fallback/loader data", err);
-      }
-    };
-
-    fetchFreshProducts();
-
-    // Re-fetch automatically whenever the user returns to this tab
-    const handleFocus = () => {
-      fetchFreshProducts();
-    };
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("visibilitychange", handleFocus);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("visibilitychange", handleFocus);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (products && products.length > 0) {
-      setAllProducts(products);
-    }
-  }, [products]);
+  // Use loader data directly; fall back to defaults if admin hasn't configured settings yet.
+  const allProducts = products;
+  const categoriesBanners = rawCategoryBanners ?? DEFAULT_CATEGORY_BANNERS;
+  const collectionsBanners = rawCollectionBanners ?? DEFAULT_COLLECTION_BANNERS;
+  const promiseCollage = rawPromise ?? [];
 
   const trendingProducts = useMemo(() => {
     const list = allProducts.filter((p: any) => p.isTrending);
@@ -335,7 +362,7 @@ function Home() {
 
   return (
     <>
-      <Hero />
+      <Hero slides={heroSlides} />
       <AboutMocsSection />
       <TrendingProducts products={trendingProducts} />
 

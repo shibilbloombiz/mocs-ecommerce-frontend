@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { apiClient, API_BASE_URL } from "@/lib/api";
-import { cn, getImageUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
-type Slide = {
+export type Slide = {
   bg: string;
   eyebrow: string;
   title: string;
@@ -15,58 +15,36 @@ type Slide = {
   mobileFocus?: "center" | "left" | "right";
 };
 
-const defaultSlides: Slide[] = [];
+export function HeroSkeleton() {
+  return (
+    <div className="relative h-[55vh] sm:h-[65vh] lg:h-[80vh] min-h-[400px] w-full overflow-hidden bg-stone-950 text-white border-b border-stone-900 animate-pulse">
+      <div className="absolute inset-0 bg-gradient-to-r from-stone-900 via-stone-800 to-stone-900 opacity-60" />
+      <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col justify-end px-4 pb-14 sm:px-6 sm:pb-20 lg:px-8">
+        <div className="max-w-2xl space-y-4">
+          <div className="h-4 w-32 rounded bg-stone-800" />
+          <div className="h-10 sm:h-16 w-3/4 rounded bg-stone-800" />
+          <div className="h-4 sm:h-6 w-1/2 rounded bg-stone-800" />
+          <div className="h-12 w-40 rounded-full bg-stone-800 mt-4" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
-export function Hero() {
+export function Hero({ slides }: { slides: Slide[] }) {
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [heroSlides, setHeroSlides] = useState<Slide[]>(defaultSlides);
 
-  // Fetch dynamic hero slides from backend settings
+  // Auto-advance carousel — data arrives via props from the server-side loader.
+  // No client-side fetch needed; the parent route loader runs before first paint.
   useEffect(() => {
-    const fetchHeroSettings = async () => {
-      try {
-        const res = await apiClient.settings.get("hero_slides");
-        const slidesArray = res && (Array.isArray(res) ? res : (res.value && Array.isArray(res.value) ? res.value : null));
-        
-        if (slidesArray && slidesArray.length > 0) {
-          const mapped = slidesArray.map((slide: any) => ({
-            eyebrow: slide.eyebrow || "",
-            title: slide.title || "",
-            subtitle: slide.subtitle || "",
-            cta: slide.cta || "Shop Now",
-            to: (slide.to || "/shop") as any,
-            mobileFocus: slide.mobileFocus || "center",
-            bg: getImageUrl(slide.bg, { width: 1920, quality: 95 }) || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=95&w=1920",
-          }));
-          setHeroSlides(mapped);
-        } else {
-          setHeroSlides(defaultSlides);
-        }
-      } catch (err) {
-        console.warn("Failed to load dynamic hero slides, using fallback", err);
-        setHeroSlides(defaultSlides);
-      }
-    };
-    fetchHeroSettings();
-  }, []);
-
-  // Preload dynamic slides
-  useEffect(() => {
-    heroSlides.forEach((slide) => {
-      const img = new Image();
-      img.src = slide.bg;
-    });
-  }, [heroSlides]);
-
-  useEffect(() => {
-    if (heroSlides.length === 0) return;
+    if (slides.length === 0) return;
     const t = setInterval(() => {
       setDirection(1);
-      setActive((a) => (a + 1) % heroSlides.length);
+      setActive((a) => (a + 1) % slides.length);
     }, 5000);
     return () => clearInterval(t);
-  }, [heroSlides.length]);
+  }, [slides.length]);
 
   const go = (i: number) => {
     setDirection(i > active ? 1 : -1);
@@ -90,15 +68,11 @@ export function Hero() {
     });
   };
 
-  if (heroSlides.length === 0) {
-    return (
-      <section className="relative h-[50vh] min-h-[500px] w-full overflow-hidden bg-stone-950 text-white border-b border-stone-900 flex items-center justify-center">
-        <div className="text-stone-500 text-sm font-medium animate-pulse uppercase tracking-widest">Loading...</div>
-      </section>
-    );
+  if (slides.length === 0) {
+    return <HeroSkeleton />;
   }
 
-  const current = heroSlides[active];
+  const current = slides[active];
 
   return (
     <section className="relative h-[55vh] sm:h-[65vh] lg:h-[80vh] min-h-[400px] w-full overflow-hidden bg-stone-950 text-white border-b border-stone-900">
@@ -106,29 +80,34 @@ export function Hero() {
       {/* 1. Image Container: full absolute background, centered on footwear */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <AnimatePresence initial={false}>
-          <motion.img
+          <motion.div
             key={active}
-            src={current.bg}
-            alt={current.title}
             initial={{ opacity: 0, scale: 1.15 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className={cn(
-              "absolute inset-0 w-full h-full object-cover select-none pointer-events-none",
-              current.mobileFocus === "right"
-                ? "object-right lg:object-center"
-                : current.mobileFocus === "left"
-                ? "object-left lg:object-center"
-                : "object-center"
-            )}
+            className="absolute inset-0 w-full h-full"
             style={{ 
-              willChange: "transform",
+              willChange: "transform, opacity",
               backfaceVisibility: "hidden"
             }}
-            fetchPriority="high"
-            loading="eager"
-          />
+          >
+            <OptimizedImage
+              src={current.bg}
+              alt={current.title}
+              priority={true}
+              sizes="100vw"
+              containerClassName="h-full w-full bg-stone-950"
+              className={cn(
+                "h-full w-full object-cover select-none pointer-events-none",
+                current.mobileFocus === "right"
+                  ? "object-right lg:object-center"
+                  : current.mobileFocus === "left"
+                  ? "object-left lg:object-center"
+                  : "object-center"
+              )}
+            />
+          </motion.div>
         </AnimatePresence>
         
         {/* Subtle dark shade overlay: bottom gradient on mobile, left gradient on desktop for text legibility */}
@@ -220,7 +199,7 @@ export function Hero() {
       <button
         type="button"
         aria-label="Previous slide"
-        onClick={() => go((active - 1 + heroSlides.length) % heroSlides.length)}
+        onClick={() => go((active - 1 + slides.length) % slides.length)}
         className="absolute left-4 top-1/2 z-30 -translate-y-1/2 grid grid-cols-1 place-items-center rounded-full bg-[#1C1917]/60 border border-stone-800 p-2 sm:p-3.5 text-stone-300 shadow-sm transition hover:bg-primary hover:text-white cursor-pointer"
       >
         <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -228,7 +207,7 @@ export function Hero() {
       <button
         type="button"
         aria-label="Next slide"
-        onClick={() => go((active + 1) % heroSlides.length)}
+        onClick={() => go((active + 1) % slides.length)}
         className="absolute right-4 top-1/2 z-30 -translate-y-1/2 grid grid-cols-1 place-items-center rounded-full bg-[#1C1917]/60 border border-stone-800 p-2 sm:p-3.5 text-stone-300 shadow-sm transition hover:bg-primary hover:text-white cursor-pointer"
       >
         <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />

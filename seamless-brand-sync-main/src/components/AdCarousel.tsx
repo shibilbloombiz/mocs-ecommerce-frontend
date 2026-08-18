@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { cn, getImageUrl } from "@/lib/utils";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 interface AdCarouselProps {
   advertisements: string[];
@@ -25,9 +26,11 @@ export function AdCarousel({ advertisements }: AdCarouselProps) {
         {advertisements.length === 1 ? (
           // Single image: static center card
           <div className="w-[90%] sm:w-[85%] lg:w-[80%] h-full rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden bg-stone-950 shadow-soft">
-            <img
+            <OptimizedImage
               src={getImageUrl(advertisements[0], { width: 1400, quality: 85 })}
               alt="Advertisement Banner"
+              sizes="(max-width: 1024px) 90vw, 1200px"
+              containerClassName="w-full h-full"
               className="w-full h-full object-cover"
             />
           </div>
@@ -81,9 +84,11 @@ export function AdCarousel({ advertisements }: AdCarouselProps) {
                       isCenter ? "pointer-events-auto shadow-[0_20px_50px_rgba(0,0,0,0.35)]" : "pointer-events-auto shadow-none hover:opacity-60"
                     )}
                   >
-                    <img
+                    <OptimizedImage
                       src={getImageUrl(advertisements[slide.idx], { width: 1400, quality: 85 })}
                       alt={`Advertisement Banner #${slide.idx + 1}`}
+                      sizes="(max-width: 1024px) 80vw, 1000px"
+                      containerClassName="w-full h-full"
                       className="w-full h-full object-cover pointer-events-none"
                     />
                   </motion.div>

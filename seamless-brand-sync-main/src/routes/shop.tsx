@@ -8,11 +8,11 @@ import {
   type Product,
 } from "@/lib/products";
 import { ProductCard } from "@/components/ProductCard";
-import { SkeletonCard } from "@/components/SkeletonCard";
 import { cn, getImageUrl } from "@/lib/utils";
 import { apiClient, API_BASE_URL } from "@/lib/api";
 import { useStore } from "@/lib/store";
 import { formatApiProducts } from "@/routes/index";
+import { ShopSkeleton } from "@/components/skeletons/ShopSkeleton";
 
 // Styled custom dropdown that animates open/close instead of using native <select>.
 function FancyDropdown<T extends string>({
@@ -120,13 +120,13 @@ export const Route = createFileRoute("/shop")({
       { property: "og:description", content: "Browse the full MOCS premium footwear collection." },
     ],
   }),
+  pendingComponent: ShopSkeleton,
   component: Shop,
 });
 
 function Shop() {
   const { products } = Route.useLoaderData();
   const search = Route.useSearch();
-  const [loading, setLoading] = useState(false);
   const [allProducts, setAllProducts] = useState<Product[]>(products);
   const [cat, setCat] = useState<string>(search.category ?? "All");
   const [coll, setColl] = useState<string>(search.collection ?? "All");
@@ -135,38 +135,9 @@ function Shop() {
   const [sort, setSort] = useState<(typeof sortOptions)[number]>("Top Trending");
   const [showFilters, setShowFilters] = useState(false);
 
+  // Sync allProducts when the loader invalidates (e.g. navigating back to /shop).
   useEffect(() => {
-    let isMounted = true;
-    const fetchFreshProducts = async () => {
-      try {
-        const res = await apiClient.products.list("limit=100");
-        if (isMounted && res && res.items) {
-          setAllProducts(formatApiProducts(res.items));
-        }
-      } catch (err) {
-        console.warn("Failed to load products from API", err);
-      }
-    };
-
-    fetchFreshProducts();
-
-    const handleFocus = () => {
-      fetchFreshProducts();
-    };
-    window.addEventListener("focus", handleFocus);
-    window.addEventListener("visibilitychange", handleFocus);
-
-    return () => {
-      isMounted = false;
-      window.removeEventListener("focus", handleFocus);
-      window.removeEventListener("visibilitychange", handleFocus);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (products && products.length > 0) {
-      setAllProducts(products);
-    }
+    setAllProducts(products);
   }, [products]);
 
   useEffect(() => {
@@ -350,7 +321,7 @@ function Shop() {
                 Shop {cat === "All" ? "All" : cat}
               </h1>
               <p className="mt-1 text-sm text-muted-foreground font-medium">
-                {loading ? "Loading..." : `${filtered.length} products`}
+                {`${filtered.length} products`}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -366,12 +337,10 @@ function Shop() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
-            {loading
-              ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-              : filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
+            {filtered.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
           </div>
 
-          {!loading && filtered.length === 0 && (
+          {filtered.length === 0 && (
             <p className="py-20 text-center text-muted-foreground">
               No products match your filters.
             </p>
