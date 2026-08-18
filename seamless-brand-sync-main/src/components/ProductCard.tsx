@@ -10,10 +10,12 @@ export function ProductCard({
   product,
   index = 0,
   variant = "default",
+  showNewBadge = true,
 }: {
   product: Product;
   index?: number;
   variant?: "default" | "simple";
+  showNewBadge?: boolean;
 }) {
   const { addToCart, toggleWishlist, isWishlisted } = useStore();
   const navigate = useNavigate();
@@ -43,8 +45,19 @@ export function ProductCard({
             />
           </div>
 
-          {/* Top-Left Category Badge */}
-          <div className="absolute left-3 top-3 z-20">
+          {/* Top-Left Badges */}
+          <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5 z-20 pointer-events-none">
+            {showNewBadge && product.isNew && (
+              <span className="inline-flex items-center rounded-full bg-gradient-to-r from-[#EA580C] via-orange-500 to-amber-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-[0_3px_10px_rgba(234,88,12,0.45)] border border-white/30 backdrop-blur-xs">
+                NEW
+              </span>
+            )}
+            {discount > 0 && (
+              <span className="inline-flex items-center overflow-hidden rounded-md border border-stone-900/90 bg-stone-950/95 text-[9px] font-black text-white shadow-md backdrop-blur-md">
+                <span className="bg-rose-600 px-1.5 py-0.5 text-white">-{discount}%</span>
+                <span className="px-1.5 py-0.5 text-[7.5px] text-stone-300 uppercase tracking-widest font-bold">OFF</span>
+              </span>
+            )}
             <span className="rounded-full bg-white/95 backdrop-blur-md px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-900 border border-stone-200/70 shadow-xs">
               {product.category}
             </span>
@@ -131,15 +144,16 @@ export function ProductCard({
           />
 
           {/* Top-Left Badges */}
-          <div className="absolute left-3 top-3 flex flex-col gap-1.5 pointer-events-none z-20">
-            {product.isNew && (
-              <span className="rounded-full bg-primary px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-xs">
-                New
+          <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5 pointer-events-none z-20">
+            {showNewBadge && product.isNew && (
+              <span className="inline-flex items-center rounded-full bg-gradient-to-r from-[#EA580C] via-orange-500 to-amber-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-white shadow-[0_3px_10px_rgba(234,88,12,0.45)] border border-white/30 backdrop-blur-xs">
+                NEW
               </span>
             )}
             {discount > 0 && (
-              <span className="rounded-full bg-stone-900 px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-xs">
-                -{discount}%
+              <span className="inline-flex items-center overflow-hidden rounded-md border border-stone-900/90 bg-stone-950/95 text-[9px] font-black text-white shadow-md backdrop-blur-md">
+                <span className="bg-rose-600 px-1.5 py-0.5 text-white">-{discount}%</span>
+                <span className="px-1.5 py-0.5 text-[7.5px] text-stone-300 uppercase tracking-widest font-bold">OFF</span>
               </span>
             )}
           </div>

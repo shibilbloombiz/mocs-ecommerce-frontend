@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OptimizedImage } from "@/components/OptimizedImage";
 
@@ -45,11 +45,6 @@ export function Hero({ slides }: { slides: Slide[] }) {
     }, 5000);
     return () => clearInterval(t);
   }, [slides.length]);
-
-  const go = (i: number) => {
-    setDirection(i > active ? 1 : -1);
-    setActive(i);
-  };
 
   const renderTitle = (title: string) => {
     if (typeof title !== "string" || !title) return null;
@@ -194,24 +189,6 @@ export function Hero({ slides }: { slides: Slide[] }) {
           </AnimatePresence>
         </div>
       </div>
-
-      {/* Slide Navigation Arrows */}
-      <button
-        type="button"
-        aria-label="Previous slide"
-        onClick={() => go((active - 1 + slides.length) % slides.length)}
-        className="absolute left-4 top-1/2 z-30 -translate-y-1/2 grid grid-cols-1 place-items-center rounded-full bg-[#1C1917]/60 border border-stone-800 p-2 sm:p-3.5 text-stone-300 shadow-sm transition hover:bg-primary hover:text-white cursor-pointer"
-      >
-        <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Next slide"
-        onClick={() => go((active + 1) % slides.length)}
-        className="absolute right-4 top-1/2 z-30 -translate-y-1/2 grid grid-cols-1 place-items-center rounded-full bg-[#1C1917]/60 border border-stone-800 p-2 sm:p-3.5 text-stone-300 shadow-sm transition hover:bg-primary hover:text-white cursor-pointer"
-      >
-        <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-      </button>
     </section>
   );
 }

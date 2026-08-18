@@ -73,7 +73,7 @@ export function TrendingProducts({ products }: { products: any[] }) {
           <div className="flex gap-6">
             {products.map((product, i) => (
               <div key={product.id} className="min-w-0 flex-[0_0_80%] sm:flex-[0_0_46%] lg:flex-[0_0_23.5%]">
-                <ProductCard product={product} index={i} variant="simple" />
+                <ProductCard product={product} index={i} variant="simple" showNewBadge={false} />
               </div>
             ))}
           </div>
