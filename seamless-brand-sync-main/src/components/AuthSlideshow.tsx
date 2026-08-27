@@ -26,18 +26,34 @@ const slideVariants = {
   },
 };
 
+const DEFAULT_SLIDES = [
+  {
+    image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800",
+    title: "Discover Your Style",
+    subtitle: "Explore premium MOCS collections tailored just for you.",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800",
+    title: "Create Your Vision",
+    subtitle: "Join our community to unlock custom footwear and personalized styles.",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800",
+    title: "Crafted For Comfort",
+    subtitle: "Every pair is built for active lifestyles and durable comfort.",
+  },
+];
+
 export function AuthSlideshow({ authSlides }: AuthSlideshowProps) {
+  const slides = authSlides && authSlides.length > 0 ? authSlides : DEFAULT_SLIDES;
   const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
-    if (!authSlides || authSlides.length === 0) return;
     const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % authSlides.length);
+      setActiveSlide((prev) => (prev + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [authSlides]);
-
-  if (!authSlides || authSlides.length === 0) return null;
+  }, [slides.length]);
 
   return (
     <div className="relative w-full md:w-[45%] h-[150px] md:h-auto overflow-hidden border-b md:border-b-0 md:border-r border-stone-150 select-none bg-stone-950 rounded-t-[22px] md:rounded-tr-none md:rounded-l-[22px]">
@@ -53,20 +69,15 @@ export function AuthSlideshow({ authSlides }: AuthSlideshowProps) {
         >
           {/* Cover Background Image */}
           {(() => {
-            const fallbackImages = [
-              "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800",
-              "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800",
-              "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800"
-            ];
-            const slideImg = authSlides[activeSlide]?.image;
-            const imgSrc = slideImg && slideImg.trim() !== "" ? getImageUrl(slideImg) : fallbackImages[activeSlide % fallbackImages.length];
+            const slideImg = slides[activeSlide]?.image;
+            const imgSrc = slideImg && slideImg.trim() !== "" ? getImageUrl(slideImg) : DEFAULT_SLIDES[activeSlide % DEFAULT_SLIDES.length].image;
             return (
               <img
                 src={imgSrc}
                 alt="Auth visual"
                 className="absolute inset-0 h-full w-full object-cover object-bottom rounded-t-[22px] md:rounded-tr-none md:rounded-l-[22px]"
                 onError={(e) => {
-                  e.currentTarget.src = fallbackImages[activeSlide % fallbackImages.length];
+                  e.currentTarget.src = DEFAULT_SLIDES[activeSlide % DEFAULT_SLIDES.length].image;
                 }}
               />
             );
@@ -75,7 +86,7 @@ export function AuthSlideshow({ authSlides }: AuthSlideshowProps) {
           {/* Slideshow dot indicators overlay */}
           <div className="absolute bottom-6 left-6 z-10 hidden md:block bg-stone-950/80 backdrop-blur-md border border-white/10 rounded-full px-3 py-2.5 shadow-lg">
             <div className="flex gap-1.5">
-              {authSlides.map((_, idx) => (
+              {slides.map((_, idx) => (
                 <span
                   key={idx}
                   className={cn(

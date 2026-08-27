@@ -147,20 +147,34 @@ const queryClient = new QueryClient();
 function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
-  const isAuthPage = pathname === "/auth";
+  const isAuthPage =
+    pathname === "/auth" ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/sign-in") ||
+    pathname.startsWith("/sign-up");
   const isAdminRoute = pathname.startsWith("/admin");
 
   const renderContent = () => (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
-        {!isAdminRoute && <Navbar />}
-        <main className={isAdminRoute ? "" : isHome ? "" : isAuthPage ? "pt-14 sm:pt-16" : "pt-16"}>
+        {!isAdminRoute && !isAuthPage && <Navbar />}
+        <main
+          className={
+            isAdminRoute
+              ? ""
+              : isHome
+              ? ""
+              : isAuthPage
+              ? "pt-0"
+              : "pt-16"
+          }
+        >
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </main>
         {!isAuthPage && !isAdminRoute && <Footer />}
         {!isAuthPage && !isAdminRoute && <AnnouncementBar />}
-        {!isAdminRoute && <MobileNav />}
+        {!isAuthPage && !isAdminRoute && <MobileNav />}
         {!isAdminRoute && <CartDrawer />}
         {!isAdminRoute && <SearchModal />}
         {!isAuthPage && !isAdminRoute && <ScrollTagline />}
