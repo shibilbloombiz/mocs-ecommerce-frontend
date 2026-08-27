@@ -82,18 +82,23 @@ export function Hero({
   slides?: Slide[];
   collageImages?: CollageImage[];
 }) {
-  const activeSlides = slides && slides.length > 0 ? slides : DEFAULT_HERO_SLIDES;
+  const activeSlides = slides && slides.length > 1 ? slides : DEFAULT_HERO_SLIDES;
   const totalSlides = activeSlides.length;
 
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [paused, setPaused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
-  const prefersReduced =
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false;
+  // Preload all slide images on mount for instant, flicker-free crossfades
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    activeSlides.forEach((slide) => {
+      if (slide.bg) {
+        const img = new window.Image();
+        img.src = getImageUrl(slide.bg, { width: 1920, quality: 92 });
+      }
+    });
+  }, [activeSlides]);
 
   const goTo = useCallback((idx: number, dir: 1 | -1 = 1) => {
     setDirection(dir);
@@ -110,12 +115,17 @@ export function Hero({
     setActive((a) => (a - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-advance
+  // Guaranteed continuous auto-advance every 5 seconds
   useEffect(() => {
-    if (totalSlides <= 1 || paused || prefersReduced) return;
-    const t = setInterval(next, 7000);
-    return () => clearInterval(t);
-  }, [totalSlides, paused, prefersReduced, next]);
+    if (totalSlides <= 1) return;
+
+    const timer = setInterval(() => {
+      setDirection(1);
+      setActive((prevIdx) => (prevIdx + 1) % totalSlides);
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [totalSlides, active]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -174,48 +184,31 @@ export function Hero({
     );
   };
 
-  const textVariants = {
+  // Cinematic Background Image Animation
+  const imageVariants = {
     enter: (d: number) => ({
       opacity: 0,
-      y: d > 0 ? 20 : -20,
-    }),
-    center: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: prefersReduced ? 0 : 0.6,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    },
-    exit: (d: number) => ({
-      opacity: 0,
-      y: d > 0 ? -20 : 20,
-      transition: {
-        duration: prefersReduced ? 0 : 0.3,
-        ease: [0.22, 1, 0.36, 1],
-      },
-    }),
-  };
-
-  const imageVariants = {
-    enter: () => ({
-      opacity: 0,
-      scale: 1.04,
+      scale: 1.08,
+      x: d > 0 ? 15 : -15,
     }),
     center: {
       opacity: 1,
       scale: 1,
+      x: 0,
       transition: {
-        duration: prefersReduced ? 0 : 0.9,
-        ease: [0.25, 1, 0.5, 1],
+        opacity: { duration: 0.85, ease: "easeOut" },
+        scale: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
+        x: { duration: 1.0, ease: [0.16, 1, 0.3, 1] },
       },
     },
-    exit: () => ({
+    exit: (d: number) => ({
       opacity: 0,
-      scale: 0.98,
+      scale: 0.97,
+      x: d > 0 ? -15 : 15,
       transition: {
-        duration: prefersReduced ? 0 : 0.5,
-        ease: [0.25, 1, 0.5, 1],
+        opacity: { duration: 0.65, ease: "easeIn" },
+        scale: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
+        x: { duration: 0.8, ease: [0.16, 1, 0.3, 1] },
       },
     }),
   };
@@ -227,10 +220,6 @@ export function Hero({
       aria-roledescription="carousel"
       aria-label="Hero slideshow"
       className="relative h-[100dvh] min-h-[600px] md:min-h-[720px] w-full overflow-hidden bg-[#141210] text-white outline-none"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -238,11 +227,12 @@ export function Hero({
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           key={active}
+          custom={direction}
           variants={imageVariants}
           initial="enter"
           animate="center"
           exit="exit"
-          className="absolute inset-0 h-full w-full select-none pointer-events-none"
+          className="absolute inset-0 h-full w-full select-none pointer-events-none will-change-transform"
         >
           <img
             src={getImageUrl(current.bg, { width: 1920, quality: 92 })}
@@ -278,36 +268,55 @@ export function Hero({
         {/* Top spacer for navbar breathing room on desktop */}
         <div className="hidden md:block" />
 
-        {/* Center/Main text presentation */}
+        {/* Center/Main text presentation with staggered entry */}
         <div className="md:my-auto max-w-xl lg:max-w-2xl py-4 sm:py-6 bg-transparent">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={active}
               custom={direction}
-              variants={textVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.25 } }}
               className="space-y-4 sm:space-y-5 md:space-y-6 text-left bg-transparent drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
             >
               {/* Eyebrow */}
-              <p className="text-xs sm:text-xs font-bold uppercase tracking-[0.22em] sm:tracking-[0.28em] text-[#e08a5c] [text-shadow:_0_1px_8px_rgba(0,0,0,0.8)]">
+              <motion.p
+                initial={{ opacity: 0, y: direction > 0 ? 12 : -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+                className="text-xs sm:text-xs font-bold uppercase tracking-[0.22em] sm:tracking-[0.28em] text-[#e08a5c] [text-shadow:_0_1px_8px_rgba(0,0,0,0.8)]"
+              >
                 {current.eyebrow || "PREMIUM COMFORT"}
-              </p>
+              </motion.p>
 
               {/* Title */}
-              <div className="[text-shadow:_0_3px_20px_rgba(0,0,0,0.85)]">
+              <motion.div
+                initial={{ opacity: 0, y: direction > 0 ? 20 : -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.65, delay: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                className="[text-shadow:_0_3px_20px_rgba(0,0,0,0.85)]"
+              >
                 {renderTitle()}
-              </div>
+              </motion.div>
 
               {/* Subtitle */}
-              <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-stone-300 font-light max-w-[300px] sm:max-w-md [text-shadow:_0_2px_10px_rgba(0,0,0,0.85)]">
+              <motion.p
+                initial={{ opacity: 0, y: direction > 0 ? 14 : -14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                className="text-sm sm:text-base md:text-[17px] leading-relaxed text-stone-300 font-light max-w-[300px] sm:max-w-md [text-shadow:_0_2px_10px_rgba(0,0,0,0.85)]"
+              >
                 {current.subtitle ||
                   "Premium footwear crafted for everyday movement and lasting comfort."}
-              </p>
+              </motion.p>
 
               {/* CTA Link */}
-              <div className="pt-2 sm:pt-4">
+              <motion.div
+                initial={{ opacity: 0, y: direction > 0 ? 12 : -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.32, ease: [0.16, 1, 0.3, 1] }}
+                className="pt-2 sm:pt-4"
+              >
                 <a
                   href={current.to || "/shop"}
                   className="group inline-flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.22em] text-white uppercase transition-colors duration-200 border-b border-white pb-1 hover:border-[#e08a5c] hover:text-[#e08a5c] [text-shadow:_0_2px_10px_rgba(0,0,0,0.8)]"
@@ -315,7 +324,7 @@ export function Hero({
                   <span>{current.cta || "SHOP NOW"}</span>
                   <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
                 </a>
-              </div>
+              </motion.div>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -347,7 +356,7 @@ export function Hero({
               tabIndex={0}
             >
               <div
-                className="absolute top-0 left-0 bottom-0 bg-[#e08a5c] transition-all duration-500 ease-out rounded-full"
+                className="absolute top-0 left-0 bottom-0 bg-[#e08a5c] transition-all duration-700 ease-out rounded-full"
                 style={{
                   width: `${((active + 1) / totalSlides) * 100}%`,
                 }}
