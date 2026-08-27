@@ -189,7 +189,7 @@ export function Navbar() {
               type="button"
               aria-label="Cart"
               onClick={() => setCartOpen(true)}
-              className="relative grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
+              className="relative hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
             >
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
@@ -203,7 +203,7 @@ export function Navbar() {
                 </motion.span>
               )}
             </button>
-            <div className="relative hidden sm:block" ref={userMenuRef}>
+            <div className="relative block" ref={userMenuRef}>
               <button
                 type="button"
                 aria-label="Account"
@@ -219,7 +219,7 @@ export function Navbar() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-12 w-56 rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-card"
+                    className="absolute right-0 top-12 w-56 rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-card z-50"
                   >
                     {user ? (
                       <>
