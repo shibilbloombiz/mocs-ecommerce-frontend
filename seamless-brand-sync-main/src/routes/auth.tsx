@@ -292,11 +292,32 @@ function AuthPage() {
       {/* ───────────────────────────────────────────────────────────────────── */}
       <div className="block md:hidden w-full max-w-[430px] rounded-[32px] bg-[#141312] border border-white/[0.09] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] overflow-hidden text-left">
         
-        {/* Top Header / Brand Visual Pane */}
-        <div className="p-5 pb-4 flex flex-col items-center relative border-b border-white/[0.06] bg-gradient-to-b from-[#181615] to-[#141312]">
-          {/* Top Bar: Brand Logo & Close Action */}
-          <div className="w-full flex items-center justify-between">
-            <Link to="/" className="flex items-center group">
+        {/* Top Header / Full-Size Brand Visual Pane */}
+        <div className="relative w-full h-52 sm:h-60 overflow-hidden bg-stone-950">
+          {/* Full-Size Background Image with Crossfade */}
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={activeSlideIdx}
+              src={
+                currentSlide?.image
+                  ? getImageUrl(currentSlide.image, { width: 800, quality: 90 })
+                  : getImageUrl("https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800")
+              }
+              alt="MOCS Footwear"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+              className="absolute inset-0 h-full w-full object-cover object-center select-none"
+            />
+          </AnimatePresence>
+
+          {/* Gradients for smooth transition and contrast */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#141312] via-[#141312]/25 to-[#141312]/75 pointer-events-none" />
+
+          {/* Top Floating Bar: Logo & Close Button */}
+          <div className="absolute top-0 inset-x-0 p-4 sm:p-5 flex items-center justify-between z-10">
+            <Link to="/" className="flex items-center group drop-shadow-md">
               <img
                 src={logo}
                 alt="MOCS"
@@ -308,31 +329,10 @@ function AuthPage() {
             <Link
               to="/"
               aria-label="Close and return to store"
-              className="h-8 w-8 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/10 flex items-center justify-center text-stone-400 hover:text-white transition-colors"
+              className="h-8 w-8 rounded-full border border-white/20 bg-black/40 backdrop-blur-md hover:bg-black/60 flex items-center justify-center text-stone-300 hover:text-white transition-colors shadow-sm"
             >
               <X className="h-4 w-4" />
             </Link>
-          </div>
-
-          {/* Center Circular Visual / Focus Badge */}
-          <div className="my-5 relative flex items-center justify-center">
-            <div className="w-24 h-24 rounded-full border border-white/15 bg-black/40 shadow-[inset_0_0_20px_rgba(0,0,0,0.6)] flex items-center justify-center overflow-hidden p-1">
-              {currentSlide?.image ? (
-                <img
-                  src={getImageUrl(currentSlide.image, { width: 300, quality: 80 })}
-                  alt="MOCS Footwear"
-                  className="h-full w-full object-cover rounded-full select-none"
-                />
-              ) : (
-                <img
-                  src={logo}
-                  alt="MOCS"
-                  className="h-8 w-auto object-contain select-none"
-                />
-              )}
-            </div>
-            {/* Subtle glow behind circle */}
-            <div className="absolute inset-0 rounded-full bg-[#ea580c]/10 blur-xl pointer-events-none" />
           </div>
         </div>
 
