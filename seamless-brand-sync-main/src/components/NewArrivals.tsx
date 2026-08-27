@@ -53,9 +53,9 @@ export function NewArrivals({ products }: NewArrivalsProps) {
               <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/80">
                 Fresh Drops
               </p>
-              <h2 className="mt-1 font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-white tracking-[-0.015em] leading-[1.05]">
+              <h2 className="mt-1 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.05]">
                 New <br />
-                <span className="italic font-serif text-white/95">Arrivals.</span>
+                Arrivals
               </h2>
               <p className="mt-3 text-xs sm:text-sm font-light tracking-normal text-white/85 leading-relaxed">
                 Handcrafted comfort, timeless silhouette. Designed for your everyday journey.

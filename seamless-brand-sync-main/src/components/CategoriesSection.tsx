@@ -18,8 +18,8 @@ export function CategoriesSection({ categoriesBanners }: CategoriesSectionProps)
           <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
             Explore Categories
           </p>
-          <h2 className="mt-1.5 font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
-            Built For <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Everyone.</span>
+          <h2 className="mt-1.5 font-display text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15]">
+            Built For <span className="text-[#d96b27] dark:text-[#e07a38]">Everyone</span>
           </h2>
         </div>
       </Reveal>

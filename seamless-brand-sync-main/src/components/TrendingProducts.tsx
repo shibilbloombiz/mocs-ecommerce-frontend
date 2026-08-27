@@ -40,8 +40,8 @@ export function TrendingProducts({ products }: { products: any[] }) {
             <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
               Curated Selection
             </p>
-            <h2 className="mt-1.5 font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
-              Trending <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Products</span>
+            <h2 className="mt-1.5 font-display text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15]">
+              Trending <span className="text-[#d96b27] dark:text-[#e07a38]">Products</span>
             </h2>
             <p className="text-muted-foreground text-sm sm:text-base mt-2 font-light max-w-md">
               Our absolute best sellers of this season, engineered for lasting comfort.

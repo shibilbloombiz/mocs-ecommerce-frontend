@@ -106,8 +106,8 @@ export function ScrollBrandReveal({ collections }: { collections: any[] }) {
           </span>
         </Reveal>
         <Reveal delay={0.1}>
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
-            Shop by <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Collection.</span>
+          <h2 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15]">
+            Shop by <span className="text-[#d96b27] dark:text-[#e07a38]">Collection</span>
           </h2>
         </Reveal>
         <Reveal delay={0.2}>

@@ -19,18 +19,18 @@ type CollageImage = { src: string; name: string };
 
 export const DEFAULT_HERO_SLIDES: Slide[] = [
   {
-    eyebrow: "NEW COLLECTION",
-    title: "Step Into",
-    titleAccent: "Comfort.",
-    subtitle: "Premium footwear crafted for everyday movement, effortless style, and lasting comfort.",
-    cta: "SHOP COLLECTION",
+    eyebrow: "PREMIUM COMFORT",
+    title: "Step into",
+    titleAccent: "Style",
+    subtitle: "Premium footwear crafted for everyday movement and lasting comfort.",
+    cta: "SHOP NOW",
     to: "/shop",
     bg: "/hero-comfort.jpg",
   },
   {
     eyebrow: "SUMMER ESSENTIALS",
     title: "Effortless",
-    titleAccent: "Luxury.",
+    titleAccent: "Luxury",
     subtitle: "Handcrafted silhouette with cloud-soft footbed designed for all-day lightness.",
     cta: "EXPLORE NOW",
     to: "/shop",
@@ -39,7 +39,7 @@ export const DEFAULT_HERO_SLIDES: Slide[] = [
   {
     eyebrow: "SIGNATURE SERIES",
     title: "Modern Minimal",
-    titleAccent: "Craft.",
+    titleAccent: "Craft",
     subtitle: "Precision engineering meets ultra-refined aesthetic for modern living.",
     cta: "VIEW STYLES",
     to: "/shop",
@@ -48,7 +48,7 @@ export const DEFAULT_HERO_SLIDES: Slide[] = [
   {
     eyebrow: "NEW ARRIVALS",
     title: "Walk In",
-    titleAccent: "Elegance.",
+    titleAccent: "Elegance",
     subtitle: "Timeless tones and supple materials that complement every outfit with confidence.",
     cta: "SHOP NEW IN",
     to: "/shop",
@@ -59,16 +59,16 @@ export const DEFAULT_HERO_SLIDES: Slide[] = [
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 export function HeroSkeleton() {
   return (
-    <section className="relative h-screen min-h-[600px] w-full overflow-hidden bg-[#141210] text-white animate-pulse">
-      <div className="mx-auto flex h-full max-w-7xl flex-col justify-between px-6 sm:px-10 lg:px-16 pt-28 pb-16">
+    <section className="relative h-[100dvh] min-h-[600px] md:min-h-[720px] w-full overflow-hidden bg-[#141210] text-white animate-pulse">
+      <div className="mx-auto flex h-full max-w-7xl flex-col justify-end md:justify-between px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 pb-20 sm:pb-16">
         <div className="hidden md:block" />
-        <div className="max-w-xl space-y-5 my-auto">
+        <div className="max-w-xl space-y-4 sm:space-y-5 md:my-auto">
           <div className="h-3 w-32 rounded bg-stone-800" />
-          <div className="h-16 w-4/5 rounded bg-stone-800" />
+          <div className="h-14 sm:h-16 w-4/5 rounded bg-stone-800" />
           <div className="h-4 w-3/5 rounded bg-stone-800" />
-          <div className="h-6 w-40 rounded bg-stone-800 pt-2" />
+          <div className="h-6 w-36 rounded bg-stone-800 pt-2" />
         </div>
-        <div className="h-3 w-44 rounded bg-stone-800" />
+        <div className="h-3 w-44 rounded bg-stone-800 pt-6 sm:pt-4" />
       </div>
     </section>
   );
@@ -145,35 +145,31 @@ export function Hero({
 
   // Helper to separate title into main text & italic accent if not explicitly split
   const renderTitle = () => {
-    if (current.titleAccent) {
-      return (
-        <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[80px] xl:text-[88px] font-normal leading-[1.03] tracking-[-0.02em] text-white">
-          <span className="block">{current.title}</span>
-          <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38] block mt-1.5">
-            {current.titleAccent}
-          </span>
-        </h1>
-      );
-    }
+    let firstPart = "";
+    let accentPart = "";
 
-    // If title contains multiple words, italicize the last word
-    const parts = (current.title || "Step Into Comfort.").trim().split(" ");
-    if (parts.length > 1) {
-      const lastWord = parts.pop();
-      const firstPart = parts.join(" ");
-      return (
-        <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[80px] xl:text-[88px] font-normal leading-[1.03] tracking-[-0.02em] text-white">
-          <span className="block">{firstPart}</span>
-          <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38] block mt-1.5">
-            {lastWord}
-          </span>
-        </h1>
-      );
+    if (current.titleAccent) {
+      firstPart = current.title;
+      accentPart = current.titleAccent;
+    } else {
+      const trimmed = (current.title || "Step Into Comfort.").trim();
+      const parts = trimmed.split(/\s+/);
+      if (parts.length > 1) {
+        accentPart = parts.pop() || "";
+        firstPart = parts.join(" ");
+      } else {
+        firstPart = trimmed;
+      }
     }
 
     return (
-      <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-[80px] xl:text-[88px] font-normal leading-[1.03] tracking-[-0.02em] text-white">
-        {current.title}
+      <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-[80px] xl:text-[88px] font-normal leading-[1.03] tracking-[-0.02em] text-white">
+        <span className="block">{firstPart}</span>
+        {accentPart && (
+          <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38] block mt-1.5">
+            {accentPart}
+          </span>
+        )}
       </h1>
     );
   };
@@ -181,21 +177,21 @@ export function Hero({
   const textVariants = {
     enter: (d: number) => ({
       opacity: 0,
-      y: d > 0 ? 24 : -24,
+      y: d > 0 ? 20 : -20,
     }),
     center: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: prefersReduced ? 0 : 0.65,
+        duration: prefersReduced ? 0 : 0.6,
         ease: [0.22, 1, 0.36, 1],
       },
     },
     exit: (d: number) => ({
       opacity: 0,
-      y: d > 0 ? -24 : 24,
+      y: d > 0 ? -20 : 20,
       transition: {
-        duration: prefersReduced ? 0 : 0.35,
+        duration: prefersReduced ? 0 : 0.3,
         ease: [0.22, 1, 0.36, 1],
       },
     }),
@@ -230,7 +226,7 @@ export function Hero({
       tabIndex={0}
       aria-roledescription="carousel"
       aria-label="Hero slideshow"
-      className="relative h-screen min-h-[640px] md:min-h-[720px] w-full overflow-hidden bg-[#141210] text-white outline-none"
+      className="relative h-[100dvh] min-h-[600px] md:min-h-[720px] w-full overflow-hidden bg-[#141210] text-white outline-none"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -265,20 +261,25 @@ export function Hero({
       </AnimatePresence>
 
       {/* ── LUXURY DARK GRADIENT OVERLAYS ─────────────────────────────────── */}
-      {/* Desktop/Tablet Left Side Rich Shadow (feathers to image on right, fully transparent on mobile) */}
+      {/* Mobile Dark Gradient Overlay to ensure maximum contrast and match mockup */}
+      <div className="md:hidden absolute inset-0 bg-gradient-to-t from-[#141210] via-[#141210]/85 via-55% to-[#141210]/35 pointer-events-none z-10" />
+
+      {/* Desktop/Tablet Left Side Rich Shadow (feathers to image on right) */}
       <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#141210] via-[#141210]/90 md:via-[#141210]/75 via-45% to-transparent pointer-events-none z-10" />
+
       {/* Top subtle fade for navbar contrast */}
-      <div className="absolute top-0 inset-x-0 h-32 md:h-36 bg-gradient-to-b from-[#141210]/60 md:from-[#141210]/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 inset-x-0 h-32 md:h-36 bg-gradient-to-b from-[#141210]/70 md:from-[#141210]/80 to-transparent pointer-events-none z-10" />
+
       {/* Bottom grounding vignette */}
-      <div className="absolute bottom-0 inset-x-0 h-28 md:h-36 bg-gradient-to-t from-[#141210]/60 md:from-[#141210]/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 inset-x-0 h-28 md:h-36 bg-gradient-to-t from-[#141210]/70 md:from-[#141210]/80 to-transparent pointer-events-none z-10" />
 
       {/* ── FULL-HEIGHT HERO FOREGROUND CONTENT ───────────────────────────── */}
-      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 pb-12 sm:pb-16 flex flex-col justify-between h-full bg-transparent">
-        {/* Top spacer for navbar breathing room */}
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 pb-20 sm:pb-16 flex flex-col justify-end md:justify-between h-full bg-transparent">
+        {/* Top spacer for navbar breathing room on desktop */}
         <div className="hidden md:block" />
 
         {/* Center/Main text presentation */}
-        <div className="my-auto max-w-xl lg:max-w-2xl py-6 bg-transparent">
+        <div className="md:my-auto max-w-xl lg:max-w-2xl py-4 sm:py-6 bg-transparent">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={active}
@@ -287,11 +288,11 @@ export function Hero({
               initial="enter"
               animate="center"
               exit="exit"
-              className="space-y-5 sm:space-y-6 text-left bg-transparent drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
+              className="space-y-4 sm:space-y-5 md:space-y-6 text-left bg-transparent drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
             >
               {/* Eyebrow */}
-              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38] [text-shadow:_0_1px_8px_rgba(0,0,0,0.8)]">
-                {current.eyebrow || "NEW COLLECTION"}
+              <p className="text-xs sm:text-xs font-bold uppercase tracking-[0.22em] sm:tracking-[0.28em] text-[#e08a5c] [text-shadow:_0_1px_8px_rgba(0,0,0,0.8)]">
+                {current.eyebrow || "PREMIUM COMFORT"}
               </p>
 
               {/* Title */}
@@ -300,19 +301,19 @@ export function Hero({
               </div>
 
               {/* Subtitle */}
-              <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-stone-200 sm:text-stone-300 font-light max-w-md [text-shadow:_0_2px_10px_rgba(0,0,0,0.85)]">
+              <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-stone-300 font-light max-w-[300px] sm:max-w-md [text-shadow:_0_2px_10px_rgba(0,0,0,0.85)]">
                 {current.subtitle ||
-                  "Premium footwear crafted for everyday movement, effortless style, and lasting comfort."}
+                  "Premium footwear crafted for everyday movement and lasting comfort."}
               </p>
 
               {/* CTA Link */}
-              <div className="pt-3 sm:pt-4">
+              <div className="pt-2 sm:pt-4">
                 <a
                   href={current.to || "/shop"}
-                  className="group inline-flex items-center gap-3 text-xs sm:text-sm font-bold tracking-[0.22em] text-white uppercase transition-colors duration-200 border-b border-white/60 pb-1.5 hover:border-[#d96b27] hover:text-[#d96b27] [text-shadow:_0_2px_10px_rgba(0,0,0,0.8)]"
+                  className="group inline-flex items-center gap-2.5 sm:gap-3 text-xs sm:text-sm font-bold tracking-[0.2em] sm:tracking-[0.22em] text-white uppercase transition-colors duration-200 border-b border-white pb-1 hover:border-[#e08a5c] hover:text-[#e08a5c] [text-shadow:_0_2px_10px_rgba(0,0,0,0.8)]"
                 >
-                  <span>{current.cta || "SHOP COLLECTION"}</span>
-                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
+                  <span>{current.cta || "SHOP NOW"}</span>
+                  <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
                 </a>
               </div>
             </motion.div>
@@ -320,14 +321,14 @@ export function Hero({
         </div>
 
         {/* ── BOTTOM SLIDE INDICATOR (01 ─── 04) ──────────────────────────── */}
-        <div className="pt-4">
+        <div className="pt-6 sm:pt-4">
           <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono tracking-widest text-stone-400 select-none">
-            <span className="text-white font-medium text-xs">
+            <span className="text-stone-300 font-medium text-xs">
               {String(active + 1).padStart(2, "0")}
             </span>
 
             <div
-              className="relative w-24 sm:w-36 h-[2px] bg-stone-700/80 rounded-full overflow-hidden cursor-pointer"
+              className="relative w-20 sm:w-36 h-[2px] bg-stone-700/80 rounded-full overflow-hidden cursor-pointer"
               onClick={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
@@ -346,7 +347,7 @@ export function Hero({
               tabIndex={0}
             >
               <div
-                className="absolute top-0 left-0 bottom-0 bg-[#d96b27] transition-all duration-500 ease-out rounded-full"
+                className="absolute top-0 left-0 bottom-0 bg-[#e08a5c] transition-all duration-500 ease-out rounded-full"
                 style={{
                   width: `${((active + 1) / totalSlides) * 100}%`,
                 }}
@@ -362,3 +363,4 @@ export function Hero({
     </section>
   );
 }
+

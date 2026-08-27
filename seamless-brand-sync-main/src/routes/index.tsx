@@ -375,7 +375,6 @@ function Home() {
         <ScrollBrandReveal collections={collectionsBanners} />
       </div>
       <AdCarousel advertisements={advertisements} />
-      <SandalsCarousel products={sandalsProducts} />
       <QualityPromise collage={promiseCollage} />
       <ReviewsMarquee reviews={reviews} />
     </>

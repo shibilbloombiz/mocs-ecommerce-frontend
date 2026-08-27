@@ -124,8 +124,8 @@ export function QualityPromise({ collage }: { collage?: any[] }) {
             <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38]">
               Engineered Excellence
             </p>
-            <h2 className="mt-2 font-serif text-4xl sm:text-5xl lg:text-6xl font-normal leading-tight text-white max-w-2xl mx-auto tracking-[-0.015em]">
-              MOCS <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Footwear.</span>
+            <h2 className="mt-2 font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-white max-w-2xl mx-auto tracking-tight">
+              MOCS <span className="text-[#d96b27] dark:text-[#e07a38]">Footwear</span>
             </h2>
           </Reveal>
           <Reveal delay={0.2}>

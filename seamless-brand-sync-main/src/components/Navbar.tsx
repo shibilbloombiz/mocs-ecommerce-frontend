@@ -169,7 +169,7 @@ export function Navbar() {
               type="button"
               aria-label="Search"
               onClick={() => setSearchOpen(true)}
-              className="grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
+              className="hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -189,7 +189,7 @@ export function Navbar() {
               type="button"
               aria-label="Cart"
               onClick={() => setCartOpen(true)}
-              className="relative hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
+              className="relative grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
             >
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
@@ -203,7 +203,7 @@ export function Navbar() {
                 </motion.span>
               )}
             </button>
-            <div className="relative block" ref={userMenuRef}>
+            <div className="relative hidden sm:block" ref={userMenuRef}>
               <button
                 type="button"
                 aria-label="Account"

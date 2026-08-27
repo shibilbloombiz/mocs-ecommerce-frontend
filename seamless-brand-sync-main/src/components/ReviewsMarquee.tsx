@@ -34,8 +34,8 @@ export function ReviewsMarquee({ reviews }: ReviewsMarqueeProps) {
         <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38]">
           Customer Stories
         </p>
-        <h2 className="mt-1.5 font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
-          Loved by our <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Community.</span>
+        <h2 className="mt-1.5 font-display text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold tracking-tight text-foreground leading-[1.15]">
+          Loved by our <span className="text-[#d96b27] dark:text-[#e07a38]">Community</span>
         </h2>
       </Reveal>
       <div className="relative flex w-full overflow-x-hidden py-4">

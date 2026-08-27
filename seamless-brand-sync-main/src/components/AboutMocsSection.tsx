@@ -107,7 +107,7 @@ export function AboutMocsSection() {
 
             {/* 2. Headline */}
             <div className="overflow-hidden mb-6">
-              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] leading-[1.04] tracking-tight">
+              <h2 className="font-display font-extrabold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] leading-[1.04] tracking-tight">
                 <motion.span
                   initial={prefersReducedMotion ? false : { opacity: 0, x: -48, skewX: -4 }}
                   whileInView={{ opacity: 1, x: 0, skewX: 0 }}
@@ -122,7 +122,7 @@ export function AboutMocsSection() {
                   whileInView={{ opacity: 1, x: 0, skewX: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.75, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                  className="block italic font-serif text-[#d96b27]"
+                  className="block text-[#d96b27]"
                 >
                   Built For Comfort.
                 </motion.span>
