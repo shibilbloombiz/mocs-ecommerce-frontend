@@ -145,7 +145,7 @@ export function QualityPromise({ collage }: { collage?: any[] }) {
                 to="/about"
                 className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-xs font-bold uppercase tracking-wide text-white transition-all hover:-translate-y-0.5 hover:bg-white/10 hover:border-primary/50 hover:text-primary"
               >
-                About
+                Our Story
               </Link>
             </div>
           </Reveal>
