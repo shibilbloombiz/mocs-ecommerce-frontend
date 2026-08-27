@@ -65,13 +65,25 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-500 text-foreground",
-          "border-b border-border bg-background/95 shadow-soft backdrop-blur-xl",
-          transparent &&
-          "lg:border-transparent lg:bg-background/40 lg:shadow-none lg:backdrop-blur-md",
+          "fixed inset-x-0 top-0 z-50 transition-all duration-500",
+          // At top on home → Feoro-style: gradient fade from dark so hero image shows through
+          transparent && "bg-gradient-to-b from-black/50 to-transparent border-transparent text-white shadow-none",
+          // Scrolled → frosted glass panel
+          !transparent && "border-b border-white/10 text-foreground",
         )}
+        style={
+          !transparent
+            ? {
+                background: "rgba(255,255,255,0.55)",
+                backdropFilter: "blur(20px) saturate(180%)",
+                WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                borderColor: "rgba(255,255,255,0.18)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.3) inset",
+              }
+            : undefined
+        }
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-20 lg:h-24 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 lg:hidden">
             <button
               type="button"
@@ -87,34 +99,34 @@ export function Navbar() {
             <img
               src={logo}
               alt="MOCS"
-              className="h-9 w-auto select-none sm:h-10"
+              className="h-10 w-auto select-none sm:h-12"
               draggable={false}
             />
           </Link>
 
           <nav
-            className="hidden items-center gap-1 lg:flex relative"
+            className="hidden items-center gap-2 lg:flex relative"
             onMouseLeave={() => setMenuOpen(false)}
           >
             <button
               type="button"
               onMouseEnter={() => setMenuOpen(true)}
-              className="group relative flex items-center gap-1 px-3 py-2 text-sm font-semibold cursor-pointer"
+              className="group relative flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium tracking-[0.12em] uppercase cursor-pointer transition-opacity duration-200 hover:opacity-60"
             >
               Collections
-              <ChevronDown className="h-3.5 w-3.5" />
-              <span className="absolute inset-x-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
+              <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
+              <span className="absolute bottom-1 inset-x-4 h-px origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
             </button>
             {navLinks.map((l) => (
               <Link
                 key={l.label}
                 to={l.to}
                 search={l.search as any}
-                className="group relative px-3 py-2 text-sm font-semibold"
-                activeProps={{ className: "text-primary" }}
+                className="group relative px-4 py-2 text-[13px] font-medium tracking-[0.12em] uppercase transition-opacity duration-200 hover:opacity-60"
+                activeProps={{ className: "opacity-100 font-semibold" }}
               >
                 {l.label}
-                <span className="absolute inset-x-3 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
+                <span className="absolute bottom-1 inset-x-4 h-px origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
               </Link>
             ))}
 

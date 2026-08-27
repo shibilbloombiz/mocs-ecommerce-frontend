@@ -15,11 +15,11 @@ export function CategoriesSection({ categoriesBanners }: CategoriesSectionProps)
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-4 text-left">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-            Shop by category
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
+            Explore Categories
           </p>
-          <h2 className="mt-2 font-display text-4xl font-extrabold sm:text-5xl">
-            Built for <span className="bg-gradient-to-r from-stone-950 to-primary bg-clip-text text-transparent">everyone</span>
+          <h2 className="mt-1.5 font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
+            Built For <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Everyone.</span>
           </h2>
         </div>
       </Reveal>

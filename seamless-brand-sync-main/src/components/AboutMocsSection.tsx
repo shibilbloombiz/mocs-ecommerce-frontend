@@ -107,7 +107,7 @@ export function AboutMocsSection() {
 
             {/* 2. Headline */}
             <div className="overflow-hidden mb-6">
-              <h2 className="font-black text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] leading-[0.98] tracking-tight uppercase">
+              <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[76px] leading-[1.04] tracking-tight">
                 <motion.span
                   initial={prefersReducedMotion ? false : { opacity: 0, x: -48, skewX: -4 }}
                   whileInView={{ opacity: 1, x: 0, skewX: 0 }}
@@ -115,16 +115,16 @@ export function AboutMocsSection() {
                   transition={{ duration: 0.75, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
                   className="block text-foreground"
                 >
-                  MADE WITH PURPOSE.
+                  Made With Purpose.
                 </motion.span>
                 <motion.span
                   initial={prefersReducedMotion ? false : { opacity: 0, x: 48, skewX: 4 }}
                   whileInView={{ opacity: 1, x: 0, skewX: 0 }}
                   viewport={{ once: true, margin: "-60px" }}
                   transition={{ duration: 0.75, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                  className="block text-[#F26522]"
+                  className="block italic font-serif text-[#d96b27]"
                 >
-                  BUILT FOR COMFORT.
+                  Built For Comfort.
                 </motion.span>
               </h2>
             </div>

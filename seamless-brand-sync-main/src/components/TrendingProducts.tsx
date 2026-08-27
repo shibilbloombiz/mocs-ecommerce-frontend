@@ -37,11 +37,14 @@ export function TrendingProducts({ products }: { products: any[] }) {
       <Reveal className="mb-10 text-left">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <h2 className="mt-2 font-display text-4xl font-extrabold sm:text-5xl">
-              Trending <span className="bg-gradient-to-r from-stone-950 to-primary bg-clip-text text-transparent">Products</span>
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
+              Curated Selection
+            </p>
+            <h2 className="mt-1.5 font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
+              Trending <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Products</span>
             </h2>
-            <p className="text-muted-foreground text-sm mt-1.5 font-medium">
-              Our absolute best sellers of this season, selected for you.
+            <p className="text-muted-foreground text-sm sm:text-base mt-2 font-light max-w-md">
+              Our absolute best sellers of this season, engineered for lasting comfort.
             </p>
           </div>
 

@@ -121,8 +121,12 @@ export function QualityPromise({ collage }: { collage?: any[] }) {
       <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 z-20 text-center flex flex-col items-center justify-center min-h-[300px]">
         <div className="bg-black/55 border border-orange-700/50 backdrop-blur-xl p-8 sm:p-12 rounded-3xl max-w-3xl mx-auto shadow-[0_0_55px_rgba(194,65,12,0.45)] space-y-6">
           <Reveal delay={0.1}>
-            <h2 className="font-display text-4xl sm:text-5xl font-extrabold leading-tight text-white max-w-2xl mx-auto">
-              MOCS <span className="text-orange-500">FOOTWEARS</span>            </h2>
+            <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38]">
+              Engineered Excellence
+            </p>
+            <h2 className="mt-2 font-serif text-4xl sm:text-5xl lg:text-6xl font-normal leading-tight text-white max-w-2xl mx-auto tracking-[-0.015em]">
+              MOCS <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Footwear.</span>
+            </h2>
           </Reveal>
           <Reveal delay={0.2}>
             <p className="text-sm md:text-base leading-relaxed text-stone-200/90 font-medium max-w-2xl mx-auto">
@@ -141,7 +145,7 @@ export function QualityPromise({ collage }: { collage?: any[] }) {
                 to="/about"
                 className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-8 py-4 text-xs font-bold uppercase tracking-wide text-white transition-all hover:-translate-y-0.5 hover:bg-white/10 hover:border-primary/50 hover:text-primary"
               >
-                Our Quality Process
+                About
               </Link>
             </div>
           </Reveal>

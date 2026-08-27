@@ -101,13 +101,13 @@ export function ScrollBrandReveal({ collections }: { collections: any[] }) {
     <section className="mx-auto max-w-7xl px-4 pt-2 pb-2 sm:px-6 lg:px-8 overflow-hidden font-sans">
       <div className="text-center max-w-3xl mx-auto space-y-4 mb-16">
         <Reveal>
-          <span className="rounded-full bg-primary/10 px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest text-primary">
-            MOCS Collections
+          <span className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38]">
+            Signature Series
           </span>
         </Reveal>
         <Reveal delay={0.1}>
-          <h2 className="font-display text-4xl sm:text-5xl font-black uppercase tracking-tight text-stone-900">
-            Shop by <span className="bg-gradient-to-r from-stone-950 to-primary bg-clip-text text-transparent">Collection</span>
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-normal tracking-[-0.015em] text-foreground">
+            Shop by <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">Collection.</span>
           </h2>
         </Reveal>
         <Reveal delay={0.2}>

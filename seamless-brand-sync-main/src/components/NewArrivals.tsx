@@ -50,11 +50,14 @@ export function NewArrivals({ products }: NewArrivalsProps) {
           {/* Left Column: Heading & Info */}
           <div className="flex flex-col justify-between shrink-0 lg:w-72 xl:w-80 text-left space-y-5">
             <div>
-              <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight uppercase leading-[0.95] drop-shadow-sm">
+              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-white/80">
+                Fresh Drops
+              </p>
+              <h2 className="mt-1 font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-white tracking-[-0.015em] leading-[1.05]">
                 New <br />
-                <span className="text-white/95">Arrivals</span>
+                <span className="italic font-serif text-white/95">Arrivals.</span>
               </h2>
-              <p className="mt-3 text-xs sm:text-sm font-medium tracking-wide text-white/90 leading-relaxed">
+              <p className="mt-3 text-xs sm:text-sm font-light tracking-normal text-white/85 leading-relaxed">
                 Handcrafted comfort, timeless silhouette. Designed for your everyday journey.
               </p>
             </div>

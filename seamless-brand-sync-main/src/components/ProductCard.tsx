@@ -33,14 +33,22 @@ export function ProductCard({
           className="relative block w-full aspect-square overflow-hidden rounded-3xl border border-stone-200/80 bg-stone-100 shadow-sm"
         >
           {/* Product Image with Pure Scale Animation on Hover */}
-          <div className="relative h-full w-full overflow-hidden bg-stone-100">
+          <div className="relative h-full w-full overflow-hidden bg-stone-900">
+            {/* Decorative background image */}
+            <img
+              src="/hero-bg.jpg"
+              alt=""
+              aria-hidden
+              draggable={false}
+              className="absolute inset-0 h-full w-full object-cover object-center opacity-30 blur-[1px] scale-105 pointer-events-none select-none z-0"
+            />
             <OptimizedImage
               src={getImageUrl(product.image, { width: 450, quality: 75 })}
               alt={product.name}
               aspectRatio="1/1"
               priority={index < 4}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              containerClassName="h-full w-full"
+              containerClassName="h-full w-full relative z-10"
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
             />
           </div>
@@ -131,7 +139,15 @@ export function ProductCard({
         params={{ id: product.id || (product as any)._id || "" }}
         className="block overflow-hidden rounded-3xl bg-white border border-stone-200/80 shadow-soft text-stone-900"
       >
-        <div className="relative aspect-square overflow-hidden bg-stone-100">
+        <div className="relative aspect-square overflow-hidden bg-stone-900">
+          {/* Decorative background image */}
+          <img
+            src="/hero-bg.jpg"
+            alt=""
+            aria-hidden
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-25 blur-[1px] scale-105 pointer-events-none select-none z-0"
+          />
           {/* Main Product Image with Smooth Scale on Hover */}
           <OptimizedImage
             src={getImageUrl(product.image, { width: 450, quality: 75 })}
@@ -139,7 +155,7 @@ export function ProductCard({
             aspectRatio="1/1"
             priority={index < 4}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            containerClassName="h-full w-full"
+            containerClassName="h-full w-full relative z-10"
             className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108"
           />
 

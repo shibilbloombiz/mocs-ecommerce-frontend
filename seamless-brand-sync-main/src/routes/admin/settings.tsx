@@ -535,7 +535,7 @@ function AdminSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 text-left relative">
+    <div className="mx-auto max-w-4xl space-y-6 text-left relative pb-28 sm:pb-32">
       <div>
         <h1 className="font-display text-3xl font-extrabold tracking-tight">Global Configurations</h1>
         <p className="mt-1.5 text-sm text-muted-foreground">Manage Hero slideshow assets and category banners.</p>
@@ -666,13 +666,36 @@ function AdminSettingsPage() {
           getImageUrl={getImageUrl}
         />
 
-        <div className="flex justify-end pt-4">
+        {/* Sticky Floating Save Changes Button in Bottom Right */}
+        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 pointer-events-auto">
           <button
             onClick={handleSaveSettings}
             disabled={saving}
-            className="flex items-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-bold uppercase text-primary-foreground transition hover:bg-primary-glow cursor-pointer disabled:opacity-60"
+            aria-label="Save settings changes"
+            className={cn(
+              "group relative flex items-center gap-2.5 rounded-full px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-2xl transition-all duration-300 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 active:scale-95",
+              isDirty
+                ? "bg-primary hover:bg-primary-glow ring-4 ring-primary/30 shadow-[0_10px_35px_-5px_rgba(244,106,30,0.55)]"
+                : "bg-primary/95 hover:bg-primary backdrop-blur-md shadow-xl shadow-black/20"
+            )}
           >
-            <Save className="h-4.5 w-4.5" /> {saving ? "Saving Changes..." : "Save Settings"}
+            {saving ? (
+              <>
+                <div className="h-4 w-4 sm:h-4.5 sm:w-4.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <span>Saving Changes...</span>
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 sm:h-4.5 sm:w-4.5 transition-transform group-hover:scale-110" />
+                <span>Save Changes</span>
+                {isDirty && (
+                  <span className="relative flex h-2 w-2 ml-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                  </span>
+                )}
+              </>
+            )}
           </button>
         </div>
       </div>

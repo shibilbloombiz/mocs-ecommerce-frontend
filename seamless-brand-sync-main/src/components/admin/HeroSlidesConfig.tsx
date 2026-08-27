@@ -150,6 +150,26 @@ export function HeroSlidesConfig({
                   )}
                 </div>
               </div>
+
+              {/* Right Focus toggle */}
+              <div className="flex items-center gap-3 py-1">
+                <label className="flex items-center gap-3 cursor-pointer select-none">
+                  <div className="relative inline-block">
+                    <input
+                      type="checkbox"
+                      checked={slide.rightFocus !== false}
+                      onChange={(e) => updateHeroSlideField(idx, "rightFocus", e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="h-5 w-9 rounded-full bg-stone-200 peer-checked:bg-primary transition-colors duration-200" />
+                    <div className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-4" />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                    Image on Right (desktop)
+                  </span>
+                </label>
+              </div>
+
               <div className="sm:col-span-2">
                 <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Background Image</label>
                 <div className="flex flex-col sm:flex-row gap-4 items-center">

@@ -84,11 +84,12 @@ export const Route = createFileRoute("/")({
               title: slide.title || "",
               subtitle: slide.subtitle || "",
               cta: slide.cta || "Shop Now",
-              to: (slide.to || "/shop") as Slide["to"],
+              to: slide.to || "/shop",
               mobileFocus: slide.mobileFocus || "center",
+              rightFocus: slide.rightFocus !== false, // default true (image on right)
               bg:
                 getImageUrl(slide.bg, { width: 1920, quality: 95 }) ||
-                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=95&w=1920",
+                "/hero-bg.jpg",
             }))
           : [];
 
@@ -362,8 +363,9 @@ function Home() {
 
   return (
     <>
-      <Hero slides={heroSlides} />
-      <AboutMocsSection />
+      <Hero slides={heroSlides} collageImages={allProducts.map((p: any) => ({ src: p.image, name: p.name }))} />
+      {/* About section hidden — remove the `hidden` class to re-enable */}
+      <div className="hidden"><AboutMocsSection /></div>
       <TrendingProducts products={trendingProducts} />
 
       <NewArrivals products={newArrivals} />

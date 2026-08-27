@@ -317,11 +317,14 @@ function Shop() {
         <div>
           <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 border-b border-stone-100 pb-5">
             <div className="text-left">
-              <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-stone-900 leading-tight">
-                Shop {cat === "All" ? "All" : cat}
+              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
+                Catalog
+              </p>
+              <h1 className="mt-1 font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-stone-900 dark:text-stone-100 leading-tight tracking-[-0.015em]">
+                Shop <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">{cat === "All" ? "All" : cat}.</span>
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground font-medium">
-                {`${filtered.length} products`}
+              <p className="mt-1 text-xs sm:text-sm text-muted-foreground font-light">
+                {`${filtered.length} curated products`}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
