@@ -265,22 +265,20 @@ export function Hero({
       </AnimatePresence>
 
       {/* ── LUXURY DARK GRADIENT OVERLAYS ─────────────────────────────────── */}
-      {/* Left Side Rich Shadow (Darkening under text, feathering smoothly to image on right) */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#141210] via-[#141210]/90 md:via-[#141210]/75 via-45% to-transparent pointer-events-none z-10" />
+      {/* Desktop/Tablet Left Side Rich Shadow (feathers to image on right, fully transparent on mobile) */}
+      <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-[#141210] via-[#141210]/90 md:via-[#141210]/75 via-45% to-transparent pointer-events-none z-10" />
       {/* Top subtle fade for navbar contrast */}
-      <div className="absolute top-0 inset-x-0 h-36 bg-gradient-to-b from-[#141210]/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute top-0 inset-x-0 h-32 md:h-36 bg-gradient-to-b from-[#141210]/60 md:from-[#141210]/80 to-transparent pointer-events-none z-10" />
       {/* Bottom grounding vignette */}
-      <div className="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-[#141210]/80 to-transparent pointer-events-none z-10" />
-      {/* Mobile vertical gradient so text is always crisp */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#141210] via-[#141210]/65 to-transparent md:hidden pointer-events-none z-10" />
+      <div className="absolute bottom-0 inset-x-0 h-28 md:h-36 bg-gradient-to-t from-[#141210]/60 md:from-[#141210]/80 to-transparent pointer-events-none z-10" />
 
       {/* ── FULL-HEIGHT HERO FOREGROUND CONTENT ───────────────────────────── */}
-      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 pb-12 sm:pb-16 flex flex-col justify-between h-full">
+      <div className="relative z-20 mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-16 pt-24 sm:pt-28 pb-12 sm:pb-16 flex flex-col justify-between h-full bg-transparent">
         {/* Top spacer for navbar breathing room */}
         <div className="hidden md:block" />
 
         {/* Center/Main text presentation */}
-        <div className="my-auto max-w-xl lg:max-w-2xl py-6">
+        <div className="my-auto max-w-xl lg:max-w-2xl py-6 bg-transparent">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={active}
@@ -289,18 +287,20 @@ export function Hero({
               initial="enter"
               animate="center"
               exit="exit"
-              className="space-y-5 sm:space-y-6 text-left"
+              className="space-y-5 sm:space-y-6 text-left bg-transparent drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]"
             >
               {/* Eyebrow */}
-              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38]">
+              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.28em] text-[#d96b27] dark:text-[#e07a38] [text-shadow:_0_1px_8px_rgba(0,0,0,0.8)]">
                 {current.eyebrow || "NEW COLLECTION"}
               </p>
 
               {/* Title */}
-              {renderTitle()}
+              <div className="[text-shadow:_0_3px_20px_rgba(0,0,0,0.85)]">
+                {renderTitle()}
+              </div>
 
               {/* Subtitle */}
-              <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-stone-300 font-light max-w-md">
+              <p className="text-sm sm:text-base md:text-[17px] leading-relaxed text-stone-200 sm:text-stone-300 font-light max-w-md [text-shadow:_0_2px_10px_rgba(0,0,0,0.85)]">
                 {current.subtitle ||
                   "Premium footwear crafted for everyday movement, effortless style, and lasting comfort."}
               </p>
@@ -309,7 +309,7 @@ export function Hero({
               <div className="pt-3 sm:pt-4">
                 <a
                   href={current.to || "/shop"}
-                  className="group inline-flex items-center gap-3 text-xs sm:text-sm font-bold tracking-[0.22em] text-white uppercase transition-colors duration-200 border-b border-white/40 pb-1.5 hover:border-[#d96b27] hover:text-[#d96b27]"
+                  className="group inline-flex items-center gap-3 text-xs sm:text-sm font-bold tracking-[0.22em] text-white uppercase transition-colors duration-200 border-b border-white/60 pb-1.5 hover:border-[#d96b27] hover:text-[#d96b27] [text-shadow:_0_2px_10px_rgba(0,0,0,0.8)]"
                 >
                   <span>{current.cta || "SHOP COLLECTION"}</span>
                   <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1.5" />
