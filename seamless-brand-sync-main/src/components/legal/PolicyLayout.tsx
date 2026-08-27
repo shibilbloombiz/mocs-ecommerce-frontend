@@ -57,18 +57,18 @@ export function PolicyLayout({
       desc: "Data protection & privacy rights",
     },
     {
-      id: "terms",
-      label: "Terms of Service",
-      to: "/terms" as const,
-      icon: FileText,
-      desc: "User agreement & purchase terms",
-    },
-    {
       id: "shipping",
       label: "Shipping & Returns",
       to: "/shipping" as const,
       icon: Truck,
       desc: "Delivery timelines & 7-day exchange",
+    },
+    {
+      id: "terms",
+      label: "Terms of Service",
+      to: "/terms" as const,
+      icon: FileText,
+      desc: "Store agreement & purchase terms",
     },
   ];
 
@@ -90,10 +90,10 @@ export function PolicyLayout({
   }, [toc]);
 
   const handleShare = () => {
-    if (navigator.clipboard) {
+    if (typeof window !== "undefined" && navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      toast.success("Policy URL copied to clipboard!");
+      toast.success("Policy link copied to clipboard");
       setTimeout(() => setCopied(false), 2000);
     }
   };
@@ -105,70 +105,64 @@ export function PolicyLayout({
     : toc;
 
   return (
-    <div className="min-h-screen bg-[#070709] text-[#ececee] font-sans selection:bg-primary selection:text-white">
-      {/* Top Background Gradient Orbs */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden opacity-40">
-        <div className="absolute -top-32 left-1/4 h-[500px] w-[500px] rounded-full bg-primary/10 blur-[120px]" />
-        <div className="absolute top-1/3 -right-32 h-[450px] w-[450px] rounded-full bg-orange-600/10 blur-[130px]" />
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground font-sans">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         
-        {/* Navigation Breadcrumb & Switcher Header */}
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+        {/* Navigation Breadcrumb & Meta Bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-border pb-5">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <Link to="/" className="hover:text-primary transition-colors">
               Home
             </Link>
             <span>/</span>
-            <span className="text-zinc-500">Legal & Policies</span>
+            <span>Policies</span>
             <span>/</span>
-            <span className="text-primary font-bold">{title}</span>
+            <span className="text-foreground font-semibold">{title}</span>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/60 px-4 py-1.5 text-xs font-bold text-zinc-300 backdrop-blur-md transition hover:border-primary/50 hover:bg-zinc-800 hover:text-white cursor-pointer"
-              title="Share Policy"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary cursor-pointer shadow-sm"
+              title="Share Link"
             >
               {copied ? (
                 <>
-                  <Check className="h-3.5 w-3.5 text-green-400" />
-                  <span className="text-green-400">Copied</span>
+                  <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  <span className="text-emerald-500">Copied</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="h-3.5 w-3.5 text-zinc-400" />
+                  <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Share</span>
                 </>
               )}
             </button>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-zinc-900/80 border border-zinc-800 px-3 py-1 text-[11px] font-medium text-zinc-400">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-muted/60 border border-border px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
               <Clock className="h-3.5 w-3.5 text-primary" />
               <span>Updated: {lastUpdated}</span>
             </div>
           </div>
         </div>
 
-        {/* Hero Banner */}
-        <Reveal className="mb-10">
-          <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-br from-zinc-900/90 via-zinc-900/40 to-black/80 p-6 sm:p-10 backdrop-blur-xl shadow-2xl">
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-2 rounded-full bg-primary/15 border border-primary/30 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-primary">
-                <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+        {/* Minimal Hero Header */}
+        <Reveal className="mb-8">
+          <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 shadow-sm space-y-6">
+            <div className="max-w-3xl space-y-3">
+              <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 border border-primary/20 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
+                <span className="h-2 w-2 rounded-full bg-primary" />
                 {badgeText}
               </div>
-              <h1 className="mt-4 font-display text-3xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="font-display text-3xl font-black tracking-tight text-foreground sm:text-4xl lg:text-5xl">
                 {title}
               </h1>
-              <p className="mt-4 text-base sm:text-lg text-zinc-300 leading-relaxed max-w-2xl font-normal">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-normal">
                 {subtitle}
               </p>
             </div>
 
-            {/* Policy Tabs Pill Switcher */}
-            <div className="mt-8 pt-8 border-t border-zinc-800/80 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Quick Switcher Policy Tabs */}
+            <div className="pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-3 gap-3">
               {policyTabs.map((tab) => {
                 const isActive = tab.id === currentPolicy;
                 const Icon = tab.icon;
@@ -176,17 +170,17 @@ export function PolicyLayout({
                   <Link
                     key={tab.id}
                     to={tab.to}
-                    className={`group relative flex items-center gap-3.5 rounded-2xl p-3.5 transition-all duration-300 border ${
+                    className={`flex items-center gap-3.5 rounded-2xl p-3.5 transition-all duration-200 border ${
                       isActive
-                        ? "bg-primary text-white border-primary shadow-lg shadow-orange-500/20"
-                        : "bg-zinc-950/40 text-zinc-300 border-zinc-800/80 hover:bg-zinc-900/80 hover:border-zinc-700 hover:text-white"
+                        ? "bg-primary text-white border-primary shadow-sm"
+                        : "bg-background text-foreground border-border hover:border-primary/50 hover:bg-accent"
                     }`}
                   >
                     <div
                       className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl transition ${
                         isActive
                           ? "bg-white/20 text-white"
-                          : "bg-zinc-800/60 text-primary group-hover:bg-primary/20 group-hover:text-primary"
+                          : "bg-muted text-primary"
                       }`}
                     >
                       <Icon className="h-5 w-5" />
@@ -197,8 +191,8 @@ export function PolicyLayout({
                         {isActive && <CheckCircle2 className="h-3.5 w-3.5 text-white shrink-0" />}
                       </div>
                       <p
-                        className={`text-[11px] truncate mt-0.5 ${
-                          isActive ? "text-white/80 font-medium" : "text-zinc-400 font-normal"
+                        className={`text-xs truncate mt-0.5 ${
+                          isActive ? "text-white/80 font-medium" : "text-muted-foreground font-normal"
                         }`}
                       >
                         {tab.desc}
@@ -211,56 +205,53 @@ export function PolicyLayout({
           </div>
         </Reveal>
 
-        {/* Policy Highlights Cards (If available) */}
+        {/* Highlights Row */}
         {highlights && highlights.length > 0 && (
-          <div className="mb-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mb-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {highlights.map((h, idx) => {
               const Icon = h.icon;
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-zinc-800/80 bg-zinc-900/30 p-5 backdrop-blur-md hover:border-primary/40 transition-colors"
+                  className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-sm hover:border-primary/40 transition-colors space-y-2"
                 >
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary mb-3">
-                    <Icon className="h-5 w-5" />
+                  <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <Icon className="h-4.5 w-4.5" />
                   </div>
-                  <h3 className="text-sm font-bold text-white mb-1">{h.title}</h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed font-normal">{h.desc}</p>
+                  <h3 className="text-sm font-bold text-foreground">{h.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed font-normal">{h.desc}</p>
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* Main Content Layout: Sticky Sidebar TOC + Body */}
-        <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-10 items-start">
+        {/* Main Content Layout: Sticky Sidebar TOC + Policy Clauses */}
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 items-start">
           
-          {/* Sticky Table of Contents on Desktop */}
+          {/* Sticky Minimal Table of Contents on Desktop */}
           <aside className="hidden lg:block sticky top-24 space-y-4">
-            <div className="rounded-3xl border border-zinc-800/80 bg-zinc-900/40 p-5 backdrop-blur-md shadow-xl">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800/60">
-                <span className="text-xs font-black uppercase tracking-wider text-zinc-400">
-                  Contents ({toc.length})
-                </span>
-                <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                  Quick Jump
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
+                <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Sections ({toc.length})
                 </span>
               </div>
 
-              {/* Quick Search */}
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-zinc-500" />
+              {/* Quick Filter */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Filter sections..."
+                  placeholder="Filter..."
                   value={filterQuery}
                   onChange={(e) => setFilterQuery(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950/60 py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder-zinc-500 outline-none focus:border-primary"
+                  className="w-full rounded-xl border border-border bg-background py-1.5 pl-8 pr-2.5 text-xs text-foreground placeholder-muted-foreground outline-none focus:border-primary transition"
                 />
               </div>
 
-              {/* TOC Links */}
-              <nav className="space-y-1 max-h-[60vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-700">
+              {/* TOC Navigation */}
+              <nav className="space-y-1 max-h-[55vh] overflow-y-auto pr-1">
                 {filteredToc.map((item, idx) => {
                   const isActive = activeSection === item.id;
                   return (
@@ -277,13 +268,13 @@ export function PolicyLayout({
                           setActiveSection(item.id);
                         }
                       }}
-                      className={`group flex items-start gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold transition-all duration-200 ${
+                      className={`flex items-start gap-2 rounded-xl px-2.5 py-2 text-xs font-semibold transition-all duration-150 ${
                         isActive
-                          ? "bg-primary/15 text-primary border-l-2 border-primary"
-                          : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200"
+                          ? "bg-primary/10 text-primary font-bold"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       }`}
                     >
-                      <span className="text-[11px] font-mono text-zinc-500 mt-0.5">
+                      <span className="text-[11px] font-mono opacity-70 mt-0.5">
                         {(idx + 1).toString().padStart(2, "0")}
                       </span>
                       <span className="leading-snug flex-1">{item.title}</span>
@@ -293,67 +284,67 @@ export function PolicyLayout({
               </nav>
             </div>
 
-            {/* Need Direct Assistance Card */}
-            <div className="rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/10 to-transparent p-5 backdrop-blur-md">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-primary">Need Clarification?</h4>
-              <p className="mt-1 text-xs text-zinc-400 leading-relaxed font-normal">
-                Our customer care & legal compliance team is available 6 days a week.
+            {/* Quick Contact Box */}
+            <div className="rounded-2xl border border-border bg-card p-4 space-y-2 text-xs shadow-sm">
+              <h4 className="font-bold text-foreground uppercase tracking-wider text-[11px]">Need Help?</h4>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Contact our customer support team directly:
               </p>
-              <div className="mt-3 space-y-2 text-xs">
+              <div className="space-y-1.5 pt-1">
                 <a
                   href="tel:+917994550834"
-                  className="flex items-center gap-2 text-zinc-300 hover:text-primary transition-colors font-medium"
+                  className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium"
                 >
-                  <Phone className="h-3.5 w-3.5 text-primary" />
-                  +91 7994550834
+                  <Phone className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span>+91 7994550834</span>
                 </a>
                 <a
                   href="mailto:support@mocs.in"
-                  className="flex items-center gap-2 text-zinc-300 hover:text-primary transition-colors font-medium"
+                  className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium"
                 >
-                  <Mail className="h-3.5 w-3.5 text-primary" />
-                  support@mocs.in
+                  <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span>support@mocs.in</span>
                 </a>
               </div>
             </div>
           </aside>
 
-          {/* Policy Document Clauses Content */}
-          <main className="min-w-0 space-y-12 pb-16">
+          {/* Policy Clauses Content */}
+          <main className="min-w-0 space-y-8 pb-16">
             {children}
 
-            {/* Bottom Official Guarantee & Sign-off Box */}
-            <div className="mt-16 rounded-3xl border border-zinc-800 bg-zinc-900/40 p-6 sm:p-8 backdrop-blur-xl">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-b border-zinc-800/80 pb-6">
+            {/* Bottom Support & Guarantee Card */}
+            <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-5">
                 <div>
-                  <h3 className="font-display text-xl font-bold text-white">
-                    MOCS Footwear Legal & Customer Support
+                  <h3 className="font-display text-lg font-bold text-foreground">
+                    MOCS Footwear Customer Care
                   </h3>
-                  <p className="mt-1 text-xs text-zinc-400 font-normal">
-                    Corporate Office: MOCS Foot Care, 7QJ8+42H, West Hill, Kozhikode, Kerala 673005, India
+                  <p className="mt-1 text-xs text-muted-foreground font-normal">
+                    MOCS Foot Care, Kozhikode, Kerala, India • Open Mon–Sat 9:00 AM – 6:00 PM IST
                   </p>
                 </div>
                 <Link
                   to="/contact"
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-primary-glow cursor-pointer shrink-0 shadow-md shadow-orange-500/20"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white transition hover:bg-primary-glow cursor-pointer shrink-0 shadow-sm"
                 >
-                  <span>Contact Helpdesk</span>
+                  <span>Contact Us</span>
                   <ArrowUpRight className="h-4 w-4" />
                 </Link>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-400">
-                <div className="flex items-center gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-muted-foreground font-medium">
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  <span>100% Genuine MOCS Footwear</span>
+                  <span>100% Genuine MOCS Quality</span>
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  <span>RBI & PCI-DSS Secure Payments</span>
+                  <span>Secure Encrypted Payments</span>
                 </div>
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-                  <span>7-Day Hassle-Free Exchange</span>
+                  <span>7-Day Easy Size Exchange</span>
                 </div>
               </div>
             </div>

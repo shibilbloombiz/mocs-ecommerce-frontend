@@ -76,7 +76,7 @@ export function Footer() {
                   <Phone className="h-4 w-4" />
                 </span>
                 <a
-                  href="tel:++91 7994550834"
+                  href="tel:+917994550834"
                   className="leading-snug text-secondary-foreground/80 transition hover:text-primary"
                 >
                   +91 7994550834

@@ -50,62 +50,12 @@ class NotificationManager {
 
     const notifType: NotificationType = raw.type || type || "info";
     const id = raw.id || `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const message = raw.message || raw.description || "";
-
-    // Intelligent Title & Action Mapping based on content if not explicitly provided
+    const primaryText = raw.message || raw.description || raw.title || "";
     let title = raw.title;
+    let message = primaryText;
     let actionLabel = raw.actionLabel;
     let onAction = raw.onAction;
     let duration = typeof raw.duration === "number" ? raw.duration : 4500;
-
-    if (!title) {
-      const lower = message.toLowerCase();
-      if (notifType === "error") {
-        if (
-          lower.includes("shipping") ||
-          lower.includes("contact") ||
-          lower.includes("fill in") ||
-          lower.includes("required") ||
-          lower.includes("missing") ||
-          lower.includes("details")
-        ) {
-          title = "Missing Information";
-          if (!actionLabel) actionLabel = "Review details";
-        } else if (
-          lower.includes("password") ||
-          lower.includes("auth") ||
-          lower.includes("sign in") ||
-          lower.includes("session")
-        ) {
-          title = "Authentication Required";
-        } else if (lower.includes("stock") || lower.includes("size")) {
-          title = "Selection Required";
-        } else {
-          title = "Attention Required";
-        }
-      } else if (notifType === "success") {
-        if (
-          lower.includes("saved") ||
-          lower.includes("updated") ||
-          lower.includes("submitted") ||
-          lower.includes("created")
-        ) {
-          title = "Successfully Saved";
-        } else if (lower.includes("review")) {
-          title = "Review Submitted";
-        } else if (lower.includes("order") || lower.includes("cancel") || lower.includes("return")) {
-          title = "Order Updated";
-        } else if (lower.includes("added to cart") || lower.includes("cart")) {
-          title = "Added to Cart";
-        } else {
-          title = "Successfully Completed";
-        }
-      } else if (notifType === "warning") {
-        title = "Check Your Details";
-      } else {
-        title = "New Information";
-      }
-    }
 
     // Default action for checkout missing information if not specified
     if (!onAction && actionLabel === "Review details") {

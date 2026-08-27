@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   X,
-  AlertCircle,
-  CheckCircle2,
+  Check,
   AlertTriangle,
   Info,
 } from "lucide-react";
@@ -14,123 +13,207 @@ import {
   type NotificationType,
 } from "@/lib/notifications";
 
-const variantConfig: Record<
-  NotificationType,
-  {
-    icon: React.ElementType;
-    accentBar: string;
-    iconBg: string;
-    iconColor: string;
-    progressBar: string;
-  }
-> = {
-  error: {
-    icon: AlertCircle,
-    accentBar: "bg-[#EF4444]",
-    iconBg: "bg-red-50/90 border border-red-100/90 text-[#EF4444]",
-    iconColor: "text-[#EF4444]",
-    progressBar: "bg-[#EF4444]",
-  },
-  success: {
-    icon: CheckCircle2,
-    accentBar: "bg-[#10B981]",
-    iconBg: "bg-emerald-50/90 border border-emerald-100/90 text-[#10B981]",
-    iconColor: "text-[#10B981]",
-    progressBar: "bg-[#10B981]",
-  },
-  warning: {
-    icon: AlertTriangle,
-    accentBar: "bg-[#F59E0B]",
-    iconBg: "bg-amber-50/90 border border-amber-100/90 text-[#F59E0B]",
-    iconColor: "text-[#F59E0B]",
-    progressBar: "bg-[#F59E0B]",
-  },
-  info: {
-    icon: Info,
-    accentBar: "bg-[#3B82F6]",
-    iconBg: "bg-blue-50/90 border border-blue-100/90 text-[#3B82F6]",
-    iconColor: "text-[#3B82F6]",
-    progressBar: "bg-[#3B82F6]",
-  },
+// Line icon shape mapping (outlined circle with 1px border, distinct icon per state)
+const stateIcons: Record<NotificationType, React.ElementType> = {
+  success: Check,
+  error: X,
+  warning: AlertTriangle,
+  info: Info,
 };
 
-function NotificationCardItem({ item }: { item: ActiveNotification }) {
-  const config = variantConfig[item.type] || variantConfig.info;
-  const IconComponent = config.icon;
+interface ToastItemProps {
+  item: ActiveNotification;
+  onDismiss: (id: string) => void;
+  prefersReducedMotion: boolean;
+}
+
+function ToastItem({ item, onDismiss, prefersReducedMotion }: ToastItemProps) {
+  const [isPaused, setIsPaused] = useState(false);
+  const [remainingTime, setRemainingTime] = useState(item.duration || 4500);
+  const [progress, setProgress] = useState(100);
+
+  const startTimeRef = useRef<number>(Date.now());
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
+
+  const Icon = stateIcons[item.type] || Info;
+  const isPersistent = item.duration === 0;
+
+  // Handle countdown & progress bar with accurate pause/resume
+  const startTimer = useCallback((duration: number) => {
+    if (isPersistent || duration <= 0) return;
+
+    startTimeRef.current = Date.now();
+
+    const updateProgress = () => {
+      const elapsed = Date.now() - startTimeRef.current;
+      const remaining = Math.max(0, duration - elapsed);
+      const pct = (remaining / (item.duration || 4500)) * 100;
+
+      setProgress(pct);
+
+      if (remaining > 0) {
+        animationFrameRef.current = requestAnimationFrame(updateProgress);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(updateProgress);
+
+    timerRef.current = setTimeout(() => {
+      onDismiss(item.id);
+    }, duration);
+  }, [isPersistent, item.duration, item.id, onDismiss]);
+
+  const pauseTimer = useCallback(() => {
+    if (isPersistent || isPaused) return;
+    setIsPaused(true);
+
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+
+    const elapsed = Date.now() - startTimeRef.current;
+    const nextRemaining = Math.max(0, remainingTime - elapsed);
+    setRemainingTime(nextRemaining);
+  }, [isPersistent, isPaused, remainingTime]);
+
+  const resumeTimer = useCallback(() => {
+    if (isPersistent || !isPaused) return;
+    setIsPaused(false);
+    startTimer(remainingTime);
+  }, [isPersistent, isPaused, remainingTime, startTimer]);
+
+  useEffect(() => {
+    startTimer(remainingTime);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+    };
+  }, []);
+
+  const primaryText = item.message || item.title || "Notification";
 
   return (
-    <div
-      className="pointer-events-auto relative w-full sm:w-[360px] max-w-[calc(100vw-32px)] overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 backdrop-blur-xl p-5 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.12),0_4px_16px_-2px_rgba(0,0,0,0.04)] text-left font-sans"
-      role="alert"
-      aria-live="assertive"
+    <motion.div
+      layout={!prefersReducedMotion}
+      initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -12, scale: 0.98 }}
+      animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.96 }}
+      transition={{ duration: prefersReducedMotion ? 0 : 0.18, ease: [0.16, 1, 0.3, 1] }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 300 }}
+      dragElastic={{ left: 0.1, right: 0.8 }}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 70 || info.velocity.x > 400) {
+          onDismiss(item.id);
+        }
+      }}
+      onMouseEnter={pauseTimer}
+      onMouseLeave={resumeTimer}
+      onTouchStart={pauseTimer}
+      onTouchEnd={resumeTimer}
+      role="status"
+      aria-live="polite"
+      className={cn(
+        "group pointer-events-auto relative w-full sm:w-[360px] max-w-[380px] overflow-hidden select-none",
+        "rounded-[16px] border border-border/90 dark:border-border",
+        "bg-card/95 dark:bg-card/90 backdrop-blur-xl",
+        "shadow-md shadow-black/5 dark:shadow-black/20",
+        "text-left font-sans transition-colors duration-150"
+      )}
     >
-      {/* Left Colored Accent Bar */}
-      <div className={cn("absolute left-0 top-0 bottom-0 w-[4.5px]", config.accentBar)} />
-
-      {/* Top-Right Close Button */}
-      <button
-        type="button"
-        onClick={() => notificationManager.dismiss(item.id)}
-        aria-label="Close notification"
-        className="absolute right-3.5 top-3.5 grid h-7 w-7 place-items-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition duration-200 cursor-pointer"
-      >
-        <X className="h-4 w-4" />
-      </button>
-
-      {/* Top Status Icon / Dot */}
-      <div className="mb-3 pl-1">
-        <div className={cn("flex h-8 w-8 items-center justify-center rounded-full shadow-2xs", config.iconBg)}>
-          <IconComponent className={cn("h-4.5 w-4.5", config.iconColor)} />
+      <div className="flex items-center gap-3 p-3.5 sm:p-4">
+        {/* Outlined Circle Status Icon (1px border, no solid fill) */}
+        <div className="grid h-7 w-7 sm:h-8 sm:w-8 shrink-0 place-items-center rounded-full border border-border bg-transparent text-foreground/80">
+          <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 stroke-[2.2]" />
         </div>
+
+        {/* Content (Single primary line + Relative time) */}
+        <div className="min-w-0 flex-1 pr-1">
+          <p className="text-[13.5px] sm:text-sm font-medium text-foreground leading-snug line-clamp-2">
+            {primaryText}
+          </p>
+          <p className="text-[11.5px] sm:text-[12px] text-muted-foreground font-normal mt-0.5">
+            Just now
+          </p>
+
+          {/* Action button if present */}
+          {item.actionLabel && item.onAction && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                item.onAction?.();
+                onDismiss(item.id);
+              }}
+              className="mt-2 text-xs font-semibold text-primary hover:underline cursor-pointer"
+            >
+              {item.actionLabel}
+            </button>
+          )}
+        </div>
+
+        {/* Close button with min 40x40px tap target */}
+        <button
+          type="button"
+          onClick={() => onDismiss(item.id)}
+          aria-label="Dismiss notification"
+          className="relative -mr-1 -mt-1 sm:-mr-1.5 sm:-mt-1.5 flex h-10 w-10 min-h-[40px] min-w-[40px] shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground active:scale-95 cursor-pointer"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
-      {/* Content */}
-      <div className="pl-1 pr-6">
-        {/* Title */}
-        <h4 className="font-semibold text-[15px] leading-tight text-stone-900">
-          {item.title}
-        </h4>
-
-        {/* Description / Message */}
-        <p className="mt-1.5 text-[13px] leading-relaxed text-stone-600">
-          {item.message}
-        </p>
-      </div>
-
-      {/* Ultra-Smooth Hardware-Accelerated Progress Bar */}
-      {item.duration > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-stone-100/90 overflow-hidden">
-          <motion.div
-            initial={{ scaleX: 1 }}
-            animate={{ scaleX: 0 }}
-            transition={{
-              duration: item.duration / 1000,
-              ease: "linear",
+      {/* Auto-Dismiss Progress Bar (2px along bottom inner edge) */}
+      {!isPersistent && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-muted/40 overflow-hidden">
+          <div
+            className="h-full bg-foreground/35 dark:bg-foreground/50 transition-none will-change-transform"
+            style={{
+              width: `${Math.max(0, Math.min(100, progress))}%`,
             }}
-            style={{ transformOrigin: "left center" }}
-            className={cn("h-full w-full will-change-transform", config.progressBar)}
           />
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
 export function FloatingNotificationContainer() {
   const [notifications, setNotifications] = useState<ActiveNotification[]>([]);
+  const prefersReducedMotion =
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false;
 
   useEffect(() => {
     return notificationManager.subscribe(setNotifications);
   }, []);
 
+  const handleDismiss = useCallback((id: string) => {
+    notificationManager.dismiss(id);
+  }, []);
+
   return (
     <div
       aria-label="Notifications"
-      className="fixed z-[99999] pointer-events-none flex flex-col gap-3.5 top-4 left-4 right-4 sm:top-[70px] sm:left-auto sm:right-4 lg:top-[80px] lg:right-6"
+      className={cn(
+        "fixed z-[99999] pointer-events-none flex flex-col gap-2.5 sm:gap-3",
+        // Mobile: Centered at top, full width minus 24px margins, safe area padded
+        "top-4 inset-x-3 sm:inset-x-auto pt-[env(safe-area-inset-top,0px)] items-center",
+        // Desktop: Positioned top-right with fixed offset
+        "sm:top-20 sm:right-6 sm:items-end"
+      )}
     >
-      {notifications.map((item) => (
-        <NotificationCardItem key={item.id} item={item} />
-      ))}
+      <AnimatePresence mode="popLayout" initial={false}>
+        {notifications.map((item) => (
+          <ToastItem
+            key={item.id}
+            item={item}
+            onDismiss={handleDismiss}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+        ))}
+      </AnimatePresence>
     </div>
   );
 }
