@@ -43,7 +43,7 @@ export const DEFAULT_HERO_SLIDES: Slide[] = [
 export function HeroSkeleton() {
   return (
     <div className="w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-4 max-w-[1800px] mx-auto">
-      <section className="relative w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-auto lg:h-[calc(100dvh-2rem)] lg:min-h-[640px] lg:max-h-[960px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-stone-950 animate-pulse" />
+      <section className="relative w-full aspect-[16/9] lg:aspect-auto lg:h-[calc(100dvh-2rem)] lg:min-h-[640px] lg:max-h-[960px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-stone-950 animate-pulse" />
     </div>
   );
 }
@@ -188,7 +188,7 @@ export function Hero({
         aria-label="MOCS Hero Slideshow"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-auto lg:h-[calc(100dvh-2rem)] lg:min-h-[640px] lg:max-h-[960px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
+        className="group relative w-full aspect-[16/9] lg:aspect-auto lg:h-[calc(100dvh-2rem)] lg:min-h-[640px] lg:max-h-[960px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
       >
         {/* ── ACTIVE HERO SLIDE (WITH ADAPTIVE PICTURE ELEMENT & KEN BURNS EFFECT) ── */}
         <AnimatePresence initial={false} custom={direction}>
@@ -214,22 +214,22 @@ export function Hero({
           >
             <a
               href={current?.to || "/shop"}
-              className="relative block h-full w-full cursor-pointer focus:outline-none rounded-[inherit] overflow-hidden"
+              className="relative block h-full w-full min-h-full min-w-full cursor-pointer focus:outline-none rounded-[inherit] overflow-hidden"
               aria-label="View hero banner"
             >
-              {/* Ambient blurred backdrop when in contain mode */}
-              {current?.objectFit === "contain" && current?.bg && (
+              {/* Ambient blurred backdrop for seamless filling across all screen sizes */}
+              {current?.bg && (
                 <div
-                  className="absolute inset-0 scale-125 blur-3xl opacity-50 bg-cover bg-center pointer-events-none transition-all duration-700"
+                  className="absolute inset-0 scale-125 blur-3xl opacity-40 bg-cover bg-center pointer-events-none transition-all duration-700"
                   style={{
-                    backgroundImage: `url(${getImageUrl(current.bg, { width: 400, quality: 40 })})`,
+                    backgroundImage: `url(${getImageUrl(current.mobileBg || current.bg, { width: 400, quality: 40 })})`,
                   }}
                 />
               )}
 
-              {/* Inner slide container without hover zoom */}
-              <div className="relative h-full w-full rounded-[inherit]">
-                <picture className="relative block h-full w-full rounded-[inherit]">
+              {/* Inner slide container */}
+              <div className="relative h-full w-full min-h-full min-w-full rounded-[inherit] overflow-hidden flex items-center justify-center">
+                <picture className="relative block h-full w-full min-h-full min-w-full rounded-[inherit]">
                   {current?.mobileBg && (
                     <source
                       media="(max-width: 767px)"
@@ -241,8 +241,10 @@ export function Hero({
                     alt={`Hero Banner ${active + 1}`}
                     loading={active === 0 ? "eager" : "lazy"}
                     className={cn(
-                      "h-full w-full rounded-[inherit]",
-                      current?.objectFit === "contain" ? "object-contain" : "object-cover",
+                      "block h-full w-full min-h-full min-w-full rounded-[inherit] transition-all duration-500",
+                      current?.objectFit === "contain"
+                        ? "object-contain"
+                        : "object-cover",
                       current?.objectPosition === "top"
                         ? "object-top"
                         : current?.objectPosition === "bottom"
