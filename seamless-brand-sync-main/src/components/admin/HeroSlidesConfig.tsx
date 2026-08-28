@@ -192,6 +192,36 @@ export function HeroSlidesConfig({
                 <p className="text-[11px] text-muted-foreground">
                   Optional separate optimized image for mobile screens. If left blank, the desktop banner image will be used.
                 </p>
+
+                {/* Fix as Main Hero Image in Mobile View Checkbox */}
+                <div className="pt-2">
+                  <label className="flex items-center gap-3 p-3 rounded-xl bg-accent/40 hover:bg-accent/60 border border-border cursor-pointer transition select-none">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(slide.isMobileMain)}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        heroSlides.forEach((_, i) => {
+                          updateHeroSlideField(i, "isMobileMain", i === idx ? isChecked : false);
+                        });
+                      }}
+                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary accent-[#d97736]"
+                    />
+                    <div>
+                      <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                        <span>Fix as Main Hero Image in Mobile View</span>
+                        {slide.isMobileMain && (
+                          <span className="bg-[#d97736]/20 text-[#d97736] text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                            Fixed Main
+                          </span>
+                        )}
+                      </span>
+                      <p className="text-[11px] text-muted-foreground">
+                        Lock this image as the main hero banner in mobile view. Other slides will be shown in cards below.
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               {/* 3. Destination Path / URL */}

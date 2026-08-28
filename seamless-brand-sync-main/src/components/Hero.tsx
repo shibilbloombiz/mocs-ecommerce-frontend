@@ -95,26 +95,30 @@ export function Hero({
     setActive((a) => (a - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
+  const fixedMobileSlide = displaySlides.find((s) => s.isMobileMain);
   const mobileSlides = displaySlides.filter(
     (s) => s.mobileBg && s.mobileBg.trim() !== ""
   );
-  const shouldAutoAdvanceMobile = mobileSlides.length >= 2;
+  // Auto-carousel on mobile only if 2+ mobile hero images exist AND no slide is fixed as mobile main
+  const shouldAutoAdvanceMobile = !fixedMobileSlide && mobileSlides.length >= 2;
 
-  // Auto-advance every 5.5 seconds (auto-advances on desktop, but on mobile only if 2+ mobile images exist)
+  // Auto-advance every 5.5 seconds
   useEffect(() => {
     if (totalSlides <= 1) return;
 
     const timer = setInterval(() => {
       const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      if (isMobile && !shouldAutoAdvanceMobile) {
-        return; // Don't change automatically if only 1 mobile image is configured
+      if (isMobile) {
+        if (fixedMobileSlide || !shouldAutoAdvanceMobile) {
+          return; // Don't change automatically if fixed as main or only 1 mobile image
+        }
       }
       setDirection(1);
       setActive((prevIdx) => (prevIdx + 1) % totalSlides);
     }, 5500);
 
     return () => clearInterval(timer);
-  }, [totalSlides, active, shouldAutoAdvanceMobile]);
+  }, [totalSlides, active, shouldAutoAdvanceMobile, fixedMobileSlide]);
 
   // Smoothly scroll active thumbnail into view
   useEffect(() => {
@@ -141,31 +145,40 @@ export function Hero({
   }, [next, prev]);
 
   const current = displaySlides[active] ?? displaySlides[0];
+  const mobileCurrent = fixedMobileSlide || current;
+  const mobileOtherSlides = fixedMobileSlide
+    ? displaySlides.filter((s) => s !== fixedMobileSlide)
+    : displaySlides;
 
   const slideVariants = {
     enter: (d: number) => ({
       opacity: 0,
+      x: d > 0 ? "4%" : "-4%",
       scale: 1.03,
-      x: d > 0 ? 30 : -30,
+      filter: "brightness(0.92)",
     }),
     center: {
       opacity: 1,
+      x: "0%",
       scale: 1,
-      x: 0,
+      filter: "brightness(1)",
       transition: {
-        opacity: { duration: 0.65, ease: "easeOut" },
-        scale: { duration: 0.85, ease: [0.16, 1, 0.3, 1] },
-        x: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 0.75, ease: [0.25, 1, 0.35, 1] },
+        x: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+        scale: { duration: 1.0, ease: [0.16, 1, 0.3, 1] },
+        filter: { duration: 0.6, ease: "easeOut" },
       },
     },
     exit: (d: number) => ({
       opacity: 0,
+      x: d > 0 ? "-3%" : "3%",
       scale: 0.98,
-      x: d > 0 ? -30 : 30,
+      filter: "brightness(0.88)",
       transition: {
-        opacity: { duration: 0.5, ease: "easeIn" },
-        scale: { duration: 0.7, ease: [0.16, 1, 0.3, 1] },
-        x: { duration: 0.65, ease: [0.16, 1, 0.3, 1] },
+        opacity: { duration: 0.6, ease: [0.32, 0, 0.67, 0] },
+        x: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
+        scale: { duration: 0.75, ease: [0.16, 1, 0.3, 1] },
+        filter: { duration: 0.5, ease: "easeIn" },
       },
     }),
   };
@@ -178,7 +191,7 @@ export function Hero({
         <div className="relative w-full h-[62vh] min-h-[420px] max-h-[640px] overflow-hidden bg-stone-950">
           <AnimatePresence initial={false} custom={direction}>
             <motion.div
-              key={active}
+              key={fixedMobileSlide ? "fixed-mobile-hero" : active}
               custom={direction}
               variants={slideVariants}
               initial="enter"
@@ -187,12 +200,12 @@ export function Hero({
               className="absolute inset-0 h-full w-full will-change-transform"
             >
               <a
-                href={current.to || "/shop"}
+                href={mobileCurrent.to || "/shop"}
                 className="block h-full w-full cursor-pointer focus:outline-none"
                 aria-label="View mobile hero banner"
               >
                 <img
-                  src={getImageUrl(current.mobileBg || current.bg, { width: 1080, quality: 92 })}
+                  src={getImageUrl(mobileCurrent.mobileBg || mobileCurrent.bg, { width: 1080, quality: 92 })}
                   alt="Main Mobile Hero"
                   loading="eager"
                   className="h-full w-full object-cover object-center"
@@ -205,7 +218,7 @@ export function Hero({
           <div className="pointer-events-none absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/60 to-transparent z-10" />
           <div className="pointer-events-none absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
 
-          {/* Mobile Carousel Indicators (shown if 2+ mobile images exist) */}
+          {/* Mobile Carousel Indicators (shown only if carousel active with 2+ mobile images and not fixed) */}
           {shouldAutoAdvanceMobile && (
             <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
               {displaySlides.map((_, dotIdx) => (
@@ -227,9 +240,9 @@ export function Hero({
           )}
 
           {/* Destination Link Badge */}
-          {current.to && (
+          {mobileCurrent.to && (
             <a
-              href={current.to || "/shop"}
+              href={mobileCurrent.to || "/shop"}
               className="absolute bottom-4 left-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-white border border-white/15 shadow-lg active:scale-95 transition-transform"
             >
               <span>Explore Collection</span>
@@ -239,48 +252,43 @@ export function Hero({
         </div>
 
         {/* Other Slides in Cards Under Main Image (1 row 2 images grid) */}
-        {totalSlides > 1 && (
+        {mobileOtherSlides.length > 0 && (
           <div className="w-full px-4 py-3.5 bg-[#0e0d0c] border-t border-white/10">
             <div className="flex items-center justify-between pb-2.5">
               <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
                 Featured Collections
               </span>
               <span className="text-[10px] text-stone-500 font-mono">
-                {active + 1} / {totalSlides}
+                {mobileOtherSlides.length} Collections
               </span>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {displaySlides.map((slide, idx) => {
-                const isActive = idx === active;
+              {mobileOtherSlides.map((slide, idx) => {
+                const originalIdx = displaySlides.indexOf(slide);
+                const isActive = !fixedMobileSlide && originalIdx === active;
                 return (
-                  <button
+                  <a
                     key={idx}
-                    type="button"
-                    onClick={() => goTo(idx, idx > active ? 1 : -1)}
+                    href={slide.to || "/shop"}
                     className={cn(
-                      "group relative w-full aspect-[16/10] rounded-xl overflow-hidden border transition-all duration-200 text-left cursor-pointer",
+                      "group relative w-full aspect-[16/10] rounded-xl overflow-hidden border transition-all duration-200 text-left block active:scale-98",
                       isActive
                         ? "border-[#d97736] ring-2 ring-[#d97736]/40 shadow-md opacity-100"
-                        : "border-white/15 opacity-65 hover:opacity-95 hover:border-white/30"
+                        : "border-white/15 opacity-80 hover:opacity-100 hover:border-white/30"
                     )}
-                    aria-label={`Switch to slide ${idx + 1}`}
+                    aria-label={`View ${slide.title || `Collection ${idx + 1}`}`}
                   >
                     <img
                       src={getImageUrl(slide.mobileBg || slide.bg, { width: 500, quality: 85 })}
                       alt={`Slide ${idx + 1}`}
                       loading="lazy"
-                      className="h-full w-full object-cover object-center select-none"
+                      className="h-full w-full object-cover object-center select-none group-hover:scale-102 transition-transform duration-300"
                     />
-                    <div
-                      className={cn(
-                        "absolute inset-0 transition-opacity duration-200",
-                        isActive ? "bg-transparent" : "bg-black/30 group-hover:bg-black/10"
-                      )}
-                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                     {isActive && (
                       <div className="absolute bottom-0 inset-x-0 h-1 bg-[#d97736]" />
                     )}
-                  </button>
+                  </a>
                 );
               })}
             </div>

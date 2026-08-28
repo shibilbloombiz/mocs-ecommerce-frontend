@@ -88,6 +88,10 @@ export const Route = createFileRoute("/")({
               bg:
                 getImageUrl(slide.bg || slide.image, { width: 1920, quality: 95 }) ||
                 "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1920",
+              mobileBg: slide.mobileBg
+                ? getImageUrl(slide.mobileBg, { width: 1080, quality: 92 })
+                : undefined,
+              isMobileMain: Boolean(slide.isMobileMain || slide.fixMobileMain),
             }))
           : [];
 
