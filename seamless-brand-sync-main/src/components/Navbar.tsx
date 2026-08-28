@@ -6,6 +6,7 @@ import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/mocs-logo.png";
 import { apiClient } from "@/lib/api";
+import { AnnouncementBar } from "./AnnouncementBar";
 
 type NavLink = {
   label: string;
@@ -31,7 +32,7 @@ export function Navbar() {
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isHome = pathname === "/";
-  const transparent = isHome && !scrolled;
+  const transparent = !scrolled;
 
   const handleLogoClick = (e: React.MouseEvent) => {
     if (isHome) {
@@ -51,7 +52,7 @@ export function Navbar() {
   }, [userOpen]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => setScrolled(window.scrollY > 30);
     onScroll();
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
@@ -63,226 +64,220 @@ export function Navbar() {
 
   return (
     <>
-      <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-          // At top on home → Feoro-style: gradient fade from dark so hero image shows through
-          transparent && "bg-gradient-to-b from-black/50 to-transparent border-transparent text-white shadow-none",
-          // Scrolled → frosted glass panel
-          !transparent && "border-b border-white/10 text-foreground",
-        )}
-        style={
-          !transparent
-            ? {
-                background: "rgba(255,255,255,0.55)",
-                backdropFilter: "blur(20px) saturate(180%)",
-                WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                borderColor: "rgba(255,255,255,0.18)",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 0 rgba(255,255,255,0.3) inset",
-              }
-            : undefined
-        }
-      >
-        <div className="mx-auto flex h-20 lg:h-24 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 lg:hidden">
-            <button
-              type="button"
-              aria-label="Open menu"
-              onClick={() => setMobileOpen(true)}
-              className="grid h-10 w-10 place-items-center"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-          </div>
+      <header className="fixed inset-x-0 top-0 z-50">
+        {/* Top Announcement Bar */}
+        <AnnouncementBar />
 
-          <Link to="/" onClick={handleLogoClick} aria-label="MOCS home" className="flex items-center">
-            <img
-              src={logo}
-              alt="MOCS"
-              className="h-10 w-auto select-none sm:h-12"
-              draggable={false}
-            />
-          </Link>
-
-          <nav
-            className="hidden items-center gap-2 lg:flex relative"
-            onMouseLeave={() => setMenuOpen(false)}
-          >
-            <button
-              type="button"
-              onMouseEnter={() => setMenuOpen(true)}
-              className="group relative flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium tracking-[0.12em] uppercase cursor-pointer transition-opacity duration-200 hover:opacity-60"
-            >
-              Collections
-              <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
-              <span className="absolute bottom-1 inset-x-4 h-px origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
-            </button>
-            {navLinks.map((l) => (
-              <Link
-                key={l.label}
-                to={l.to}
-                search={l.search as any}
-                className="group relative px-4 py-2 text-[13px] font-medium tracking-[0.12em] uppercase transition-opacity duration-200 hover:opacity-60"
-                activeProps={{ className: "opacity-100 font-semibold" }}
-              >
-                {l.label}
-                <span className="absolute bottom-1 inset-x-4 h-px origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
-              </Link>
-            ))}
-
-            <AnimatePresence>
-              {menuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.2 }}
-                  className="absolute left-0 top-full pt-1 w-64"
-                  onMouseEnter={() => setMenuOpen(true)}
-                >
-                  <div className="rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-card mt-0.5">
-                    <p className="mb-3 font-display text-[10px] font-bold uppercase tracking-widest text-primary border-b border-border pb-1.5">
-                      Browse Collections
-                    </p>
-                    <ul className="space-y-1">
-                      {collections.map((col) => (
-                        <li key={col._id}>
-                          <Link
-                            to="/shop"
-                            search={{ collection: col.name } as any}
-                            onClick={() => setMenuOpen(false)}
-                            className="text-sm font-semibold text-muted-foreground transition hover:text-primary block py-1"
-                          >
-                            {col.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </nav>
-
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              aria-label="Search"
-              onClick={() => setSearchOpen(true)}
-              className="hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-            <Link
-              to="/wishlist"
-              aria-label="Wishlist"
-              className="relative hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
-            >
-              <Heart className="h-5 w-5" />
-              {wishlist.length > 0 && (
-                <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-                  {wishlist.length}
-                </span>
-              )}
-            </Link>
-            <button
-              type="button"
-              aria-label="Cart"
-              onClick={() => setCartOpen(true)}
-              className="relative hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
-            >
-              <ShoppingBag className="h-5 w-5" />
-              {cartCount > 0 && (
-                <motion.span
-                  key={cartCount}
-                  initial={{ scale: 0.4 }}
-                  animate={{ scale: 1 }}
-                  className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground"
-                >
-                  {cartCount}
-                </motion.span>
-              )}
-            </button>
-            <div className="relative block" ref={userMenuRef}>
+        {/* Main Navbar */}
+        <div
+          className={cn(
+            "transition-colors duration-300 ease-in-out",
+            transparent
+              ? "bg-transparent border-transparent text-black shadow-none"
+              : "bg-black/70 backdrop-blur-md border-b border-white/10 text-white shadow-md"
+          )}
+        >
+          <div className="mx-auto flex h-16 sm:h-20 lg:h-24 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center gap-2 lg:hidden">
               <button
                 type="button"
-                aria-label="Account"
-                onClick={() => setUserOpen((v) => !v)}
-                className="grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary focus:outline-none outline-none select-none"
+                aria-label="Open menu"
+                onClick={() => setMobileOpen(true)}
+                className="grid h-10 w-10 place-items-center"
               >
-                <User className="h-5 w-5" />
+                <Menu className="h-5 w-5" />
               </button>
+            </div>
+
+            <Link to="/" onClick={handleLogoClick} aria-label="MOCS home" className="flex items-center">
+              <img
+                src={logo}
+                alt="MOCS"
+                className="h-10 w-auto select-none sm:h-12"
+                draggable={false}
+              />
+            </Link>
+
+            <nav
+              className="hidden items-center gap-2 lg:flex relative"
+              onMouseLeave={() => setMenuOpen(false)}
+            >
+              <button
+                type="button"
+                onMouseEnter={() => setMenuOpen(true)}
+                className="group relative flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium tracking-[0.12em] uppercase cursor-pointer transition-opacity duration-200 hover:opacity-60"
+              >
+                Collections
+                <ChevronDown className="h-3 w-3 transition-transform duration-200 group-hover:rotate-180" />
+                <span className="absolute bottom-1 inset-x-4 h-px origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
+              </button>
+              {navLinks.map((l) => (
+                <Link
+                  key={l.label}
+                  to={l.to}
+                  search={l.search as any}
+                  className="group relative px-4 py-2 text-[13px] font-medium tracking-[0.12em] uppercase transition-opacity duration-200 hover:opacity-60"
+                  activeProps={{ className: "opacity-100 font-semibold" }}
+                >
+                  {l.label}
+                  <span className="absolute bottom-1 inset-x-4 h-px origin-left scale-x-0 bg-current transition-transform duration-300 group-hover:scale-x-100" />
+                </Link>
+              ))}
+
               <AnimatePresence>
-                {userOpen && (
+                {menuOpen && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-12 w-56 rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-card z-50"
+                    transition={{ duration: 0.2 }}
+                    className="absolute left-0 top-full pt-1 w-64"
+                    onMouseEnter={() => setMenuOpen(true)}
                   >
-                    {user ? (
-                      <>
-                        <div className="px-3 py-2 border-b border-border mb-1">
-                          <p className="text-sm font-bold truncate">{user.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-                        </div>
-                        <Link
-                          to="/profile"
-                          onClick={() => setUserOpen(false)}
-                          className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent focus:outline-none outline-none select-none"
-                        >
-                          My Profile
-                        </Link>
-                        <Link
-                          to="/orders"
-                          onClick={() => setUserOpen(false)}
-                          className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent focus:outline-none outline-none select-none"
-                        >
-                          My Orders
-                        </Link>
-                        <Link
-                          to="/wishlist"
-                          onClick={() => setUserOpen(false)}
-                          className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent focus:outline-none outline-none select-none"
-                        >
-                          Wishlist
-                        </Link>
-                        <button
-                          onClick={() => {
-                            logout();
-                            setUserOpen(false);
-                          }}
-                          className="w-full text-left rounded-lg px-3 py-2 text-sm font-semibold hover:bg-destructive/10 text-destructive mt-1 border-t border-border pt-2 focus:outline-none outline-none select-none"
-                        >
-                          Logout
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Link
-                          to="/auth"
-                          search={{ redirect: pathname, mode: "login" } as any}
-                          onClick={() => setUserOpen(false)}
-                          className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent"
-                        >
-                          Log in
-                        </Link>
-                        <Link
-                          to="/auth"
-                          search={{ redirect: pathname, mode: "signup" } as any}
-                          onClick={() => {
-                            setUserOpen(false);
-                          }}
-                          className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent"
-                        >
-                          Sign up
-                        </Link>
-                      </>
-                    )}
+                    <div className="rounded-2xl border border-border bg-popover p-5 text-popover-foreground shadow-card mt-0.5">
+                      <p className="mb-3 font-display text-[10px] font-bold uppercase tracking-widest text-primary border-b border-border pb-1.5">
+                        Browse Collections
+                      </p>
+                      <ul className="space-y-1">
+                        {collections.map((col) => (
+                          <li key={col._id}>
+                            <Link
+                              to="/shop"
+                              search={{ collection: col.name } as any}
+                              onClick={() => setMenuOpen(false)}
+                              className="text-sm font-semibold text-muted-foreground transition hover:text-primary block py-1"
+                            >
+                              {col.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
+            </nav>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="Search"
+                onClick={() => setSearchOpen(true)}
+                className="hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
+              >
+                <Search className="h-5 w-5" />
+              </button>
+              <Link
+                to="/wishlist"
+                aria-label="Wishlist"
+                className="relative hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
+              >
+                <Heart className="h-5 w-5" />
+                {wishlist.length > 0 && (
+                  <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+                    {wishlist.length}
+                  </span>
+                )}
+              </Link>
+              <button
+                type="button"
+                aria-label="Cart"
+                onClick={() => setCartOpen(true)}
+                className="relative hidden sm:grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <motion.span
+                    key={cartCount}
+                    initial={{ scale: 0.4 }}
+                    animate={{ scale: 1 }}
+                    className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground"
+                  >
+                    {cartCount}
+                  </motion.span>
+                )}
+              </button>
+              <div className="relative block" ref={userMenuRef}>
+                <button
+                  type="button"
+                  aria-label="Account"
+                  onClick={() => setUserOpen((v) => !v)}
+                  className="grid h-10 w-10 place-items-center rounded-full transition-all hover:scale-110 hover:text-primary focus:outline-none outline-none select-none"
+                >
+                  <User className="h-5 w-5" />
+                </button>
+                <AnimatePresence>
+                  {userOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 8 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-12 w-56 rounded-2xl border border-border bg-popover p-2 text-popover-foreground shadow-card z-50"
+                    >
+                      {user ? (
+                        <>
+                          <div className="px-3 py-2 border-b border-border mb-1">
+                            <p className="text-sm font-bold truncate">{user.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          </div>
+                          <Link
+                            to="/profile"
+                            onClick={() => setUserOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent focus:outline-none outline-none select-none"
+                          >
+                            My Profile
+                          </Link>
+                          <Link
+                            to="/orders"
+                            onClick={() => setUserOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent focus:outline-none outline-none select-none"
+                          >
+                            My Orders
+                          </Link>
+                          <Link
+                            to="/wishlist"
+                            onClick={() => setUserOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent focus:outline-none outline-none select-none"
+                          >
+                            Wishlist
+                          </Link>
+                          <button
+                            onClick={() => {
+                              logout();
+                              setUserOpen(false);
+                            }}
+                            className="w-full text-left rounded-lg px-3 py-2 text-sm font-semibold hover:bg-destructive/10 text-destructive mt-1 border-t border-border pt-2 focus:outline-none outline-none select-none"
+                          >
+                            Logout
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <Link
+                            to="/auth"
+                            search={{ redirect: pathname, mode: "login" } as any}
+                            onClick={() => setUserOpen(false)}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent"
+                          >
+                            Log in
+                          </Link>
+                          <Link
+                            to="/auth"
+                            search={{ redirect: pathname, mode: "signup" } as any}
+                            onClick={() => {
+                              setUserOpen(false);
+                            }}
+                            className="block rounded-lg px-3 py-2 text-sm font-semibold hover:bg-accent"
+                          >
+                            Sign up
+                          </Link>
+                        </>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </div>
         </div>

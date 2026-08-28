@@ -131,7 +131,8 @@ function ProfilePage() {
     <div className="min-h-screen bg-[#FAF9F6] text-stone-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-8 text-left animate-in fade-in duration-300">
         <div>
-          <h1 className="font-display text-4xl font-extrabold text-stone-900">My Account</h1>
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">Account Settings</p>
+          <h1 className="mt-1.5 font-display text-4xl font-extrabold tracking-tight text-foreground leading-[1.15]">My <span className="text-[#d96b27] dark:text-[#e07a38]">Account</span></h1>
           <p className="mt-2 text-stone-500 font-medium">Manage your personal information and security preferences.</p>
         </div>
 

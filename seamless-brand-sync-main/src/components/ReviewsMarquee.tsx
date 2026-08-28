@@ -26,7 +26,7 @@ export function ReviewsMarquee({ reviews }: ReviewsMarqueeProps) {
   const marqueeX = isMobileMarquee ? -1096 : -1376;
   const marqueeDuration = isMobileMarquee ? 12 : 25;
 
-  if (reviews.length === 0) return null;
+  if (!reviews || reviews.length === 0) return null;
 
   return (
     <section className="mx-auto py-12 sm:py-16 overflow-hidden w-full text-left bg-background">

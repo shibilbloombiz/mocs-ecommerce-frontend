@@ -59,8 +59,8 @@ function Contact() {
     <div className="min-h-screen bg-[#0a0a0c] text-white py-16 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-12 text-left animate-in fade-in duration-300">
         <Reveal className="max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">Get in touch</p>
-          <h1 className="mt-3 font-display text-4xl font-extrabold sm:text-6xl text-white">Let's talk</h1>
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">Get in touch</p>
+          <h1 className="mt-1.5 font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">Let's <span className="text-[#d96b27] dark:text-[#e07a38]">Talk</span></h1>
           <p className="mt-4 text-zinc-400 font-medium">
             Questions about an order, a product, or a partnership? Our support team usually replies within a
             few hours.

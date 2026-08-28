@@ -29,7 +29,8 @@ function PaymentFailed() {
         <span className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-destructive/15 text-destructive">
           <AlertCircle className="h-10 w-10 animate-bounce" />
         </span>
-        <h1 className="mt-6 font-display text-3xl font-extrabold text-foreground">Payment Failed</h1>
+        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.25em] text-[#d96b27]">Transaction</p>
+        <h1 className="mt-1.5 font-display text-3xl font-extrabold tracking-tight text-foreground leading-[1.15]">Payment <span className="text-destructive">Failed</span></h1>
         <p className="mt-3 text-muted-foreground text-sm">
           We couldn't process your transaction. The payment gateway reported an error or the transaction was cancelled.
         </p>

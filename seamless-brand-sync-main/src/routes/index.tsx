@@ -54,11 +54,20 @@ export function formatApiProducts(items: any[]): import("@/lib/products").Produc
   }));
 }
 
+const EMPTY_LOADER_DATA = {
+  products: [] as ReturnType<typeof formatApiProducts>,
+  heroSlides: [] as Slide[],
+  categoriesBanners: null as any[] | null,
+  collectionsBanners: null as any[] | null,
+  promiseCollage: null as any[] | null,
+  advertisements: [] as string[],
+};
+
 export const Route = createFileRoute("/")({
   loader: async () => {
     try {
       // All settings + products fetched in parallel on the server before first paint.
-      // Using .catch(() => null) so one failing endpoint never blocks the whole page.
+      // Every call has .catch(() => null) so one failing endpoint never blocks the page.
       const [
         productsRes,
         heroRes,
@@ -92,6 +101,8 @@ export const Route = createFileRoute("/")({
                 ? getImageUrl(slide.mobileBg, { width: 1080, quality: 92 })
                 : undefined,
               isMobileMain: Boolean(slide.isMobileMain || slide.fixMobileMain),
+              objectFit: slide.objectFit || "cover",
+              objectPosition: slide.objectPosition || "center",
             }))
           : [];
 
@@ -122,18 +133,10 @@ export const Route = createFileRoute("/")({
             : [],
       };
     } catch (err) {
-      console.warn("Homepage loader failed, using empty fallback", err);
-      return {
-        products: [],
-        heroSlides: [] as Slide[],
-        categoriesBanners: null,
-        collectionsBanners: null,
-        promiseCollage: null,
-        advertisements: [],
-      };
+      console.warn("Homepage loader failed, using empty fallback:", err);
+      return EMPTY_LOADER_DATA;
     }
   },
-  shouldReload: true,
   head: ({ loaderData }) => {
     const firstHeroBg = loaderData?.heroSlides?.[0]?.bg;
     return {
@@ -156,7 +159,6 @@ export const Route = createFileRoute("/")({
               rel: "preload",
               as: "image",
               href: firstHeroBg,
-              fetchPriority: "high" as const,
             },
           ]
         : [],
@@ -365,7 +367,7 @@ function Home() {
 
   return (
     <>
-      <Hero slides={heroSlides} collageImages={allProducts.map((p: any) => ({ src: p.image, name: p.name }))} />
+      <Hero slides={heroSlides || []} collageImages={(allProducts || []).map((p: any) => ({ src: p?.image || "", name: p?.name || "" }))} />
       {/* About section hidden — remove the `hidden` class to re-enable */}
       <div className="hidden"><AboutMocsSection /></div>
       <TrendingProducts products={trendingProducts} />

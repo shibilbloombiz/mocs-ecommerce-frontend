@@ -4,9 +4,10 @@ import { Reveal } from "@/components/Reveal";
 import { cn, getImageUrl } from "@/lib/utils";
 import { OptimizedImage } from "@/components/OptimizedImage";
 
-export function ScrollBrandReveal({ collections }: { collections: any[] }) {
+export function ScrollBrandReveal({ collections = [] }: { collections?: any[] }) {
+  const cols = Array.isArray(collections) ? collections : [];
   const [showAll, setShowAll] = useState(false);
-  const visibleCollections = showAll ? collections : collections.slice(0, 5);
+  const visibleCollections = showAll ? cols : cols.slice(0, 5);
   const navigate = useNavigate();
 
   const renderCard = (item: any, idx: number, isFlex: boolean) => {

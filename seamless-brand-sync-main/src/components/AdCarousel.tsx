@@ -7,18 +7,19 @@ interface AdCarouselProps {
   advertisements: string[];
 }
 
-export function AdCarousel({ advertisements }: AdCarouselProps) {
+export function AdCarousel({ advertisements = [] }: { advertisements?: string[] }) {
+  const ads = Array.isArray(advertisements) ? advertisements : [];
   const [activeAd, setActiveAd] = useState(0);
 
   useEffect(() => {
-    if (advertisements.length <= 1) return;
+    if (ads.length <= 1) return;
     const interval = setInterval(() => {
-      setActiveAd((prev) => (prev + 1) % advertisements.length);
+      setActiveAd((prev) => (prev + 1) % ads.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [advertisements.length]);
+  }, [ads.length]);
 
-  if (advertisements.length === 0) return null;
+  if (ads.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 overflow-hidden">

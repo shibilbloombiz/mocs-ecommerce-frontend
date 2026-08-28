@@ -12,6 +12,7 @@ import { CollectionsConfig } from "@/components/admin/CollectionsConfig";
 import { CollageConfig } from "@/components/admin/CollageConfig";
 import { AuthConfig } from "@/components/admin/AuthConfig";
 import { AdvertisementsConfig } from "@/components/admin/AdvertisementsConfig";
+import { AnnouncementBarConfig } from "@/components/admin/AnnouncementBarConfig";
 
 export const Route = createFileRoute("/admin/settings")({
   head: () => ({
@@ -163,10 +164,21 @@ function AdminSettingsPage() {
   const [advertisements, setAdvertisements] = useState<string[]>([]);
   const [originalAdvertisements, setOriginalAdvertisements] = useState<string[]>([]);
 
+  // Announcement Bar state
+  type AnnouncementItem = { id: number; text: string };
+  const DEFAULT_ANNOUNCEMENTS: AnnouncementItem[] = [
+    { id: 1, text: "Free shipping above ₹500" },
+    { id: 2, text: "Flat 15% OFF on first order • Use code: MOCS15" },
+    { id: 3, text: "3-day easy returns & exchange guarantee" },
+    { id: 4, text: "100% Authentic Handcrafted Comfort Footwear" },
+  ];
+  const [announcementBar, setAnnouncementBar] = useState<AnnouncementItem[]>(DEFAULT_ANNOUNCEMENTS);
+  const [originalAnnouncementBar, setOriginalAnnouncementBar] = useState<AnnouncementItem[]>(DEFAULT_ANNOUNCEMENTS);
+
   const [selectedBannerIdx, setSelectedBannerIdx] = useState(0);
   const [selectedCollectionIdx, setSelectedCollectionIdx] = useState(0);
 
-  const [activeSection, setActiveSection] = useState("hero-slideshow");
+  const [activeSection, setActiveSection] = useState("announcement-bar");
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -198,7 +210,7 @@ function AdminSettingsPage() {
       { threshold: 0.2, rootMargin: "-80px 0px -50% 0px" }
     );
 
-    const sections = ["hero-slideshow", "promo-banner", "collections-banners", "promise-collage", "auth-page", "advertisements"];
+    const sections = ["announcement-bar", "hero-slideshow", "promo-banner", "collections-banners", "promise-collage", "auth-page", "advertisements"];
     sections.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -213,7 +225,8 @@ function AdminSettingsPage() {
     JSON.stringify(collectionsBanners) !== JSON.stringify(originalCollectionsBanners) ||
     JSON.stringify(promiseCollage) !== JSON.stringify(originalPromiseCollage) ||
     JSON.stringify(authSettings) !== JSON.stringify(originalAuthSettings) ||
-    JSON.stringify(advertisements) !== JSON.stringify(originalAdvertisements);
+    JSON.stringify(advertisements) !== JSON.stringify(originalAdvertisements) ||
+    JSON.stringify(announcementBar) !== JSON.stringify(originalAnnouncementBar);
 
   const blocker = useBlocker({
     shouldBlockFn: () => isDirty,
@@ -243,6 +256,7 @@ function AdminSettingsPage() {
         const promiseRes = await apiClient.settings.get("promise_collage").catch(() => null);
         const authRes = await apiClient.settings.get("auth_settings").catch(() => null);
         const adsRes = await apiClient.settings.get("advertisements").catch(() => null);
+        const announcementRes = await apiClient.settings.get("announcement_bar").catch(() => null);
 
         if (heroRes && Array.isArray(heroRes.value)) {
           setHeroSlides(heroRes.value);
@@ -329,6 +343,15 @@ function AdminSettingsPage() {
           setAdvertisements([]);
           setOriginalAdvertisements([]);
         }
+
+        if (announcementRes && announcementRes.value && Array.isArray(announcementRes.value) && announcementRes.value.length > 0) {
+          const loaded = announcementRes.value.map((item: any, i: number) => ({
+            id: i + 1,
+            text: typeof item === "string" ? item : (item.text || ""),
+          }));
+          setAnnouncementBar(loaded);
+          setOriginalAnnouncementBar(JSON.parse(JSON.stringify(loaded)));
+        }
       } catch (err: any) {
         toast.error("Failed to load settings from server", { id: "load-settings-error" });
       } finally {
@@ -347,6 +370,7 @@ function AdminSettingsPage() {
       await apiClient.settings.update("promise_collage", promiseCollage);
       await apiClient.settings.update("auth_settings", authSettings);
       await apiClient.settings.update("advertisements", advertisements);
+      await apiClient.settings.update("announcement_bar", announcementBar);
       setOriginalSlides(JSON.parse(JSON.stringify(heroSlides)));
       setOriginalCategoriesBanners(JSON.parse(JSON.stringify(categoriesBanners)));
       setOriginalCollectionsBanners(JSON.parse(JSON.stringify(collectionsBanners)));
@@ -538,6 +562,17 @@ function AdminSettingsPage() {
       {/* Sticky Sub-Navigation Tabs */}
       <div className="sticky top-[58px] sm:top-[70px] z-30 bg-background/90 backdrop-blur-md border-b border-border py-3 flex gap-2 overflow-x-auto scrollbar-none">
         <button
+          onClick={() => scrollToSection("announcement-bar")}
+          className={cn(
+            "flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer whitespace-nowrap",
+            activeSection === "announcement-bar"
+              ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20 scale-105"
+              : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+        >
+          Announcement Bar
+        </button>
+        <button
           onClick={() => scrollToSection("hero-slideshow")}
           className={cn(
             "flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer whitespace-nowrap",
@@ -603,7 +638,15 @@ function AdminSettingsPage() {
         >
           Advertisements
         </button>
-      </div>      <div className="space-y-20">
+      </div>
+
+      <div className="space-y-20">
+        {/* Announcement Bar section */}
+        <AnnouncementBarConfig
+          announcements={announcementBar}
+          setAnnouncements={setAnnouncementBar}
+        />
+
         <HeroSlidesConfig
           heroSlides={heroSlides}
           updateHeroSlideField={updateHeroSlideField}
@@ -720,6 +763,7 @@ function AdminSettingsPage() {
                   setPromiseCollage(originalPromiseCollage);
                   setAuthSettings(originalAuthSettings);
                   setAdvertisements(originalAdvertisements);
+                  setAnnouncementBar(originalAnnouncementBar);
                   blocker.proceed();
                 }}
                 className="rounded-full border border-destructive/30 bg-destructive/10 text-destructive px-5 py-2.5 text-xs font-bold uppercase tracking-wider transition hover:bg-destructive/20 cursor-pointer"

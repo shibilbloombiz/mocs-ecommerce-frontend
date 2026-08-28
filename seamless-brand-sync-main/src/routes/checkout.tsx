@@ -395,7 +395,10 @@ function Checkout() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="font-display text-4xl font-extrabold">Checkout</h1>
+      <div className="mb-8">
+        <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">Your Order</p>
+        <h1 className="mt-1.5 font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-[1.15]">Secure <span className="text-[#d96b27] dark:text-[#e07a38]">Checkout</span></h1>
+      </div>
       <div className="mt-8 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="rounded-2xl border border-border bg-card p-6">

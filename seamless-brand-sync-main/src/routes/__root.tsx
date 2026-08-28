@@ -20,7 +20,6 @@ import { Footer } from "../components/Footer";
 import { CartDrawer } from "../components/CartDrawer";
 import { SearchModal } from "../components/SearchModal";
 import { MobileNav } from "../components/MobileNav";
-import { AnnouncementBar } from "../components/AnnouncementBar";
 import { ScrollTagline } from "../components/ScrollTagline";
 
 function NotFoundComponent() {
@@ -159,18 +158,15 @@ function RootComponent() {
           className={
             isAdminRoute
               ? ""
-              : isHome
-              ? ""
               : isAuthPage
               ? "pt-0"
-              : "pt-16"
+              : "pt-24 lg:pt-28"
           }
         >
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
         </main>
         {!isAuthPage && !isAdminRoute && <Footer />}
-        {!isAuthPage && !isAdminRoute && <AnnouncementBar />}
         {!isAuthPage && !isAdminRoute && <MobileNav />}
         {!isAdminRoute && <CartDrawer />}
         {!isAdminRoute && <SearchModal />}

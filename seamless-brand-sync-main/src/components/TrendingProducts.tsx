@@ -4,9 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 
-export function TrendingProducts({ products }: { products: any[] }) {
-  if (products.length === 0) return null;
-
+export function TrendingProducts({ products = [] }: { products?: any[] }) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     loop: false,
@@ -30,7 +28,9 @@ export function TrendingProducts({ products }: { products: any[] }) {
     onSelect();
     emblaApi.on("select", onSelect);
     emblaApi.on("reInit", onSelect);
-  }, [emblaApi]);
+  }, [emblaApi, products]);
+
+  if (!products || products.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

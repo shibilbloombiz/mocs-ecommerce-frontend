@@ -35,7 +35,6 @@ import { formatApiProducts } from "@/routes/index";
 import { ProductSkeleton } from "@/components/skeletons/ProductSkeleton";
 
 export const Route = createFileRoute("/product/$id")({
-  shouldReload: true,
   loader: async ({ params }) => {
     // Try to load product from API first
     try {
@@ -512,10 +511,10 @@ function ProductDetail() {
         </div>
 
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-primary">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
             {product.collection} · {product.category}
           </p>
-          <h1 className="mt-2 font-display text-4xl font-extrabold sm:text-5xl">{product.name}</h1>
+          <h1 className="mt-1.5 font-display text-4xl font-extrabold tracking-tight text-foreground leading-[1.15] sm:text-5xl">{product.name}</h1>
 
           <div className="mt-3 flex items-center gap-3">
             <span className="flex items-center gap-1">
@@ -691,8 +690,9 @@ function ProductDetail() {
 
       <section className="mt-20 text-left">
         <Reveal className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="font-display text-3xl font-extrabold text-foreground">Customer Reviews</h2>
+            <div>
+              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">What they say</p>
+              <h2 className="mt-1.5 font-display text-3xl font-extrabold tracking-tight text-foreground leading-[1.15]">Customer <span className="text-[#d96b27] dark:text-[#e07a38]">Reviews</span></h2>
             <div className="mt-2 flex items-center gap-2.5">
               <div className="flex items-center gap-1">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -786,7 +786,10 @@ function ProductDetail() {
       {relatedProducts.length > 0 && (
         <section className="mt-20 text-left">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="font-display text-3xl font-extrabold">You May Also Like</h2>
+            <div>
+              <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">Explore More</p>
+              <h2 className="mt-1.5 font-display text-3xl font-extrabold tracking-tight text-foreground leading-[1.15]">You May Also <span className="text-[#d96b27] dark:text-[#e07a38]">Like</span></h2>
+            </div>
             {relatedProducts.length > cardsPerView && (
               <div className="flex items-center gap-2">
                 <button

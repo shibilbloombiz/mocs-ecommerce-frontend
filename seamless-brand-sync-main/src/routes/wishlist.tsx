@@ -43,10 +43,13 @@ function Wishlist() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <h1 className="font-display text-4xl font-extrabold sm:text-5xl">Your Wishlist</h1>
-      <p className="mt-2 text-muted-foreground">
-        {saved.length} {saved.length === 1 ? "item" : "items"} saved
-      </p>
+      <div>
+        <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">Saved Items</p>
+        <h1 className="mt-1.5 font-display text-4xl sm:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">Your <span className="text-[#d96b27] dark:text-[#e07a38]">Wishlist</span></h1>
+        <p className="mt-2 text-muted-foreground">
+          {saved.length} {saved.length === 1 ? "item" : "items"} saved
+        </p>
+      </div>
 
       {loading ? (
         <div className="mt-16 flex flex-col items-center justify-center gap-4">

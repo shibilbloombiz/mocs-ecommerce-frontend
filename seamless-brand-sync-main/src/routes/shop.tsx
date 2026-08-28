@@ -107,7 +107,6 @@ export const Route = createFileRoute("/shop")({
     }
     return { products: [] };
   },
-  shouldReload: true,
   head: () => ({
     meta: [
       { title: "Shop All Footwear — MOCS" },
@@ -320,11 +319,11 @@ function Shop() {
               <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27] dark:text-[#e07a38]">
                 Catalog
               </p>
-              <h1 className="mt-1 font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-stone-900 dark:text-stone-100 leading-tight tracking-[-0.015em]">
-                Shop <span className="italic font-serif text-[#d96b27] dark:text-[#e07a38]">{cat === "All" ? "All" : cat}.</span>
+              <h1 className="mt-1.5 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
+                Shop <span className="text-[#d96b27] dark:text-[#e07a38]">{cat === "All" ? "All" : cat}</span>
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-muted-foreground font-light">
-                {`${filtered.length} curated products`}
+              <p className="mt-1.5 text-sm text-muted-foreground font-light">
+                {filtered.length} curated products
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
