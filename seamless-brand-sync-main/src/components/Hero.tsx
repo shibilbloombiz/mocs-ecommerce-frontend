@@ -42,7 +42,9 @@ export const DEFAULT_HERO_SLIDES: Slide[] = [
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 export function HeroSkeleton() {
   return (
-    <section className="relative w-full h-[100dvh] min-h-[540px] overflow-hidden bg-stone-950 animate-pulse" />
+    <div className="w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-4 max-w-[1600px] mx-auto">
+      <section className="relative w-full aspect-[4/3] sm:aspect-[16/9] sm:h-auto sm:min-h-0 max-h-[88vh] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-stone-950 animate-pulse" />
+    </div>
   );
 }
 
@@ -186,7 +188,7 @@ export function Hero({
         aria-label="MOCS Hero Slideshow"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative w-full aspect-[16/10] sm:aspect-[16/9] max-h-[88vh] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
+        className="group relative w-full aspect-[4/3] sm:aspect-[16/9] sm:h-auto sm:min-h-0 max-h-[88vh] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
       >
         {/* ── ACTIVE HERO SLIDE (WITH ADAPTIVE PICTURE ELEMENT & KEN BURNS EFFECT) ── */}
         <AnimatePresence initial={false} custom={direction}>
