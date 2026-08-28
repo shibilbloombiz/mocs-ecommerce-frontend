@@ -5,6 +5,7 @@ import { cn, getImageUrl } from "@/lib/utils";
 
 export type Slide = {
   bg: string;
+  mobileBg?: string;
   to?: string;
   // Legacy optional fields kept for type compatibility
   eyebrow?: string;
@@ -19,10 +20,12 @@ export type Slide = {
 export const DEFAULT_HERO_SLIDES: Slide[] = [
   {
     bg: "/hero-comfort-banner.jpg",
+    mobileBg: "/hero-comfort-banner.jpg",
     to: "/shop",
   },
   {
     bg: "/hero-lifestyle-1.jpg",
+    mobileBg: "/hero-lifestyle-1.jpg",
     to: "/shop?category=Women",
   },
   {
@@ -70,6 +73,10 @@ export function Hero({
         const img = new window.Image();
         img.src = getImageUrl(slide.bg, { width: 1920, quality: 95 });
       }
+      if (slide.mobileBg) {
+        const mobileImg = new window.Image();
+        mobileImg.src = getImageUrl(slide.mobileBg, { width: 900, quality: 90 });
+      }
     });
   }, [displaySlides]);
 
@@ -88,17 +95,26 @@ export function Hero({
     setActive((a) => (a - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-advance every 5.5 seconds
+  const mobileSlides = displaySlides.filter(
+    (s) => s.mobileBg && s.mobileBg.trim() !== ""
+  );
+  const shouldAutoAdvanceMobile = mobileSlides.length >= 2;
+
+  // Auto-advance every 5.5 seconds (auto-advances on desktop, but on mobile only if 2+ mobile images exist)
   useEffect(() => {
     if (totalSlides <= 1) return;
 
     const timer = setInterval(() => {
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      if (isMobile && !shouldAutoAdvanceMobile) {
+        return; // Don't change automatically if only 1 mobile image is configured
+      }
       setDirection(1);
       setActive((prevIdx) => (prevIdx + 1) % totalSlides);
     }, 5500);
 
     return () => clearInterval(timer);
-  }, [totalSlides, active]);
+  }, [totalSlides, active, shouldAutoAdvanceMobile]);
 
   // Smoothly scroll active thumbnail into view
   useEffect(() => {
@@ -156,24 +172,120 @@ export function Hero({
 
   return (
     <>
-      {/* ── MOBILE DESIGN: FULL-BLEED RADIUS-FREE IMAGE CARDS (NO BLANK SPACE) ── */}
-      <div className="block md:hidden w-full bg-[#0e0d0c] pt-20 pb-0 px-0 space-y-0">
-        {displaySlides.map((slide, idx) => (
-          <a
-            key={idx}
-            href={slide.to || "/shop"}
-            className="group relative block w-full aspect-[21/9] sm:aspect-[24/9] rounded-none overflow-hidden bg-stone-900 border-b border-white/10 active:scale-[0.99] transition-transform duration-200"
-            aria-label={`Featured banner ${idx + 1}`}
-          >
-            <img
-              src={getImageUrl(slide.bg, { width: 900, quality: 90 })}
-              alt={`Banner ${idx + 1}`}
-              loading={idx === 0 ? "eager" : "lazy"}
-              className="h-full w-full object-cover object-center rounded-none group-hover:scale-102 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-          </a>
-        ))}
+      {/* ── MOBILE DESIGN: MAIN HERO BANNER + OTHER SLIDES IN 2-COLUMN CARDS ── */}
+      <div className="block md:hidden w-full bg-[#0e0d0c] pt-16">
+        {/* Main Featured Mobile Hero Image */}
+        <div className="relative w-full h-[62vh] min-h-[420px] max-h-[640px] overflow-hidden bg-stone-950">
+          <AnimatePresence initial={false} custom={direction}>
+            <motion.div
+              key={active}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              className="absolute inset-0 h-full w-full will-change-transform"
+            >
+              <a
+                href={current.to || "/shop"}
+                className="block h-full w-full cursor-pointer focus:outline-none"
+                aria-label="View mobile hero banner"
+              >
+                <img
+                  src={getImageUrl(current.mobileBg || current.bg, { width: 1080, quality: 92 })}
+                  alt="Main Mobile Hero"
+                  loading="eager"
+                  className="h-full w-full object-cover object-center"
+                />
+              </a>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Ambient Overlays */}
+          <div className="pointer-events-none absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-black/60 to-transparent z-10" />
+          <div className="pointer-events-none absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+
+          {/* Mobile Carousel Indicators (shown if 2+ mobile images exist) */}
+          {shouldAutoAdvanceMobile && (
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+              {displaySlides.map((_, dotIdx) => (
+                <button
+                  key={dotIdx}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    goTo(dotIdx, dotIdx > active ? 1 : -1);
+                  }}
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-300",
+                    dotIdx === active ? "w-4 bg-[#d97736]" : "w-1.5 bg-white/40"
+                  )}
+                  aria-label={`Go to slide ${dotIdx + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Destination Link Badge */}
+          {current.to && (
+            <a
+              href={current.to || "/shop"}
+              className="absolute bottom-4 left-4 z-20 inline-flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-3.5 py-1.5 text-xs font-bold text-white border border-white/15 shadow-lg active:scale-95 transition-transform"
+            >
+              <span>Explore Collection</span>
+              <ChevronRight className="h-3.5 w-3.5 text-[#d97736]" />
+            </a>
+          )}
+        </div>
+
+        {/* Other Slides in Cards Under Main Image (1 row 2 images grid) */}
+        {totalSlides > 1 && (
+          <div className="w-full px-4 py-3.5 bg-[#0e0d0c] border-t border-white/10">
+            <div className="flex items-center justify-between pb-2.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400">
+                Featured Collections
+              </span>
+              <span className="text-[10px] text-stone-500 font-mono">
+                {active + 1} / {totalSlides}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {displaySlides.map((slide, idx) => {
+                const isActive = idx === active;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => goTo(idx, idx > active ? 1 : -1)}
+                    className={cn(
+                      "group relative w-full aspect-[16/10] rounded-xl overflow-hidden border transition-all duration-200 text-left cursor-pointer",
+                      isActive
+                        ? "border-[#d97736] ring-2 ring-[#d97736]/40 shadow-md opacity-100"
+                        : "border-white/15 opacity-65 hover:opacity-95 hover:border-white/30"
+                    )}
+                    aria-label={`Switch to slide ${idx + 1}`}
+                  >
+                    <img
+                      src={getImageUrl(slide.mobileBg || slide.bg, { width: 500, quality: 85 })}
+                      alt={`Slide ${idx + 1}`}
+                      loading="lazy"
+                      className="h-full w-full object-cover object-center select-none"
+                    />
+                    <div
+                      className={cn(
+                        "absolute inset-0 transition-opacity duration-200",
+                        isActive ? "bg-transparent" : "bg-black/30 group-hover:bg-black/10"
+                      )}
+                    />
+                    {isActive && (
+                      <div className="absolute bottom-0 inset-x-0 h-1 bg-[#d97736]" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── DESKTOP DESIGN: SPLIT FLEX (TOP FULL-WIDTH HERO + BOTTOM NEXT IMAGES FLEXBOX WITH START/END WHITESPACE & BORDERS) ── */}

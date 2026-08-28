@@ -447,7 +447,11 @@ function AdminSettingsPage() {
   };
 
   const handleHeroFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    handleFileUpload(e, "Uploading background image...", `hero-upload-${idx}`, (url) => updateHeroSlideField(idx, "bg", url));
+    handleFileUpload(e, "Uploading desktop hero image...", `hero-upload-${idx}`, (url) => updateHeroSlideField(idx, "bg", url));
+  };
+
+  const handleHeroMobileFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
+    handleFileUpload(e, "Uploading mobile hero image...", `hero-mobile-upload-${idx}`, (url) => updateHeroSlideField(idx, "mobileBg", url));
   };
 
   const handleCollectionFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
@@ -606,6 +610,7 @@ function AdminSettingsPage() {
           addHeroSlide={addHeroSlide}
           removeHeroSlide={removeHeroSlide}
           handleHeroFileChange={handleHeroFileChange}
+          handleHeroMobileFileChange={handleHeroMobileFileChange}
           openFocusIdx={openFocusIdx}
           setOpenFocusIdx={setOpenFocusIdx}
         />
