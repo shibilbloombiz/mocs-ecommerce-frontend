@@ -80,16 +80,14 @@ export const Route = createFileRoute("/")({
       const heroSlides: Slide[] =
         heroRes?.value && Array.isArray(heroRes.value) && heroRes.value.length > 0
           ? heroRes.value.map((slide: any) => ({
-              eyebrow: slide.eyebrow || "",
-              title: slide.title || "",
-              subtitle: slide.subtitle || "",
-              cta: slide.cta || "Shop Now",
-              to: slide.to || "/shop",
-              mobileFocus: slide.mobileFocus || "center",
-              rightFocus: slide.rightFocus !== false, // default true (image on right)
+              eyebrow: slide.eyebrow,
+              title: slide.title,
+              subtitle: slide.subtitle,
+              cta: slide.cta,
+              to: slide.to || slide.path || "/shop",
               bg:
-                getImageUrl(slide.bg, { width: 1920, quality: 95 }) ||
-                "/hero-bg.jpg",
+                getImageUrl(slide.bg || slide.image, { width: 1920, quality: 95 }) ||
+                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1920",
             }))
           : [];
 

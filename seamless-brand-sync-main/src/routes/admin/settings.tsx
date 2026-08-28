@@ -250,13 +250,8 @@ function AdminSettingsPage() {
         } else {
           const fallbacks = [
             {
-              eyebrow: "Premium Comfort",
-              title: "Step Into Style",
-              subtitle: "Explore the new MOCS lifestyle sneaker collection.",
-              cta: "Shop Men",
-              to: "/shop",
               bg: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1920",
-              mobileFocus: "center"
+              to: "/shop",
             }
           ];
           setHeroSlides(fallbacks);
@@ -505,13 +500,8 @@ function AdminSettingsPage() {
     setHeroSlides([
       ...heroSlides,
       {
-        eyebrow: "New Arrival",
-        title: "Model Name",
-        subtitle: "Fresh colors and premium quality mesh details.",
-        cta: "Explore Now",
+        bg: "",
         to: "/shop",
-        bg: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
-        mobileFocus: "center"
       }
     ]);
   };

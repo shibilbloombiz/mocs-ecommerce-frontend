@@ -1,5 +1,5 @@
-import { Plus, Trash2, Image, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Trash2, Image as ImageIcon, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { getImageUrl } from "@/lib/utils";
 
 interface HeroSlidesConfigProps {
   heroSlides: any[];
@@ -7,8 +7,8 @@ interface HeroSlidesConfigProps {
   addHeroSlide: () => void;
   removeHeroSlide: (idx: number) => void;
   handleHeroFileChange: (e: React.ChangeEvent<HTMLInputElement>, idx: number) => void;
-  openFocusIdx: number | null;
-  setOpenFocusIdx: (idx: number | null) => void;
+  openFocusIdx?: number | null;
+  setOpenFocusIdx?: (idx: number | null) => void;
 }
 
 export function HeroSlidesConfig({
@@ -17,171 +17,104 @@ export function HeroSlidesConfig({
   addHeroSlide,
   removeHeroSlide,
   handleHeroFileChange,
-  openFocusIdx,
-  setOpenFocusIdx,
 }: HeroSlidesConfigProps) {
   return (
     <div id="hero-slideshow" className="space-y-6 scroll-mt-24">
-      <div className="flex items-center justify-between border-b border-border pb-3">
-        <h2 className="font-display text-lg font-bold">Hero Slideshow</h2>
+      {/* Header section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+        <div>
+          <h2 className="font-display text-lg font-bold text-foreground">Hero Advertising Banners</h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Configure homepage hero banner images. Clicking on a banner navigates directly to its destination link.
+          </p>
+        </div>
         <button
+          type="button"
           onClick={addHeroSlide}
-          className="flex items-center gap-1.5 rounded-full border border-border bg-background px-4 py-2 text-xs font-bold uppercase transition hover:bg-accent cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground transition hover:opacity-90 cursor-pointer shadow-xs self-start sm:self-auto"
         >
-          <Plus className="h-4 w-4" /> Add Slide
+          <Plus className="h-4 w-4" /> Add Banner
         </button>
       </div>
 
+      {/* Slides list */}
       <div className="space-y-6">
         {heroSlides.map((slide, idx) => (
-          <div key={idx} className="rounded-3xl border border-border bg-card p-6 shadow-soft space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <span className="font-display text-sm font-extrabold text-primary uppercase">Slide #{idx + 1}</span>
+          <div
+            key={idx}
+            className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-soft space-y-5 transition-all"
+          >
+            {/* Top Bar with Banner Index and Delete Button */}
+            <div className="flex items-center justify-between border-b border-border/80 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-black text-primary">
+                  {idx + 1}
+                </span>
+                <span className="font-display text-sm font-extrabold uppercase tracking-wide text-foreground">
+                  Banner #{idx + 1}
+                </span>
+              </div>
               {heroSlides.length > 1 && (
                 <button
+                  type="button"
                   onClick={() => removeHeroSlide(idx)}
-                  className="rounded-full bg-destructive/10 p-1.5 text-destructive transition hover:bg-destructive/20 cursor-pointer"
+                  className="flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1.5 text-xs font-semibold text-destructive transition hover:bg-destructive/20 cursor-pointer"
+                  aria-label={`Remove banner ${idx + 1}`}
                 >
-                  <Trash2 className="h-4.5 w-4.5" />
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Remove</span>
                 </button>
               )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Eyebrow (Small Tag)</label>
-                <input
-                  required
-                  value={slide.eyebrow}
-                  onChange={(e) => updateHeroSlideField(idx, "eyebrow", e.target.value)}
-                  className="input-field"
-                  placeholder="e.g. New Arrivals"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Title (Heading)</label>
-                <input
-                  required
-                  value={slide.title}
-                  onChange={(e) => updateHeroSlideField(idx, "title", e.target.value)}
-                  className="input-field"
-                  placeholder="e.g. Step Into Style"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Subtitle (Description)</label>
-                <input
-                  required
-                  value={slide.subtitle}
-                  onChange={(e) => updateHeroSlideField(idx, "subtitle", e.target.value)}
-                  className="input-field"
-                  placeholder="e.g. Feel the comfort of polyurethanes."
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">CTA (Button Label)</label>
-                <input
-                  required
-                  value={slide.cta}
-                  onChange={(e) => updateHeroSlideField(idx, "cta", e.target.value)}
-                  className="input-field"
-                  placeholder="e.g. Shop Now"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Link URL</label>
-                <input
-                  required
-                  value={slide.to}
-                  onChange={(e) => updateHeroSlideField(idx, "to", e.target.value)}
-                  className="input-field"
-                  placeholder="e.g. /shop"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Mobile Image Focus</label>
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setOpenFocusIdx(openFocusIdx === idx ? null : idx)}
-                    className="w-full text-left rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-sm font-semibold text-stone-900 transition-all focus:outline-none focus:ring-1 focus:ring-primary flex items-center justify-between shadow-sm cursor-pointer"
-                  >
-                    <span>
-                      {slide.mobileFocus === "right"
-                        ? "Right Focus (Footwear on Right)"
-                        : slide.mobileFocus === "left"
-                          ? "Left Focus (Footwear on Left)"
-                          : "Center Focus (Default)"}
-                    </span>
-                    <ChevronDown className={cn("h-4 w-4 text-primary transition-transform duration-200", openFocusIdx === idx && "rotate-180")} />
-                  </button>
-
-                  {openFocusIdx === idx && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-30"
-                        onClick={() => setOpenFocusIdx(null)}
-                      />
-                      <div className="absolute left-0 right-0 mt-1.5 z-40 rounded-xl border border-stone-150 bg-white p-1.5 shadow-[0_10px_25px_rgba(0,0,0,0.08)] animate-in fade-in slide-in-from-top-2 duration-200">
-                        {[
-                          { value: "center", label: "Center Focus (Default)" },
-                          { value: "right", label: "Right Focus (Footwear on Right)" },
-                          { value: "left", label: "Left Focus (Footwear on Left)" }
-                        ].map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => {
-                              updateHeroSlideField(idx, "mobileFocus", opt.value);
-                              setOpenFocusIdx(null);
-                            }}
-                            className={cn(
-                              "w-full text-left rounded-lg px-3 py-2 text-xs font-semibold transition cursor-pointer",
-                              (slide.mobileFocus || "center") === opt.value
-                                ? "bg-primary/10 text-primary"
-                                : "text-stone-700 hover:bg-stone-50 hover:text-black"
-                            )}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Focus toggle */}
-              <div className="flex items-center gap-3 py-1">
-                <label className="flex items-center gap-3 cursor-pointer select-none">
-                  <div className="relative inline-block">
-                    <input
-                      type="checkbox"
-                      checked={slide.rightFocus !== false}
-                      onChange={(e) => updateHeroSlideField(idx, "rightFocus", e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="h-5 w-9 rounded-full bg-stone-200 peer-checked:bg-primary transition-colors duration-200" />
-                    <div className="absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-4" />
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Image on Right (desktop)
-                  </span>
-                </label>
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">Background Image</label>
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
-                  <input
-                    required
-                    value={slide.bg}
-                    onChange={(e) => updateHeroSlideField(idx, "bg", e.target.value)}
-                    className="input-field flex-1"
-                    placeholder="Image URL (e.g. https://...)"
+            {/* Banner Preview Card */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Banner Image Preview
+              </label>
+              <div className="relative w-full aspect-[21/9] sm:aspect-[24/9] rounded-2xl overflow-hidden bg-stone-900 border border-border flex items-center justify-center group">
+                {slide.bg ? (
+                  <img
+                    src={getImageUrl(slide.bg, { width: 1200, quality: 90 })}
+                    alt={`Hero Banner ${idx + 1}`}
+                    className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-102"
                   />
-                  <label className="flex h-11 px-4 items-center justify-center rounded-xl border border-dashed border-border hover:border-primary bg-muted/20 hover:bg-muted/40 transition text-xs font-bold cursor-pointer whitespace-nowrap gap-1">
-                    <Image className="h-4 w-4" />
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 text-stone-500 p-6 text-center">
+                    <ImageIcon className="h-8 w-8 text-stone-600" />
+                    <p className="text-xs font-medium">No advertising image selected yet</p>
+                    <p className="text-[11px] text-stone-600">Upload a high-resolution promotional graphic or enter an image URL below.</p>
+                  </div>
+                )}
+
+                {slide.to && (
+                  <div className="absolute bottom-3 left-3 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-mono text-stone-300 flex items-center gap-1.5 border border-white/10">
+                    <LinkIcon className="h-3 w-3 text-primary" />
+                    <span className="truncate max-w-[200px] sm:max-w-[320px]">{slide.to}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Inputs Grid */}
+            <div className="grid gap-5 sm:grid-cols-2">
+              {/* Image Input & Upload */}
+              <div className="sm:col-span-2 space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Advertising Image Source
+                </label>
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+                  <div className="relative flex-1">
+                    <input
+                      required
+                      value={slide.bg || ""}
+                      onChange={(e) => updateHeroSlideField(idx, "bg", e.target.value)}
+                      className="input-field w-full pl-3 pr-3 text-xs sm:text-sm"
+                      placeholder="Image URL (e.g. https://... or uploaded path)"
+                    />
+                  </div>
+                  <label className="flex h-11 px-5 items-center justify-center rounded-xl border border-dashed border-primary/40 hover:border-primary bg-primary/5 hover:bg-primary/10 transition text-xs font-bold text-primary cursor-pointer whitespace-nowrap gap-2 shadow-xs">
+                    <ImageIcon className="h-4 w-4" />
                     <span>Upload from Device</span>
                     <input
                       type="file"
@@ -192,9 +125,42 @@ export function HeroSlidesConfig({
                   </label>
                 </div>
               </div>
+
+              {/* Destination Path / URL */}
+              <div className="sm:col-span-2 space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Destination Path / Click URL
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
+                    <ExternalLink className="h-4 w-4" />
+                  </div>
+                  <input
+                    required
+                    value={slide.to || ""}
+                    onChange={(e) => updateHeroSlideField(idx, "to", e.target.value)}
+                    className="input-field w-full pl-10 text-xs sm:text-sm font-mono"
+                    placeholder="e.g. /shop, /shop?category=Men, /collections/summer, or https://..."
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  When customers click on this hero advertising banner on the homepage, they will be navigated to this destination path or URL.
+                </p>
+              </div>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Bottom Add Button */}
+      <div className="flex justify-center pt-2">
+        <button
+          type="button"
+          onClick={addHeroSlide}
+          className="inline-flex items-center gap-2 rounded-full border border-dashed border-border bg-card/60 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-foreground hover:border-primary hover:bg-accent transition cursor-pointer"
+        >
+          <Plus className="h-4 w-4 text-primary" /> Add Another Banner Slide
+        </button>
       </div>
     </div>
   );

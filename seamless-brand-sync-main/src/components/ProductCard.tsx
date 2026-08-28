@@ -34,14 +34,6 @@ export function ProductCard({
         >
           {/* Product Image with Pure Scale Animation on Hover */}
           <div className="relative h-full w-full overflow-hidden bg-stone-900">
-            {/* Decorative background image */}
-            <img
-              src="/hero-bg.jpg"
-              alt=""
-              aria-hidden
-              draggable={false}
-              className="absolute inset-0 h-full w-full object-cover object-center opacity-30 blur-[1px] scale-105 pointer-events-none select-none z-0"
-            />
             <OptimizedImage
               src={getImageUrl(product.image, { width: 450, quality: 75 })}
               alt={product.name}
@@ -140,14 +132,6 @@ export function ProductCard({
         className="block overflow-hidden rounded-3xl bg-white border border-stone-200/80 shadow-soft text-stone-900"
       >
         <div className="relative aspect-square overflow-hidden bg-stone-900">
-          {/* Decorative background image */}
-          <img
-            src="/hero-bg.jpg"
-            alt=""
-            aria-hidden
-            draggable={false}
-            className="absolute inset-0 h-full w-full object-cover object-center opacity-25 blur-[1px] scale-105 pointer-events-none select-none z-0"
-          />
           {/* Main Product Image with Smooth Scale on Hover */}
           <OptimizedImage
             src={getImageUrl(product.image, { width: 450, quality: 75 })}
