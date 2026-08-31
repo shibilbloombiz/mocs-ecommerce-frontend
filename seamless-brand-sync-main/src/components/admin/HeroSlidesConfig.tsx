@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Trash2, Image as ImageIcon, Link as LinkIcon, ExternalLink, Smartphone, Monitor, Crop, AlignVerticalJustifyCenter, Info, ChevronDown, Check } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, Link as LinkIcon, ExternalLink, Smartphone, Monitor, Crop, AlignVerticalJustifyCenter, Info, ChevronDown, Check, X } from "lucide-react";
 import { getImageUrl, cn } from "@/lib/utils";
 
 interface HeroSlidesConfigProps {
@@ -336,21 +336,37 @@ export function HeroSlidesConfig({
                   </div>
                 </div>
 
-                {/* 2. Mobile Image Source & Upload */}
-                <div className="sm:col-span-2 space-y-2">
+                {/* 2. Mobile Image Source & Upload (Completely Optional) */}
+                <div className="sm:col-span-2 space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-3.5">
                   <div className="flex items-center justify-between">
                     <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-foreground">
                       <Smartphone className="h-3.5 w-3.5 text-primary" />
-                      <span>Mobile Banner Image (Optional - 4:5 or 1:1 Recommended)</span>
+                      <span>Mobile Banner Image</span>
+                      <span className="rounded-full bg-muted border border-border/80 px-2 py-0.5 text-[10px] font-semibold text-muted-foreground lowercase">
+                        optional
+                      </span>
                     </label>
+                    {slide.mobileBg && (
+                      <button
+                        type="button"
+                        onClick={() => updateHeroSlideField(idx, "mobileBg", "")}
+                        className="flex items-center gap-1 text-[11px] font-medium text-destructive hover:underline cursor-pointer"
+                      >
+                        <X className="h-3 w-3" />
+                        <span>Clear mobile image</span>
+                      </button>
+                    )}
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+                  <p className="text-[11px] text-muted-foreground">
+                    Leave blank to automatically use the desktop image on mobile phones. Only upload here if you have a custom vertical/square portrait design for mobile.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 items-stretch pt-0.5">
                     <div className="relative flex-1">
                       <input
                         value={slide.mobileBg || ""}
                         onChange={(e) => updateHeroSlideField(idx, "mobileBg", e.target.value)}
                         className="input-field w-full pl-3 pr-3 text-xs sm:text-sm"
-                        placeholder="Optional mobile image path (leave blank to use desktop image)"
+                        placeholder="Optional mobile image URL (e.g. /uploads/... or https://...)"
                       />
                     </div>
                     {handleHeroMobileFileChange && (
