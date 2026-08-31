@@ -281,9 +281,9 @@ export function Hero({
                 prev();
               }}
               aria-label="Previous slide"
-              className="hidden sm:flex absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 lg:h-13 lg:w-13 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
+              className="hidden sm:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-20 p-2 text-white hover:text-[#d97736] bg-transparent border-0 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] items-center justify-center transition-all duration-300 hover:scale-125 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 focus:outline-none"
             >
-              <HeroArrowIcon className="h-5 w-5 lg:h-6 lg:w-6 rotate-180 transition-transform duration-200" />
+              <HeroArrowIcon className="h-8 w-8 lg:h-10 lg:w-10 rotate-180 transition-transform duration-200" />
             </button>
 
             {/* Right Arrow */}
@@ -295,9 +295,9 @@ export function Hero({
                 next();
               }}
               aria-label="Next slide"
-              className="hidden sm:flex absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 lg:h-13 lg:w-13 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
+              className="hidden sm:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-20 p-2 text-white hover:text-[#d97736] bg-transparent border-0 drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] items-center justify-center transition-all duration-300 hover:scale-125 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 focus:outline-none"
             >
-              <HeroArrowIcon className="h-5 w-5 lg:h-6 lg:w-6 transition-transform duration-200" />
+              <HeroArrowIcon className="h-8 w-8 lg:h-10 lg:w-10 transition-transform duration-200" />
             </button>
           </>
         )}
