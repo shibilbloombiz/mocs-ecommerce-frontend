@@ -37,7 +37,30 @@ export function NewArrivals({ products }: NewArrivalsProps) {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, products]);
 
-  if (!products || products.length === 0) return null;
+  if (!products || products.length === 0) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <Reveal className="relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] bg-gradient-to-br from-[#EA580C] via-[#F97316] to-[#FB923C] p-8 sm:p-10 shadow-2xl text-center">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute -left-20 -bottom-20 h-80 w-80 rounded-full bg-black/10 blur-2xl" />
+          <div className="relative z-10 flex flex-col items-center gap-4 py-6">
+            <p className="text-[11px] font-bold uppercase tracking-[0.25em] text-white/80">Fresh Drops</p>
+            <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight">New Arrivals</h2>
+            <p className="text-white/80 text-sm font-light max-w-xs">
+              No new arrivals yet. Check back soon — fresh drops are on their way!
+            </p>
+            <Link
+              to="/shop"
+              className="mt-2 inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-stone-900 shadow-md transition-all duration-300 hover:bg-stone-950 hover:text-white hover:scale-105"
+            >
+              Browse All Products
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </Reveal>
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

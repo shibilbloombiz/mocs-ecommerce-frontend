@@ -30,7 +30,25 @@ export function TrendingProducts({ products = [] }: { products?: any[] }) {
     emblaApi.on("reInit", onSelect);
   }, [emblaApi, products]);
 
-  if (!products || products.length === 0) return null;
+  if (!products || products.length === 0) {
+    return (
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-4 text-left">
+          <p className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.25em] text-[#d96b27]">Curated Selection</p>
+          <h2 className="mt-1.5 font-display text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-foreground leading-[1.15]">
+            Trending <span className="text-[#d96b27]">Products</span>
+          </h2>
+        </div>
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-stone-200 bg-stone-50 py-16 text-center">
+          <p className="text-4xl mb-3">👟</p>
+          <p className="font-display text-lg font-bold text-stone-700">No trending products yet</p>
+          <p className="mt-1 text-sm text-muted-foreground max-w-xs">
+            Products marked as trending will appear here. Add products from the admin dashboard.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">

@@ -343,10 +343,26 @@ function Shop() {
           </div>
 
           {filtered.length === 0 && (
-            <p className="py-20 text-center text-muted-foreground">
-              No products match your filters.
-            </p>
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <p className="text-5xl mb-4">🔍</p>
+              <p className="font-display text-xl font-bold text-foreground">No products found</p>
+              <p className="mt-2 text-sm text-muted-foreground max-w-xs">
+                {allProducts.length === 0
+                  ? "No products have been added yet. Check back soon!"
+                  : "No products match your current filters. Try adjusting them."}
+              </p>
+              {allProducts.length === 0 ? null : (
+                <button
+                  type="button"
+                  onClick={() => { setCat("All"); setColl("All"); setColorFilter(null); setMaxPrice(5000); }}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-primary/90 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                >
+                  Clear All Filters
+                </button>
+              )}
+            </div>
           )}
+
         </div>
       </div>
 
