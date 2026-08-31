@@ -12,7 +12,12 @@ export function getImageUrl(url?: any, options: { width?: number; quality?: numb
   const targetWidth = options.width || 700;
   const targetQuality = options.quality || 75;
 
-  if (normalizedUrl.startsWith("http://") || normalizedUrl.startsWith("https://") || normalizedUrl.startsWith("data:")) {
+  if (
+    normalizedUrl.startsWith("http://") ||
+    normalizedUrl.startsWith("https://") ||
+    normalizedUrl.startsWith("data:") ||
+    normalizedUrl.startsWith("blob:")
+  ) {
     if (normalizedUrl.includes("images.unsplash.com")) {
       try {
         const u = new URL(normalizedUrl);
@@ -30,7 +35,6 @@ export function getImageUrl(url?: any, options: { width?: number; quality?: numb
         let rest = normalizedUrl.substring(uploadIdx + uploadMarker.length);
 
         // Transformation segments always contain key_value pairs like w_700, q_auto, f_auto, c_limit
-        // (they contain underscores). Version numbers (v1234567890/) and folders (mocs/uploads/) do not.
         const transformSegmentRegex = /^([a-z]{1,4}_[a-zA-Z0-9_.:-]+(?:,[a-z]{1,4}_[a-zA-Z0-9_.:-]+)*\/)/i;
         if (transformSegmentRegex.test(rest)) {
           rest = rest.replace(transformSegmentRegex, "");
@@ -43,12 +47,19 @@ export function getImageUrl(url?: any, options: { width?: number; quality?: numb
     return normalizedUrl;
   }
 
-  const cleanBase = API_BASE_URL.replace(/\/+$/, "");
+  // 2. Handle backend Multer uploads & API image routes vs frontend public assets
   let cleanUrl = normalizedUrl.replace(/^\/+/, "");
   if (cleanUrl.startsWith("src/uploads/")) {
     cleanUrl = cleanUrl.slice(4);
   }
-  return `${cleanBase}/${cleanUrl}`;
+
+  if (cleanUrl.startsWith("uploads/") || cleanUrl.startsWith("api/")) {
+    const cleanBase = (API_BASE_URL || "").replace(/\/+$/, "");
+    return cleanBase ? `${cleanBase}/${cleanUrl}` : `/${cleanUrl}`;
+  }
+
+  // 3. Frontend public root assets (e.g. hero-comfort-banner.jpg, favicon.png)
+  return `/${cleanUrl}`;
 }
 
 export function formatDate(dateInput: any): string {

@@ -22,6 +22,7 @@ import {
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api";
+import mocsLogo from "@/assets/mocs-logo.png";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -155,10 +156,10 @@ function AdminLayout() {
 
   const renderSidebar = (isMobile = false) => (
     <div className="relative z-10 flex h-full flex-col w-full">
-      <div className="flex h-16 items-center justify-between border-b border-zinc-800/80 px-6 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary font-display text-lg font-black text-primary-foreground">
-            M
+      <div className="flex h-16 items-center justify-between border-b border-zinc-800/80 px-5 shrink-0">
+        <Link to="/admin/dashboard" className="flex items-center gap-3 group focus:outline-none">
+          <div className="flex h-9 items-center justify-center rounded-xl bg-white/95 px-2.5 py-1 shadow-sm transition-transform group-hover:scale-105">
+            <img src={mocsLogo} alt="MOCS Logo" className="h-6 w-auto object-contain" />
           </div>
           <div className="leading-tight text-left">
             <p className="font-display text-sm font-extrabold tracking-tight text-white">MOCS</p>
@@ -166,7 +167,7 @@ function AdminLayout() {
               Admin Dashboard
             </p>
           </div>
-        </div>
+        </Link>
         {isMobile && (
           <button
             onClick={() => setMobileMenuOpen(false)}
@@ -220,13 +221,16 @@ function AdminLayout() {
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col lg:flex-row admin-layout">
       {/* Mobile Top Header */}
-      <header className="sticky top-0 z-50 flex lg:hidden items-center justify-between border-b border-border bg-card px-6 py-4 shrink-0 shadow-sm">
-        <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary font-display text-sm font-black text-primary-foreground">
-            M
+      <header className="sticky top-0 z-50 flex lg:hidden items-center justify-between border-b border-border bg-card px-4 sm:px-6 py-3 shrink-0 shadow-sm">
+        <Link to="/admin/dashboard" className="flex items-center gap-2.5">
+          <div className="flex h-8 items-center justify-center rounded-lg bg-white/95 px-2 py-0.5 shadow-sm border border-border">
+            <img src={mocsLogo} alt="MOCS Logo" className="h-5 w-auto object-contain" />
           </div>
-          <span className="font-display text-sm font-extrabold text-foreground tracking-tight">MOCS Admin</span>
-        </div>
+          <div className="leading-tight text-left">
+            <span className="font-display text-sm font-extrabold text-foreground tracking-tight">MOCS</span>
+            <span className="ml-1.5 text-[10px] font-bold uppercase tracking-wider text-primary">Admin</span>
+          </div>
+        </Link>
         <button
           onClick={() => setMobileMenuOpen(true)}
           className="rounded-xl border border-border p-2 hover:bg-muted text-foreground transition"

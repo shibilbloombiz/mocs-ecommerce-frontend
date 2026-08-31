@@ -11,6 +11,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import mocsLogo from "@/assets/mocs-logo.png";
 
 const nav: { to: string; label: string; icon: typeof LayoutDashboard; badge?: string }[] = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -27,12 +28,12 @@ export function Sidebar() {
 
   return (
     <aside className="sticky top-4 hidden h-[calc(100vh-2rem)] my-4 ml-4 w-64 shrink-0 flex-col rounded-[2rem] border border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex overflow-hidden no-scrollbar shadow-xl">
-      <div className="flex items-center gap-2 px-6 py-5 shrink-0">
-        <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary font-display text-lg font-black text-primary-foreground">
-          M
+      <div className="flex items-center gap-3 px-6 py-5 shrink-0">
+        <div className="flex h-9 items-center justify-center rounded-xl bg-white/95 px-2.5 py-1 shadow-sm border border-sidebar-border">
+          <img src={mocsLogo} alt="MOCS" className="h-6 w-auto object-contain" />
         </div>
         <div className="leading-tight">
-          <p className="font-display text-lg font-extrabold tracking-tight">MOCS</p>
+          <p className="font-display text-base font-extrabold tracking-tight">MOCS</p>
           <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-sidebar-foreground/60">
             Commerce Console
           </p>

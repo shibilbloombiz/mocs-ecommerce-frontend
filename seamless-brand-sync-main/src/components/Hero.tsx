@@ -42,8 +42,8 @@ export const DEFAULT_HERO_SLIDES: Slide[] = [
 // ─── Skeleton ────────────────────────────────────────────────────────────────
 export function HeroSkeleton() {
   return (
-    <div className="w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-4 max-w-[1800px] mx-auto">
-      <section className="relative w-full aspect-[16/9] lg:aspect-auto lg:h-[calc(100dvh-2rem)] lg:min-h-[640px] lg:max-h-[960px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-stone-950 animate-pulse" />
+    <div className="w-full px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2.5 max-w-[1800px] mx-auto">
+      <section className="relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-auto lg:h-[min(540px,calc(100dvh-6.5rem))] lg:min-h-[380px] lg:max-h-[540px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.2rem] bg-stone-950 animate-pulse" />
     </div>
   );
 }
@@ -113,14 +113,14 @@ export function Hero({
     setActive((a) => (a - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-advance every 5.5s when not hovered
+  // Auto-advance every 5 seconds when not hovered
   useEffect(() => {
     if (totalSlides <= 1 || isHovered) return;
 
     const timer = setInterval(() => {
       setDirection(1);
       setActive((prevIdx) => (prevIdx + 1) % totalSlides);
-    }, 5500);
+    }, 5000);
 
     return () => clearInterval(timer);
   }, [totalSlides, active, isHovered]);
@@ -139,36 +139,31 @@ export function Hero({
 
   const current = displaySlides[active] ?? displaySlides[0] ?? DEFAULT_HERO_SLIDES[0];
 
-  // Smooth cinematic slide transition variants with depth & gentle blur
+  // Ultra-smooth cinematic GPU-accelerated slide transition variants
   const slideVariants = {
     enter: (d: number) => ({
       opacity: 0,
-      x: d > 0 ? "6%" : "-6%",
-      scale: 1.08,
-      filter: "blur(6px) brightness(0.9)",
+      x: d > 0 ? "3.5%" : "-3.5%",
+      scale: 1.03,
     }),
     center: {
       opacity: 1,
       x: "0%",
       scale: 1,
-      filter: "blur(0px) brightness(1)",
       transition: {
-        opacity: { duration: 0.8, ease: [0.25, 1, 0.35, 1] },
+        opacity: { duration: 0.85, ease: [0.25, 1, 0.5, 1] },
         x: { duration: 0.85, ease: [0.22, 1, 0.36, 1] },
-        scale: { duration: 1.1, ease: [0.16, 1, 0.3, 1] },
-        filter: { duration: 0.7, ease: "easeOut" },
+        scale: { duration: 1.0, ease: [0.16, 1, 0.3, 1] },
       },
     },
     exit: (d: number) => ({
       opacity: 0,
-      x: d > 0 ? "-5%" : "5%",
-      scale: 0.95,
-      filter: "blur(4px) brightness(0.8)",
+      x: d > 0 ? "-3%" : "3%",
+      scale: 0.98,
       transition: {
-        opacity: { duration: 0.55, ease: "easeInOut" },
-        x: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
-        scale: { duration: 0.65, ease: "easeIn" },
-        filter: { duration: 0.45 },
+        opacity: { duration: 0.65, ease: [0.25, 1, 0.5, 1] },
+        x: { duration: 0.75, ease: [0.22, 1, 0.36, 1] },
+        scale: { duration: 0.75, ease: [0.25, 1, 0.5, 1] },
       },
     }),
   };
@@ -180,7 +175,7 @@ export function Hero({
   };
 
   return (
-    <div className="w-full px-3 sm:px-6 lg:px-8 py-2 sm:py-4 max-w-[1800px] mx-auto">
+    <div className="w-full px-3 sm:px-6 lg:px-8 py-1.5 sm:py-2.5 max-w-[1800px] mx-auto">
       <section
         ref={sectionRef}
         tabIndex={0}
@@ -188,7 +183,7 @@ export function Hero({
         aria-label="MOCS Hero Slideshow"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className="group relative w-full aspect-[16/9] lg:aspect-auto lg:h-[calc(100dvh-2rem)] lg:min-h-[640px] lg:max-h-[960px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.5rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
+        className="group relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-auto lg:h-[min(540px,calc(100dvh-6.5rem))] lg:min-h-[380px] lg:max-h-[540px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.2rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
       >
         {/* ── ACTIVE HERO SLIDE (WITH ADAPTIVE PICTURE ELEMENT & KEN BURNS EFFECT) ── */}
         <AnimatePresence initial={false} custom={direction}>
@@ -266,8 +261,8 @@ export function Hero({
         </AnimatePresence>
 
         {/* ── AMBIENT GRADIENT OVERLAYS ── */}
-        <div className="pointer-events-none absolute top-0 inset-x-0 h-20 sm:h-28 bg-gradient-to-b from-black/40 via-transparent to-transparent z-10 rounded-t-[inherit]" />
-        <div className="pointer-events-none absolute bottom-0 inset-x-0 h-20 sm:h-28 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 rounded-b-[inherit]" />
+        <div className="pointer-events-none absolute top-0 inset-x-0 h-16 sm:h-20 bg-gradient-to-b from-black/40 via-transparent to-transparent z-10 rounded-t-[inherit]" />
+        <div className="pointer-events-none absolute bottom-0 inset-x-0 h-16 sm:h-20 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 rounded-b-[inherit]" />
 
         {/* ── MODERN PREMIUM ARROW CONTROLS (DESKTOP / TABLET ONLY - HIDDEN ON MOBILE) ── */}
         {totalSlides > 1 && (
@@ -281,9 +276,9 @@ export function Hero({
                 prev();
               }}
               aria-label="Previous slide"
-              className="hidden sm:flex absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 lg:h-13 lg:w-13 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
+              className="hidden sm:flex absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
             >
-              <HeroArrowIcon className="h-5 w-5 lg:h-6 lg:w-6 rotate-180 transition-transform duration-200" />
+              <HeroArrowIcon className="h-5 w-5 lg:h-5.5 lg:w-5.5 rotate-180 transition-transform duration-200" />
             </button>
 
             {/* Right Arrow */}
@@ -295,24 +290,24 @@ export function Hero({
                 next();
               }}
               aria-label="Next slide"
-              className="hidden sm:flex absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 h-11 w-11 lg:h-13 lg:w-13 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
+              className="hidden sm:flex absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
             >
-              <HeroArrowIcon className="h-5 w-5 lg:h-6 lg:w-6 transition-transform duration-200" />
+              <HeroArrowIcon className="h-5 w-5 lg:h-5.5 lg:w-5.5 transition-transform duration-200" />
             </button>
           </>
         )}
 
         {/* ── BOTTOM INDICATOR DOTS / PILL ── */}
         {totalSlides > 1 && (
-          <div className="absolute bottom-5 sm:bottom-8 inset-x-0 z-20 flex items-center justify-center pointer-events-none">
-            <div className="flex items-center gap-2.5 bg-black/40 backdrop-blur-xl px-4 py-2 rounded-full border border-white/15 shadow-2xl pointer-events-auto">
+          <div className="absolute bottom-3 sm:bottom-5 inset-x-0 z-20 flex items-center justify-center pointer-events-none">
+            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl pointer-events-auto">
               {displaySlides.map((_, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => goTo(idx, idx > active ? 1 : -1)}
                   className={cn(
-                    "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
+                    "h-1.5 rounded-full transition-all duration-500 cursor-pointer",
                     idx === active
                       ? "w-6 bg-[#d97736] shadow-[0_0_10px_#d97736]"
                       : "w-2 bg-white/40 hover:bg-white/70"

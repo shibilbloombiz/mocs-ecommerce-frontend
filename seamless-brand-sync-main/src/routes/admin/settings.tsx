@@ -416,18 +416,21 @@ function AdminSettingsPage() {
     e: React.ChangeEvent<HTMLInputElement>,
     toastMsg: string,
     toastId: string,
-    onSuccess: (url: string) => void
+    onSuccess: (url: string) => void,
+    type?: string
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const formData = new FormData();
     formData.append("image", file);
+    if (type) formData.append("type", type);
 
     try {
       toast.loading(toastMsg, { id: toastId });
       const token = localStorage.getItem("mocs_token");
-      const res = await fetch(`${API_BASE_URL}/api/products/upload`, {
+      const urlQuery = type ? `?type=${encodeURIComponent(type)}` : "";
+      const res = await fetch(`${API_BASE_URL}/api/products/upload${urlQuery}`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
@@ -446,7 +449,7 @@ function AdminSettingsPage() {
   };
 
   const handlePromiseFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    handleFileUpload(e, "Uploading image...", `promise-upload-${idx}`, (url) => updatePromiseField(idx, "bg", url));
+    handleFileUpload(e, "Uploading image...", `promise-upload-${idx}`, (url) => updatePromiseField(idx, "bg", url), "promise");
   };
 
   const addAdsImageByUrl = (url: string) => {
@@ -462,24 +465,25 @@ function AdminSettingsPage() {
       e,
       "Uploading advertisement image...",
       `ad-upload-${Date.now()}`,
-      (url) => setAdvertisements((prev) => [...prev, url])
+      (url) => setAdvertisements((prev) => [...prev, url]),
+      "advertisement"
     );
   };
 
   const handleBannerFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    handleFileUpload(e, "Uploading background image...", `banner-upload-${idx}`, (url) => updateBannerField(idx, "bg", url));
+    handleFileUpload(e, "Uploading background image...", `banner-upload-${idx}`, (url) => updateBannerField(idx, "bg", url), "banner");
   };
 
   const handleHeroFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    handleFileUpload(e, "Uploading desktop hero image...", `hero-upload-${idx}`, (url) => updateHeroSlideField(idx, "bg", url));
+    handleFileUpload(e, "Uploading desktop hero image...", `hero-upload-${idx}`, (url) => updateHeroSlideField(idx, "bg", url), "hero-banner");
   };
 
   const handleHeroMobileFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    handleFileUpload(e, "Uploading mobile hero image...", `hero-mobile-upload-${idx}`, (url) => updateHeroSlideField(idx, "mobileBg", url));
+    handleFileUpload(e, "Uploading mobile hero image...", `hero-mobile-upload-${idx}`, (url) => updateHeroSlideField(idx, "mobileBg", url), "hero-mobile-banner");
   };
 
   const handleCollectionFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
-    handleFileUpload(e, "Uploading background image...", `collection-upload-${idx}`, (url) => updateCollectionField(idx, "bg", url));
+    handleFileUpload(e, "Uploading background image...", `collection-upload-${idx}`, (url) => updateCollectionField(idx, "bg", url), "collection-banner");
   };
 
   const handleAuthFileChange = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
@@ -489,7 +493,7 @@ function AdminSettingsPage() {
         newSlides[idx] = { ...newSlides[idx], image: url };
         return { ...prev, slides: newSlides };
       });
-    });
+    }, "auth-slide");
   };
 
   const updateBannerField = (idx: number, field: string, value: any) => {

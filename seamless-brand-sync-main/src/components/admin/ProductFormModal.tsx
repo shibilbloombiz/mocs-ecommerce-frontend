@@ -163,11 +163,12 @@ export function ProductFormModal({
 
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("type", "product");
 
     try {
       toast.loading("Uploading image file...", { id: "image-upload" });
       const token = getToken();
-      const res = await fetch(`${API_BASE_URL}/api/products/upload`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/upload?type=product`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
