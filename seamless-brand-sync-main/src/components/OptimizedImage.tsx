@@ -35,7 +35,7 @@ export function OptimizedImage({
   // Multi-density responsive srcSet for instant sharp rendering on all screens
   const srcSet = useMemo(() => {
     if (!rawSrc || rawSrc.startsWith("data:")) return undefined;
-    if (rawSrc.includes("images.unsplash.com") || rawSrc.includes("res.cloudinary.com")) {
+    if (rawSrc.includes("images.unsplash.com")) {
       const widths = [320, 480, 720, 1080];
       return widths
         .map((w) => `${getImageUrl(rawSrc, { width: w, quality: 75 })} ${w}w`)
