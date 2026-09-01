@@ -48,17 +48,27 @@ export function HeroSkeleton() {
   );
 }
 
-// ─── Custom Arrow Icon ────────────────────────────────────────────────────────
-function HeroArrowIcon({ className }: { className?: string }) {
+// ─── Long Thin Arrow SVG ─────────────────────────────────────────────────────
+function LongArrow({ direction = "right", className }: { direction?: "left" | "right"; className?: string }) {
   return (
     <svg
+      viewBox="0 0 48 12"
+      fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 256 256"
-      fill="currentColor"
       className={className}
       aria-hidden="true"
     >
-      <path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z" />
+      {direction === "right" ? (
+        <>
+          <line x1="0" y1="6" x2="44" y2="6" stroke="currentColor" strokeWidth="1" />
+          <polyline points="38,1 44,6 38,11" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      ) : (
+        <>
+          <line x1="48" y1="6" x2="4" y2="6" stroke="currentColor" strokeWidth="1" />
+          <polyline points="10,1 4,6 10,11" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </>
+      )}
     </svg>
   );
 }
@@ -80,7 +90,6 @@ export function Hero({
 
   const [active, setActive] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
-  const [isHovered, setIsHovered] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   // Preload all slide images on mount for instant transitions
@@ -113,9 +122,9 @@ export function Hero({
     setActive((a) => (a - 1 + totalSlides) % totalSlides);
   }, [totalSlides]);
 
-  // Auto-advance every 5 seconds when not hovered
+  // Auto-advance every 5 seconds (continues playing even when user hovers)
   useEffect(() => {
-    if (totalSlides <= 1 || isHovered) return;
+    if (totalSlides <= 1) return;
 
     const timer = setInterval(() => {
       setDirection(1);
@@ -123,7 +132,8 @@ export function Hero({
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [totalSlides, active, isHovered]);
+  }, [totalSlides, active]);
+
 
   // Keyboard navigation
   useEffect(() => {
@@ -181,8 +191,6 @@ export function Hero({
         tabIndex={0}
         aria-roledescription="carousel"
         aria-label="MOCS Hero Slideshow"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         className="group relative w-full aspect-[16/9] sm:aspect-[21/9] lg:aspect-auto lg:h-[min(540px,calc(100dvh-6.5rem))] lg:min-h-[380px] lg:max-h-[540px] overflow-hidden rounded-2xl sm:rounded-3xl lg:rounded-[2.2rem] bg-[#0e0d0c] outline-none select-none text-white shadow-2xl touch-pan-y"
       >
         {/* ── ACTIVE HERO SLIDE (WITH ADAPTIVE PICTURE ELEMENT & KEN BURNS EFFECT) ── */}
@@ -264,61 +272,60 @@ export function Hero({
         <div className="pointer-events-none absolute top-0 inset-x-0 h-16 sm:h-20 bg-gradient-to-b from-black/40 via-transparent to-transparent z-10 rounded-t-[inherit]" />
         <div className="pointer-events-none absolute bottom-0 inset-x-0 h-16 sm:h-20 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10 rounded-b-[inherit]" />
 
-        {/* ── MODERN PREMIUM ARROW CONTROLS (DESKTOP / TABLET ONLY - HIDDEN ON MOBILE) ── */}
+        {/* ── LUXURY BOTTOM NAV: PREV (ARROW) ─ DOTS ─ NEXT (ARROW) ── */}
         {totalSlides > 1 && (
-          <>
-            {/* Left Arrow */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                prev();
-              }}
-              aria-label="Previous slide"
-              className="hidden sm:flex absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
-            >
-              <HeroArrowIcon className="h-5 w-5 lg:h-5.5 lg:w-5.5 rotate-180 transition-transform duration-200" />
-            </button>
+          <div className="absolute bottom-4 sm:bottom-5 inset-x-0 z-20 flex items-center justify-center pointer-events-none">
+            <div className="flex items-center gap-3 sm:gap-5 pointer-events-auto">
 
-            {/* Right Arrow */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                next();
-              }}
-              aria-label="Next slide"
-              className="hidden sm:flex absolute right-4 lg:right-6 top-1/2 -translate-y-1/2 z-20 h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-black/55 hover:bg-black/85 text-white/90 hover:text-[#d97736] border border-white/20 hover:border-[#d97736]/60 shadow-[0_8px_32px_rgba(0,0,0,0.5)] hover:shadow-[0_0_24px_rgba(217,119,54,0.4)] backdrop-blur-xl items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer opacity-0 group-hover:opacity-100 ring-1 ring-black/40"
-            >
-              <HeroArrowIcon className="h-5 w-5 lg:h-5.5 lg:w-5.5 transition-transform duration-200" />
-            </button>
-          </>
-        )}
-
-        {/* ── BOTTOM INDICATOR DOTS / PILL ── */}
-        {totalSlides > 1 && (
-          <div className="absolute bottom-3 sm:bottom-5 inset-x-0 z-20 flex items-center justify-center pointer-events-none">
-            <div className="flex items-center gap-2 bg-black/40 backdrop-blur-xl px-3.5 py-1.5 rounded-full border border-white/15 shadow-2xl pointer-events-auto">
-              {displaySlides.map((_, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => goTo(idx, idx > active ? 1 : -1)}
-                  className={cn(
-                    "h-1.5 rounded-full transition-all duration-500 cursor-pointer",
-                    idx === active
-                      ? "w-6 bg-[#d97736] shadow-[0_0_10px_#d97736]"
-                      : "w-2 bg-white/40 hover:bg-white/70"
-                  )}
-                  aria-label={`Go to slide ${idx + 1}`}
+              {/* PREV button (Arrow Only) */}
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); prev(); }}
+                aria-label="Previous slide"
+                className="group/prev flex items-center justify-center p-2 rounded-full cursor-pointer select-none transition-all duration-300 hover:bg-white/10"
+              >
+                <LongArrow
+                  direction="left"
+                  className="w-8 sm:w-10 h-3 text-white/50 transition-all duration-500 group-hover/prev:w-12 sm:group-hover/prev:w-14 group-hover/prev:text-white"
                 />
-              ))}
+              </button>
+
+              {/* Dot indicators */}
+              <div className="flex items-center gap-2 bg-black/35 backdrop-blur-xl px-3 py-1.5 rounded-full border border-white/10 shadow-2xl">
+                {displaySlides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => goTo(idx, idx > active ? 1 : -1)}
+                    className={cn(
+                      "h-1 rounded-full transition-all duration-500 cursor-pointer",
+                      idx === active
+                        ? "w-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                        : "w-1.5 bg-white/30 hover:bg-white/60"
+                    )}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* NEXT button (Arrow Only) */}
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); next(); }}
+                aria-label="Next slide"
+                className="group/next flex items-center justify-center p-2 rounded-full cursor-pointer select-none transition-all duration-300 hover:bg-white/10"
+              >
+                <LongArrow
+                  direction="right"
+                  className="w-8 sm:w-10 h-3 text-white/50 transition-all duration-500 group-hover/next:w-12 sm:group-hover/next:w-14 group-hover/next:text-white"
+                />
+              </button>
+
             </div>
           </div>
         )}
       </section>
     </div>
+
   );
 }

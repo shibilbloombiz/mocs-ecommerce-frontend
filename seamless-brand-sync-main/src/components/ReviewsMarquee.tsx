@@ -54,24 +54,28 @@ export function ReviewsMarquee({ reviews }: ReviewsMarqueeProps) {
           {[...reviews, ...reviews, ...reviews].map((r, i) => (
             <div
               key={i}
-              className="inline-block min-w-[250px] max-w-[250px] sm:min-w-[280px] sm:max-w-[280px] lg:min-w-[320px] lg:max-w-[320px] whitespace-normal rounded-2xl lg:rounded-3xl border border-border bg-card p-4 lg:p-6 shadow-soft transition hover:border-primary/20"
+              className="inline-flex flex-col min-w-[260px] max-w-[260px] sm:min-w-[300px] sm:max-w-[300px] lg:min-w-[340px] lg:max-w-[340px] min-h-[220px] sm:min-h-[230px] lg:min-h-[240px] whitespace-normal rounded-2xl lg:rounded-3xl border border-border bg-card p-4 lg:p-6 shadow-soft transition hover:border-primary/20"
             >
-              <div className="flex gap-0.5">
+              {/* Stars — always at top */}
+              <div className="flex gap-0.5 shrink-0">
                 {Array.from({ length: r.rating }).map((_, idx) => (
                   <Star key={idx} className="h-4 w-4 fill-primary text-primary" />
                 ))}
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">"{r.text}"</p>
-              <div className="mt-5 flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-primary/10 font-display text-sm font-bold text-primary">
+              {/* Review text — grows to fill remaining space */}
+              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">"{r.text}"</p>
+              {/* Author — always pinned to bottom */}
+              <div className="mt-4 flex items-center gap-3 shrink-0 border-t border-border/50 pt-3">
+                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 font-display text-sm font-bold text-primary">
                   {r.name.charAt(0)}
                 </span>
                 <div>
-                  <p className="text-sm font-semibold">{r.name}</p>
+                  <p className="text-sm font-semibold leading-tight">{r.name}</p>
                   <p className="text-xs text-success font-semibold">Verified purchase</p>
                 </div>
               </div>
             </div>
+
           ))}
         </motion.div>
       </div>

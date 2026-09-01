@@ -19,6 +19,8 @@ import {
   Settings,
   Bell,
 } from "lucide-react";
+
+
 import { useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { apiClient } from "@/lib/api";
@@ -154,6 +156,8 @@ function AdminLayout() {
     { label: "Settings", to: "/admin/settings", icon: Settings },
   ];
 
+
+
   const renderSidebar = (isMobile = false) => (
     <div className="relative z-10 flex h-full flex-col w-full">
       <div className="flex h-16 items-center justify-between border-b border-zinc-800/80 px-5 shrink-0">
@@ -181,19 +185,22 @@ function AdminLayout() {
       {/* Navigation Items */}
       <nav className="flex-1 space-y-1.5 px-3 py-4 overflow-y-auto no-scrollbar">
         {navLinks.map((link) => {
+          const Icon = link.icon;
           return (
             <Link
               key={link.to}
               to={link.to}
               onClick={() => setMobileMenuOpen(false)}
-              className="group flex items-center rounded-xl border border-transparent px-3 py-2 text-sm font-semibold transition-all text-zinc-300 hover:border-[#f46a1e] hover:bg-white/5 hover:text-white"
+              className="group flex items-center gap-2.5 rounded-xl border border-transparent px-3 py-2 text-sm font-semibold transition-all text-zinc-300 hover:border-[#f46a1e] hover:bg-white/5 hover:text-white"
               activeProps={{ className: "bg-primary text-white shadow-[var(--shadow-lift)] hover:bg-primary border border-transparent" }}
             >
-              {link.label}
+              {Icon && <Icon className="h-4 w-4 shrink-0 opacity-80 group-hover:opacity-100" />}
+              <span>{link.label}</span>
             </Link>
           );
         })}
       </nav>
+
 
       {/* Sidebar Footer Operations */}
       <div className="border-t border-zinc-800/80 p-3 space-y-1 shrink-0 bg-black/5">
