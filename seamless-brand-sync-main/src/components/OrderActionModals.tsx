@@ -433,12 +433,12 @@ export function OrderActionModals({
             {/* Scrollable Container (no scrollbar visible) */}
             <div className="overflow-y-auto p-5 sm:p-7 space-y-4 no-scrollbar">
               
-              {/* ── Top Header matching the Model ── */}
+              {/* ── Top Header matching MOCS Theme ── */}
               <div className="flex items-center gap-3.5 pr-8">
                 {/* Circular Return Icon with delicate outer ring */}
                 <div className="relative flex items-center justify-center shrink-0">
-                  <div className="absolute inset-0 rounded-full border border-purple-200/70 scale-120 pointer-events-none" />
-                  <div className="grid h-11 w-11 place-items-center rounded-full bg-[#f4effe] text-[#7c3aed] border border-[#e8ddfc] shadow-xs">
+                  <div className="absolute inset-0 rounded-full border border-orange-200/70 scale-120 pointer-events-none" />
+                  <div className="grid h-11 w-11 place-items-center rounded-full bg-orange-50 text-[#F46A1E] border border-orange-200 shadow-xs">
                     <RotateCcw className="h-5 w-5 stroke-[2.2]" />
                   </div>
                 </div>
@@ -446,14 +446,14 @@ export function OrderActionModals({
                 {/* Title, Badge & Subtitle with Dynamic 1-2 Days for Online Orders */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-display text-lg sm:text-xl font-bold tracking-tight text-zinc-900 leading-tight">
+                    <h3 className="font-display text-lg sm:text-xl font-bold tracking-tight text-stone-900 leading-tight">
                       {returnStep === 1 ? "Select Item to Return" : "Select Refund Method"}
                     </h3>
-                    <span className="rounded-full bg-[#f3effd] px-2 py-0.5 text-[10px] sm:text-[11px] font-semibold text-[#6d28d9] border border-[#ede9fe]">
+                    <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-orange-700 border border-orange-200">
                       Step {returnStep} of 2
                     </span>
                   </div>
-                  <p className="text-[11px] sm:text-xs text-zinc-500 font-medium mt-0.5 leading-snug">
+                  <p className="text-[11px] sm:text-xs text-stone-500 font-medium mt-0.5 leading-snug">
                     {returnStep === 1
                       ? "Select the item(s) and reason for requesting a return"
                       : `Choose where you want your refund credited (${refundTimelineSubtitle})`}
@@ -461,13 +461,13 @@ export function OrderActionModals({
                 </div>
               </div>
 
-              {/* ── STEP 1: ITEM SELECTION & RETURN REASON ── */}
+              {/* ── STEP 1: ITEM SELECTION & RETURN REASON (MOCS THEME) ── */}
               {returnStep === 1 && (
                 <div className="space-y-4 pt-1">
                   {/* Multiple Items Picker */}
                   {selectedOrder && selectedOrder.items?.length > 1 && (
                     <div className="space-y-1.5">
-                      <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-600 block">
+                      <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 block">
                         Select Item(s) to Return
                       </label>
                       <div className="space-y-1.5 max-h-36 overflow-y-auto pr-1 no-scrollbar">
@@ -480,8 +480,8 @@ export function OrderActionModals({
                               className={cn(
                                 "flex items-center gap-2.5 rounded-xl border p-2 transition cursor-pointer text-xs font-semibold select-none",
                                 isChecked
-                                  ? "border-purple-300 bg-purple-50/50 text-purple-950 shadow-xs"
-                                  : "border-zinc-200/80 bg-zinc-50/40 text-zinc-700 hover:bg-zinc-100/60"
+                                  ? "border-orange-400 bg-orange-50/60 text-stone-900 shadow-xs ring-1 ring-orange-400/20"
+                                  : "border-stone-200/80 bg-stone-50/40 text-stone-700 hover:bg-stone-100/60"
                               )}
                             >
                               <input
@@ -492,20 +492,20 @@ export function OrderActionModals({
                                     isChecked ? prev.filter((k) => k !== key) : [...prev, key]
                                   );
                                 }}
-                                className="rounded border-zinc-300 text-purple-600 focus:ring-purple-500 h-4 w-4 cursor-pointer"
+                                className="rounded border-stone-300 text-[#F46A1E] focus:ring-orange-500 h-4 w-4 cursor-pointer"
                               />
                               <img
                                 src={getImageUrl(item.image)}
                                 alt={item.name}
-                                className="h-9 w-9 rounded-lg object-cover bg-white border border-zinc-200/60 shrink-0"
+                                className="h-9 w-9 rounded-lg object-cover bg-white border border-stone-200/60 shrink-0"
                                 onError={(e) => {
                                   e.currentTarget.src =
                                     "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=120";
                                 }}
                               />
                               <div className="flex-1 min-w-0">
-                                <p className="truncate font-bold text-zinc-900 text-xs">{item.name}</p>
-                                <p className="text-[10px] text-zinc-500 font-medium">
+                                <p className="truncate font-bold text-stone-900 text-xs">{item.name}</p>
+                                <p className="text-[10px] text-stone-500 font-medium">
                                   Size {item.size} · Color: {item.color} · Qty {item.qty} · ₹{item.price * item.qty}
                                 </p>
                               </div>
@@ -518,7 +518,7 @@ export function OrderActionModals({
 
                   {/* Quick Reason Chips */}
                   <div className="space-y-1.5">
-                    <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-600 block">
+                    <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 block">
                       Choose Return Reason
                     </label>
                     <div className="flex flex-wrap gap-1.5">
@@ -530,8 +530,8 @@ export function OrderActionModals({
                           className={cn(
                             "rounded-full px-2.5 py-1 text-[11px] font-semibold transition border cursor-pointer",
                             returnReason === r
-                              ? "bg-purple-600 border-purple-600 text-white shadow-xs"
-                              : "bg-zinc-50 border-zinc-200/80 text-zinc-700 hover:bg-zinc-100 hover:border-zinc-300"
+                              ? "bg-[#F46A1E] border-[#F46A1E] text-white shadow-xs shadow-orange-500/20"
+                              : "bg-stone-50 border-stone-200/80 text-stone-700 hover:bg-orange-50/60 hover:border-orange-200 hover:text-orange-900"
                           )}
                         >
                           {r}
@@ -542,11 +542,11 @@ export function OrderActionModals({
 
                   {/* Detailed Feedback Textarea */}
                   <div className="space-y-1">
-                    <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-600 block">
+                    <label className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-stone-600 block">
                       Additional Comments (Optional)
                     </label>
                     <textarea
-                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 p-2.5 text-xs text-zinc-800 placeholder:text-zinc-400 focus:border-purple-500 focus:bg-white focus:outline-none transition-all resize-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50/50 p-2.5 text-xs text-stone-800 placeholder:text-stone-400 focus:border-[#F46A1E] focus:bg-white focus:outline-none transition-all resize-none"
                       placeholder="Provide any additional details to speed up your return approval..."
                       rows={2}
                       value={returnReason}
@@ -555,18 +555,18 @@ export function OrderActionModals({
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-150">
+                  <div className="flex items-center justify-between pt-3 border-t border-stone-150">
                     <button
                       type="button"
                       onClick={() => setReturnModal(false)}
-                      className="rounded-xl border border-zinc-200 px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-100 transition cursor-pointer"
+                      className="rounded-xl border border-stone-200 px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-100 transition cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="button"
                       onClick={handleProceedToRefund}
-                      className="flex items-center gap-1.5 rounded-xl bg-purple-600 px-5 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-purple-700 transition cursor-pointer shadow-md shadow-purple-600/10"
+                      className="flex items-center gap-1.5 rounded-xl bg-[#F46A1E] hover:bg-[#ea580c] px-5 py-2 text-xs font-bold uppercase tracking-wider text-white transition cursor-pointer shadow-md shadow-orange-500/15"
                     >
                       Next: Refund Method
                       <ArrowRight className="h-3.5 w-3.5 stroke-[2.5]" />
@@ -575,12 +575,12 @@ export function OrderActionModals({
                 </div>
               )}
 
-              {/* ── STEP 2: EXACT REFERENCE REFUND METHOD DESIGN (With 1-2 Days for Online Payment) ── */}
+              {/* ── STEP 2: REFUND METHOD DESIGN (MOCS THEME) ── */}
               {returnStep === 2 && (
                 <div className="space-y-3.5 pt-1">
                   {/* Dynamic Refund Amount Subheader */}
                   <div>
-                    <p className="text-[10.5px] sm:text-[11.5px] font-bold uppercase tracking-wider text-zinc-600">
+                    <p className="text-[10.5px] sm:text-[11.5px] font-bold uppercase tracking-wider text-stone-600">
                       HOW WOULD YOU LIKE TO RECEIVE YOUR REFUND OF ₹{refundAmount}?
                     </p>
                   </div>
@@ -598,24 +598,24 @@ export function OrderActionModals({
                       className={cn(
                         "relative rounded-2xl border-2 p-3 sm:p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between select-none",
                         refundMethod === "bank"
-                          ? "border-[#7c3aed] bg-[#faf8ff] shadow-xs ring-1 ring-[#7c3aed]/20"
-                          : "border-zinc-200/90 bg-white hover:border-zinc-300 hover:shadow-xs"
+                          ? "border-[#F46A1E] bg-[#fffaf5] shadow-xs ring-1 ring-[#F46A1E]/20"
+                          : "border-stone-200/90 bg-white hover:border-stone-300 hover:shadow-xs"
                       )}
                     >
                       <div>
                         {/* Top Row */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2 sm:gap-2.5">
-                            {/* Round light-blue icon */}
-                            <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-[#eef7fe] text-[#0284c7] shrink-0 border border-[#e0f2fe]">
+                            {/* Round orange-tinted icon */}
+                            <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-orange-50 text-orange-600 shrink-0 border border-orange-200/80">
                               <Building2 className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[2]" />
                             </div>
                             <div>
                               <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                                <span className="font-bold text-xs sm:text-sm text-zinc-900 leading-tight">
+                                <span className="font-bold text-xs sm:text-sm text-stone-900 leading-tight">
                                   Bank Transfer
                                 </span>
-                                <span className="rounded-full bg-[#e8fbf0] text-[#16a34a] text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 border border-[#bbf7d0] leading-none">
+                                <span className="rounded-full bg-emerald-50 text-emerald-700 text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 border border-emerald-200 leading-none">
                                   Recommended
                                 </span>
                               </div>
@@ -627,8 +627,8 @@ export function OrderActionModals({
                             className={cn(
                               "grid h-4.5 w-4.5 sm:h-5 sm:w-5 place-items-center rounded-full transition-all shrink-0 mt-0.5",
                               refundMethod === "bank"
-                                ? "bg-[#6d28d9] text-white shadow-xs"
-                                : "border-2 border-zinc-300 bg-white"
+                                ? "bg-[#F46A1E] text-white shadow-xs"
+                                : "border-2 border-stone-300 bg-white"
                             )}
                           >
                             {refundMethod === "bank" && <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 stroke-[3]" />}
@@ -637,19 +637,19 @@ export function OrderActionModals({
 
                         {/* Subtitles with Dynamic 1-2 Days for Online Orders */}
                         <div className="mt-2 space-y-0.5">
-                          <p className="text-[11px] sm:text-xs font-semibold text-zinc-600 leading-tight">
+                          <p className="text-[11px] sm:text-xs font-semibold text-stone-700 leading-tight">
                             IMPS / NEFT (Direct Credit)
                           </p>
-                          <p className="text-[10px] sm:text-[11px] text-zinc-400 leading-tight">
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 leading-tight">
                             Refund directly to your bank account ({refundTimeline} after pickup)
                           </p>
                         </div>
                       </div>
 
                       {/* Bottom Feature Tag */}
-                      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium text-[#0284c7] mt-2.5 pt-2 border-t border-blue-50">
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium text-orange-600 mt-2.5 pt-2 border-t border-orange-100/60">
                         <ShieldCheck className="h-3.5 w-3.5 stroke-[2] shrink-0" />
-                        <span className="truncate">Secure • Fast • Reliable</span>
+                        <span className="truncate">Secure • Fast • Direct Credit</span>
                       </div>
                     </div>
 
@@ -664,24 +664,24 @@ export function OrderActionModals({
                       className={cn(
                         "relative rounded-2xl border-2 p-3 sm:p-4 transition-all duration-200 cursor-pointer flex flex-col justify-between select-none",
                         refundMethod === "upi"
-                          ? "border-[#7c3aed] bg-[#faf8ff] shadow-xs ring-1 ring-[#7c3aed]/20"
-                          : "border-zinc-200/90 bg-white hover:border-zinc-300 hover:shadow-xs"
+                          ? "border-[#F46A1E] bg-[#fffaf5] shadow-xs ring-1 ring-[#F46A1E]/20"
+                          : "border-stone-200/90 bg-white hover:border-stone-300 hover:shadow-xs"
                       )}
                     >
                       <div>
                         {/* Top Row */}
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-2 sm:gap-2.5">
-                            {/* Round light-purple icon */}
-                            <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-[#f3eefe] text-[#7c3aed] shrink-0 border border-[#ede9fe]">
+                            {/* Round orange-tinted icon */}
+                            <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-orange-50 text-[#F46A1E] shrink-0 border border-orange-200/80">
                               <Zap className="h-4 w-4 sm:h-4.5 sm:w-4.5 stroke-[2]" />
                             </div>
                             <div>
                               <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-                                <span className="font-bold text-xs sm:text-sm text-zinc-900 leading-tight">
+                                <span className="font-bold text-xs sm:text-sm text-stone-900 leading-tight">
                                   Instant UPI
                                 </span>
-                                <span className="rounded-full bg-[#ede9fe] text-[#6d28d9] text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 border border-[#ddd6fe] leading-none">
+                                <span className="rounded-full bg-orange-100 text-orange-800 text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 border border-orange-200 leading-none">
                                   Fastest
                                 </span>
                               </div>
@@ -693,8 +693,8 @@ export function OrderActionModals({
                             className={cn(
                               "grid h-4.5 w-4.5 sm:h-5 sm:w-5 place-items-center rounded-full transition-all shrink-0 mt-0.5",
                               refundMethod === "upi"
-                                ? "bg-[#6d28d9] text-white shadow-xs"
-                                : "border-2 border-zinc-300 bg-white"
+                                ? "bg-[#F46A1E] text-white shadow-xs"
+                                : "border-2 border-stone-300 bg-white"
                             )}
                           >
                             {refundMethod === "upi" && <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 stroke-[3]" />}
@@ -703,36 +703,36 @@ export function OrderActionModals({
 
                         {/* Subtitles with Dynamic 1-2 Days for Online Orders */}
                         <div className="mt-2 space-y-0.5">
-                          <p className="text-[11px] sm:text-xs font-semibold text-zinc-600 leading-tight">
+                          <p className="text-[11px] sm:text-xs font-semibold text-stone-700 leading-tight">
                             GPay, PhonePe, Paytm, BHIM
                           </p>
-                          <p className="text-[10px] sm:text-[11px] text-zinc-400 leading-tight">
+                          <p className="text-[10px] sm:text-[11px] text-stone-500 leading-tight">
                             Instant refund to your UPI ID ({refundTimeline} after pickup)
                           </p>
                         </div>
                       </div>
 
                       {/* Bottom Feature Tag */}
-                      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium text-[#7c3aed] mt-2.5 pt-2 border-t border-purple-50">
+                      <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium text-orange-600 mt-2.5 pt-2 border-t border-orange-100/60">
                         <ShieldCheck className="h-3.5 w-3.5 stroke-[2] shrink-0" />
-                        <span className="truncate">Instant • 24x7 • Secure</span>
+                        <span className="truncate">Instant • 24x7 • Direct Payout</span>
                       </div>
                     </div>
                   </div>
 
                   {/* ── Saved Payout Account Detected Box ── */}
                   {savedAccount && savedAccount.type === refundMethod && useSavedAccount ? (
-                    <div className="rounded-2xl border border-[#bbf7d0] bg-[#f0fdf4]/50 p-3 sm:p-3.5 transition-all duration-200 animate-in fade-in">
+                    <div className="rounded-2xl border border-emerald-300 bg-emerald-50/60 p-3 sm:p-3.5 transition-all duration-200 animate-in fade-in">
                       {/* Header */}
                       <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#15803d]">
-                          <CheckCircle2 className="h-4 w-4 text-[#16a34a] stroke-[2.2]" />
+                        <span className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-emerald-800">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-600 stroke-[2.2]" />
                           Saved Payout Account Detected
                         </span>
                         <button
                           type="button"
                           onClick={() => setUseSavedAccount(false)}
-                          className="flex items-center gap-0.5 text-xs font-bold text-[#15803d] hover:text-[#166534] hover:underline cursor-pointer transition"
+                          className="flex items-center gap-0.5 text-xs font-bold text-emerald-700 hover:text-emerald-900 hover:underline cursor-pointer transition"
                         >
                           Use different account
                           <ChevronRight className="h-3.5 w-3.5 stroke-[2.5]" />
@@ -740,59 +740,59 @@ export function OrderActionModals({
                       </div>
 
                       {/* Inner Details Card matching model */}
-                      <div className="bg-white rounded-xl border border-zinc-200/80 p-2.5 sm:p-3 mt-2 flex items-center justify-between shadow-xs">
+                      <div className="bg-white rounded-xl border border-stone-200/80 p-2.5 sm:p-3 mt-2 flex items-center justify-between shadow-xs">
                         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                           {/* Authentic Brand Logo / Icon */}
                           {refundMethod === "upi" ? (
-                            <div className="grid h-9 w-12 place-items-center rounded-lg bg-zinc-50 border border-zinc-200/70 shrink-0 px-1">
+                            <div className="grid h-9 w-12 place-items-center rounded-lg bg-stone-50 border border-stone-200/70 shrink-0 px-1">
                               <UpiBrandLogo />
                             </div>
                           ) : (
-                            <div className="grid h-9 w-9 place-items-center rounded-lg bg-blue-50 text-blue-700 border border-blue-100 shrink-0">
+                            <div className="grid h-9 w-9 place-items-center rounded-lg bg-orange-50 text-orange-600 border border-orange-200 shrink-0">
                               <Building2 className="h-4.5 w-4.5 stroke-[2]" />
                             </div>
                           )}
 
                           <div className="min-w-0">
-                            <p className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider leading-none">
+                            <p className="text-[10px] font-semibold text-stone-400 uppercase tracking-wider leading-none">
                               {refundMethod === "upi" ? "UPI ID" : savedAccount.bankName || "Bank Account"}
                             </p>
                             <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
-                              <span className="font-bold text-xs sm:text-sm text-zinc-900 font-mono truncate">
+                              <span className="font-bold text-xs sm:text-sm text-stone-900 font-mono truncate">
                                 {refundMethod === "upi"
                                   ? savedAccount.maskedUpiId || savedAccount.upiId || "use***@okhdfcbank"
                                   : `${savedAccount.accountHolderName} · ${savedAccount.maskedAccountNumber}`}
                               </span>
-                              <span className="rounded-md bg-[#e8fbf0] text-[#15803d] text-[9px] font-extrabold px-1.5 py-0.5 border border-[#bbf7d0] inline-flex items-center gap-0.5 leading-none">
+                              <span className="rounded-md bg-emerald-50 text-emerald-700 text-[9px] font-extrabold px-1.5 py-0.5 border border-emerald-200 inline-flex items-center gap-0.5 leading-none">
                                 <Check className="h-2 w-2 stroke-[3]" />
                                 Verified
                               </span>
                             </div>
-                            <p className="text-[10px] text-[#15803d] font-semibold flex items-center gap-1 mt-0.5 leading-none">
-                              <Check className="h-2.5 w-2.5 stroke-[2.5] text-[#16a34a]" />
+                            <p className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1 mt-0.5 leading-none">
+                              <Check className="h-2.5 w-2.5 stroke-[2.5] text-emerald-600" />
                               Pre-verified for faster refunds
                             </p>
                           </div>
                         </div>
 
                         {/* Right Verification Shield */}
-                        <div className="grid h-8 w-8 place-items-center rounded-full bg-[#e8fbf0] text-[#16a34a] border border-[#bbf7d0] shrink-0 ml-1.5">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300 shrink-0 ml-1.5">
                           <ShieldCheck className="h-4 w-4 stroke-[2]" />
                         </div>
                       </div>
                     </div>
                   ) : (
                     /* ── Form View for Entering / Changing Details ── */
-                    <div className="space-y-2.5 rounded-2xl border border-zinc-200 bg-zinc-50/50 p-3 sm:p-3.5 transition-all duration-200">
-                      <div className="flex items-center justify-between pb-1 border-b border-zinc-200/60">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-700">
+                    <div className="space-y-2.5 rounded-2xl border border-stone-200 bg-stone-50/50 p-3 sm:p-3.5 transition-all duration-200">
+                      <div className="flex items-center justify-between pb-1 border-b border-stone-200/60">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-stone-700">
                           {refundMethod === "upi" ? "Enter UPI ID" : "Enter Bank Account Details"}
                         </span>
                         {savedAccount && savedAccount.type === refundMethod && (
                           <button
                             type="button"
                             onClick={() => setUseSavedAccount(true)}
-                            className="text-[11px] font-bold text-purple-700 hover:underline cursor-pointer"
+                            className="text-[11px] font-bold text-orange-600 hover:underline cursor-pointer"
                           >
                             ← Use saved account ({savedAccount.maskedUpiId || savedAccount.maskedAccountNumber})
                           </button>
@@ -803,7 +803,7 @@ export function OrderActionModals({
                       {refundMethod === "upi" && (
                         <div className="space-y-2">
                           <div>
-                            <label className="text-[10.5px] font-bold text-zinc-600 block mb-1">
+                            <label className="text-[10.5px] font-bold text-stone-600 block mb-1">
                               UPI ID (VPA) *
                             </label>
                             <div className="relative">
@@ -812,7 +812,7 @@ export function OrderActionModals({
                                 placeholder="e.g., username@okhdfcbank or 9876543210@paytm"
                                 value={upiId}
                                 onChange={(e) => setUpiId(e.target.value)}
-                                className="w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:border-[#7c3aed] focus:ring-1 focus:ring-[#7c3aed] focus:outline-none font-mono"
+                                className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#F46A1E] focus:ring-1 focus:ring-[#F46A1E] focus:outline-none font-mono"
                               />
                               {/^[a-zA-Z0-9.\-_]{2,49}@[a-zA-Z]{2,}$/.test(upiId.trim()) && (
                                 <div className="absolute right-2.5 top-2 text-emerald-600 flex items-center gap-1 text-[10.5px] font-bold">
@@ -825,7 +825,7 @@ export function OrderActionModals({
 
                           {/* Quick Handle Suggestions */}
                           <div className="flex items-center gap-1 flex-wrap pt-0.5">
-                            <span className="text-[9.5px] text-zinc-500 font-semibold">Quick handles:</span>
+                            <span className="text-[9.5px] text-stone-500 font-semibold">Quick handles:</span>
                             {POPULAR_UPI_HANDLES.map((handle) => (
                               <button
                                 key={handle}
@@ -834,7 +834,7 @@ export function OrderActionModals({
                                   const prefix = upiId.includes("@") ? upiId.split("@")[0] : upiId;
                                   setUpiId(`${prefix || "user"}${handle}`);
                                 }}
-                                className="rounded-md bg-white border border-zinc-200 px-1.5 py-0.5 text-[9.5px] font-bold text-zinc-700 hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition cursor-pointer"
+                                className="rounded-md bg-white border border-stone-200 px-1.5 py-0.5 text-[9.5px] font-bold text-stone-700 hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200 transition cursor-pointer"
                               >
                                 {handle}
                               </button>
@@ -848,7 +848,7 @@ export function OrderActionModals({
                         <div className="space-y-2">
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-zinc-500 block mb-0.5">
+                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-stone-500 block mb-0.5">
                                 Account Holder Name *
                               </label>
                               <input
@@ -856,11 +856,11 @@ export function OrderActionModals({
                                 placeholder="e.g., Rajesh Kumar"
                                 value={holderName}
                                 onChange={(e) => setHolderName(e.target.value)}
-                                className="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-900 placeholder:text-zinc-400 focus:border-[#7c3aed] focus:outline-none"
+                                className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-stone-900 placeholder:text-stone-400 focus:border-[#F46A1E] focus:outline-none"
                               />
                             </div>
                             <div>
-                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-zinc-500 block mb-0.5">
+                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-stone-500 block mb-0.5">
                                 Bank Name (Optional)
                               </label>
                               <input
@@ -868,14 +868,14 @@ export function OrderActionModals({
                                 placeholder="e.g., HDFC Bank"
                                 value={bankName}
                                 onChange={(e) => setBankName(e.target.value)}
-                                className="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-900 placeholder:text-zinc-400 focus:border-[#7c3aed] focus:outline-none"
+                                className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-stone-900 placeholder:text-stone-400 focus:border-[#F46A1E] focus:outline-none"
                               />
                             </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-2">
                             <div>
-                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-zinc-500 block mb-0.5">
+                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-stone-500 block mb-0.5">
                                 Account Number *
                               </label>
                               <input
@@ -883,11 +883,11 @@ export function OrderActionModals({
                                 placeholder="Enter account number"
                                 value={accountNumber}
                                 onChange={(e) => setAccountNumber(e.target.value)}
-                                className="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:border-[#7c3aed] focus:outline-none font-mono"
+                                className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#F46A1E] focus:outline-none font-mono"
                               />
                             </div>
                             <div>
-                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-zinc-500 block mb-0.5">
+                              <label className="text-[9.5px] font-bold uppercase tracking-wider text-stone-500 block mb-0.5">
                                 Confirm Account Number *
                               </label>
                               <input
@@ -896,19 +896,19 @@ export function OrderActionModals({
                                 value={confirmAccount}
                                 onChange={(e) => setConfirmAccount(e.target.value)}
                                 className={cn(
-                                  "w-full rounded-lg border bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:outline-none font-mono",
+                                  "w-full rounded-lg border bg-white px-2.5 py-1.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none font-mono",
                                   confirmAccount && accountNumber !== confirmAccount
                                     ? "border-red-400 focus:border-red-500"
                                     : confirmAccount && accountNumber === confirmAccount
                                     ? "border-emerald-500 focus:border-emerald-600"
-                                    : "border-zinc-300 focus:border-[#7c3aed]"
+                                    : "border-stone-300 focus:border-[#F46A1E]"
                                 )}
                               />
                             </div>
                           </div>
 
                           <div>
-                            <label className="text-[9.5px] font-bold uppercase tracking-wider text-zinc-500 block mb-0.5">
+                            <label className="text-[9.5px] font-bold uppercase tracking-wider text-stone-500 block mb-0.5">
                               IFSC Code * (11 characters)
                             </label>
                             <input
@@ -917,46 +917,46 @@ export function OrderActionModals({
                               maxLength={11}
                               value={ifscCode}
                               onChange={(e) => setIfscCode(e.target.value.toUpperCase())}
-                              className="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-900 placeholder:text-zinc-400 focus:border-[#7c3aed] focus:outline-none uppercase font-mono tracking-wider"
+                              className="w-full rounded-lg border border-stone-300 bg-white px-2.5 py-1.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#F46A1E] focus:outline-none uppercase font-mono tracking-wider"
                             />
                           </div>
                         </div>
                       )}
 
                       {/* Save Account Checkbox */}
-                      <label className="flex items-center gap-1.5 pt-0.5 text-[11px] font-semibold text-zinc-700 cursor-pointer select-none">
+                      <label className="flex items-center gap-1.5 pt-0.5 text-[11px] font-semibold text-stone-700 cursor-pointer select-none">
                         <input
                           type="checkbox"
                           checked={saveForFuture}
                           onChange={(e) => setSaveForFuture(e.target.checked)}
-                          className="rounded border-zinc-300 text-purple-600 focus:ring-purple-500 h-3.5 w-3.5 cursor-pointer"
+                          className="rounded border-stone-300 text-[#F46A1E] focus:ring-orange-500 h-3.5 w-3.5 cursor-pointer"
                         />
                         <span>Save this payout account securely for 1-click future refunds</span>
                       </label>
                     </div>
                   )}
 
-                  {/* ── 256-Bit Encrypted & 100% Privacy Protected Security Card (Dynamic 1-2 Days for Online) ── */}
-                  <div className="rounded-2xl border border-[#ede9fe] bg-[#faf8ff] p-3 sm:p-3.5 flex items-start gap-3">
-                    <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl bg-[#ede9fe] text-[#6d28d9] shrink-0 border border-[#ddd6fe]">
+                  {/* ── 256-Bit Encrypted & 100% Privacy Protected Security Card (MOCS Orange Theme) ── */}
+                  <div className="rounded-2xl border border-orange-200/80 bg-[#fffaf5] p-3 sm:p-3.5 flex items-start gap-3">
+                    <div className="grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-xl bg-orange-100 text-orange-700 shrink-0 border border-orange-200">
                       <Shield className="h-4.5 w-4.5 stroke-[2]" />
                     </div>
                     <div className="text-xs space-y-0.5">
-                      <p className="font-bold text-[#5b21b6] text-xs sm:text-[13px]">
+                      <p className="font-bold text-orange-950 text-xs sm:text-[13px]">
                         256-Bit Encrypted & 100% Privacy Protected
                       </p>
-                      <p className="text-zinc-500 leading-snug text-[10.5px] sm:text-[11px]">
-                        Your payout details are encrypted and accessed strictly for refund processing. Money is transferred automatically to your account within <strong className="text-zinc-700 font-semibold">{isOnlinePayment ? "1–2 business days" : "2–3 business days"}</strong> after product collection & inspection.
+                      <p className="text-stone-500 leading-snug text-[10.5px] sm:text-[11px]">
+                        Your payout details are encrypted and accessed strictly for refund processing. Money is transferred automatically to your account within <strong className="text-stone-700 font-semibold">{isOnlinePayment ? "1–2 business days" : "2–3 business days"}</strong> after product collection & inspection.
                       </p>
                     </div>
                   </div>
 
-                  {/* ── Footer Actions matching reference (Clean & Compact) ── */}
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-150 gap-2.5">
+                  {/* ── Footer Actions (MOCS Orange Theme) ── */}
+                  <div className="flex items-center justify-between pt-3 border-t border-stone-150 gap-2.5">
                     <button
                       type="button"
                       onClick={() => setReturnStep(1)}
-                      className="flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs font-bold text-zinc-800 hover:bg-zinc-50 hover:text-zinc-950 transition shadow-xs cursor-pointer"
+                      className="flex items-center gap-1.5 rounded-xl border border-stone-200 bg-white px-4 py-2.5 text-xs font-bold text-stone-800 hover:bg-stone-50 hover:text-stone-950 transition shadow-xs cursor-pointer"
                     >
                       <ArrowLeft className="h-3.5 w-3.5 stroke-[2.2]" />
                       Back
@@ -966,7 +966,7 @@ export function OrderActionModals({
                       type="button"
                       disabled={submittingReturn}
                       onClick={handleSubmitReturn}
-                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#6d28d9] to-[#4c1d95] hover:from-[#5b21b6] hover:to-[#3b0764] px-5 sm:px-7 py-2.5 text-white shadow-md shadow-purple-600/25 transition duration-200 cursor-pointer disabled:opacity-50"
+                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#F46A1E] to-[#d95b13] hover:from-[#ea580c] hover:to-[#c2410c] px-5 sm:px-7 py-2.5 text-white shadow-md shadow-orange-500/25 transition duration-200 cursor-pointer disabled:opacity-50"
                     >
                       <div className="grid h-4.5 w-4.5 place-items-center rounded-md bg-white/15 border border-white/25 shrink-0">
                         <Lock className="h-2.5 w-2.5 text-white stroke-[2.5]" />
@@ -975,7 +975,7 @@ export function OrderActionModals({
                         <span className="font-extrabold text-xs sm:text-[13px] uppercase tracking-wider block text-white leading-none">
                           {submittingReturn ? "SUBMITTING..." : "CONFIRM & SUBMIT RETURN"}
                         </span>
-                        <span className="text-[9.5px] text-purple-200 font-medium normal-case block leading-tight mt-0.5">
+                        <span className="text-[9.5px] text-orange-100 font-medium normal-case block leading-tight mt-0.5">
                           Secure • Fast • Hassle-free
                         </span>
                       </div>

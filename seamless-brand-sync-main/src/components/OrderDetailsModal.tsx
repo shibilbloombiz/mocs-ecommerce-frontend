@@ -65,7 +65,7 @@ export function OrderDetailsModal({
                     <div className="flex flex-wrap items-center gap-2 mt-0.5">
                       <span className="text-[10px] text-stone-500 font-medium">Size {item.size} · Color: {item.color} · Qty {item.qty}</span>
                       {isItemRefundedOrReturned(item, selectedOrder) && (
-                        <span className="text-[9px] font-extrabold uppercase tracking-widest text-purple-650 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-150 shrink-0">
+                        <span className="text-[9px] font-extrabold uppercase tracking-widest text-orange-700 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200 shrink-0">
                           {selectedOrder.orderStatus === "Return Requested" || selectedOrder.status === "return_requested" 
                             ? "Return Requested" 
                             : selectedOrder.orderStatus === "Return Accepted" || selectedOrder.status === "return_accepted"
@@ -185,10 +185,10 @@ export function OrderDetailsModal({
 
                   {/* Amazon/Flipkart Style Refund Payout Card for Prepaid Cancelled Orders */}
                   {selectedOrder.refundDetails && (
-                    <div className="rounded-2xl border border-purple-200/80 bg-purple-50/30 p-4 space-y-3 text-left">
-                      <div className="flex items-center justify-between border-b border-purple-150 pb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
-                          <CreditCard className="h-4 w-4 text-purple-600" />
+                    <div className="rounded-2xl border border-orange-200/80 bg-[#fffaf5] p-4 space-y-3 text-left">
+                      <div className="flex items-center justify-between border-b border-orange-150 pb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
+                          <CreditCard className="h-4 w-4 text-[#F46A1E]" />
                           Prepaid Cancellation Refund
                         </span>
                         <span className={cn(
@@ -197,7 +197,7 @@ export function OrderDetailsModal({
                             ? "bg-emerald-100 text-emerald-800 border-emerald-300"
                             : selectedOrder.refundDetails?.refundStatus === "Pending Approval" || selectedOrder.paymentStatus === "Refund Pending Approval"
                             ? "bg-amber-100 text-amber-800 border-amber-300"
-                            : "bg-purple-100 text-purple-800 border-purple-300"
+                            : "bg-orange-100 text-orange-800 border-orange-300"
                         )}>
                           {selectedOrder.refundDetails?.refundStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded" 
                             ? "Refund Credited" 
@@ -238,7 +238,7 @@ export function OrderDetailsModal({
                       </div>
 
                       {(selectedOrder.refundDetails?.refundStatus === "Pending Approval" || selectedOrder.paymentStatus === "Refund Pending Approval") && (
-                        <p className="text-[10.5px] text-stone-500 pt-2 border-t border-purple-100/70 leading-relaxed">
+                        <p className="text-[10.5px] text-stone-500 pt-2 border-t border-orange-100/70 leading-relaxed">
                           ℹ️ Your cancellation & refund request is under review by our admin team. Once approved, the funds will be transferred directly to your payment source.
                         </p>
                       )}
@@ -275,9 +275,9 @@ export function OrderDetailsModal({
                                     className={cn(
                                       "h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-xs select-none",
                                       isCompleted
-                                        ? "bg-purple-600 text-white border-2 border-purple-600"
+                                        ? "bg-[#F46A1E] text-white border-2 border-[#F46A1E]"
                                         : isActive
-                                        ? "bg-white text-purple-600 border-2 border-purple-600 ring-4 ring-purple-100 shadow-md scale-105"
+                                        ? "bg-white text-[#F46A1E] border-2 border-[#F46A1E] ring-4 ring-orange-100 shadow-md scale-105"
                                         : "bg-stone-50 text-stone-300 border-2 border-stone-200"
                                     )}
                                   >
@@ -294,7 +294,7 @@ export function OrderDetailsModal({
                                       className={cn(
                                         "text-[8.5px] sm:text-[9.5px] font-extrabold uppercase tracking-tight leading-tight",
                                         isActive
-                                          ? "text-purple-700 font-black"
+                                          ? "text-orange-700 font-black"
                                           : isCompleted
                                           ? "text-stone-850"
                                           : "text-stone-400"
@@ -316,7 +316,7 @@ export function OrderDetailsModal({
                                     <div
                                       className={cn(
                                         "h-full transition-all duration-500",
-                                        idx < clampedStepIndex ? "bg-purple-600 w-full" : "w-0"
+                                        idx < clampedStepIndex ? "bg-[#F46A1E] w-full" : "w-0"
                                       )}
                                     />
                                   </div>
@@ -331,17 +331,17 @@ export function OrderDetailsModal({
                   </div>
 
                   {/* Amazon/Flipkart-Style Refund Payout Destination Card */}
-                  <div className="rounded-2xl border border-purple-200/80 bg-purple-50/30 p-4 space-y-3">
-                    <div className="flex items-center justify-between border-b border-purple-150 pb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
-                        <CreditCard className="h-4 w-4 text-purple-600" />
+                  <div className="rounded-2xl border border-orange-200/80 bg-[#fffaf5] p-4 space-y-3">
+                    <div className="flex items-center justify-between border-b border-orange-150 pb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
+                        <CreditCard className="h-4 w-4 text-[#F46A1E]" />
                         Refund Payout Details
                       </span>
                       <span className={cn(
                         "rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider border",
                         selectedOrder.orderStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded"
                           ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                          : "bg-purple-100 text-purple-800 border-purple-300"
+                          : "bg-orange-100 text-orange-800 border-orange-300"
                       )}>
                         {selectedOrder.orderStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded" ? "Refund Credited" : "Refund in Progress"}
                       </span>
@@ -356,7 +356,7 @@ export function OrderDetailsModal({
                           </p>
                         ) : selectedOrder.refundDetails?.refundMethod === "upi" ? (
                           <p className="font-bold text-stone-850 mt-0.5">
-                            UPI ID: <span className="font-mono text-purple-700">{selectedOrder.refundDetails?.upiDetails?.maskedUpiId || selectedOrder.refundDetails?.upiDetails?.upiId}</span>
+                            UPI ID: <span className="font-mono text-orange-700 font-bold">{selectedOrder.refundDetails?.upiDetails?.maskedUpiId || selectedOrder.refundDetails?.upiDetails?.upiId}</span>
                           </p>
                         ) : (
                           <p className="font-bold text-stone-850 mt-0.5">Original Payment Source ({selectedOrder.paymentMethod})</p>
@@ -384,7 +384,7 @@ export function OrderDetailsModal({
                     </div>
 
                     {selectedOrder.returnReason && (
-                      <div className="pt-2 border-t border-purple-100 text-[11px] text-stone-600">
+                      <div className="pt-2 border-t border-orange-100 text-[11px] text-stone-600">
                         <span className="font-bold text-stone-700">Return Reason: </span>
                         {selectedOrder.returnReason}
                       </div>
@@ -520,7 +520,7 @@ export function OrderDetailsModal({
             return (
               <button
                 onClick={() => onReturn(selectedOrder._id)}
-                className="rounded-full border border-purple-200 bg-purple-50 px-5 py-2 text-xs font-bold text-purple-600 hover:bg-purple-100 transition cursor-pointer"
+                className="rounded-full border border-orange-200 bg-orange-50 px-5 py-2 text-xs font-bold text-orange-600 hover:bg-orange-100 transition cursor-pointer"
               >
                 Request Return
               </button>

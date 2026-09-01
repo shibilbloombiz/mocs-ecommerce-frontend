@@ -760,17 +760,53 @@ function AdminOrders() {
                               </div>
 
                               {selectedOrder.refundDetails?.refundMethod === "bank" && selectedOrder.refundDetails?.bankDetails && (
-                                <div className="space-y-0.5 text-[11px] font-medium text-stone-700">
+                                <div className="space-y-1 text-[11px] font-medium text-stone-700">
                                   <p><strong>A/C Holder:</strong> {selectedOrder.refundDetails.bankDetails.accountHolderName}</p>
                                   <p><strong>Bank:</strong> {selectedOrder.refundDetails.bankDetails.bankName || "Bank Transfer"}</p>
-                                  <p className="font-mono"><strong>A/C Number:</strong> {selectedOrder.refundDetails.bankDetails.accountNumber || selectedOrder.refundDetails.bankDetails.maskedAccountNumber}</p>
-                                  <p className="font-mono"><strong>IFSC Code:</strong> {selectedOrder.refundDetails.bankDetails.ifscCode}</p>
+                                  <div className="flex items-center justify-between font-mono bg-stone-50 p-1.5 rounded border border-stone-200">
+                                    <span><strong>A/C:</strong> {selectedOrder.refundDetails.bankDetails.accountNumber || selectedOrder.refundDetails.bankDetails.maskedAccountNumber}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(selectedOrder.refundDetails.bankDetails.accountNumber);
+                                        toast.success("Account number copied!");
+                                      }}
+                                      className="text-[10px] font-bold text-purple-700 hover:underline cursor-pointer"
+                                    >
+                                      Copy A/C
+                                    </button>
+                                  </div>
+                                  <div className="flex items-center justify-between font-mono bg-stone-50 p-1.5 rounded border border-stone-200">
+                                    <span><strong>IFSC:</strong> {selectedOrder.refundDetails.bankDetails.ifscCode}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(selectedOrder.refundDetails.bankDetails.ifscCode);
+                                        toast.success("IFSC Code copied!");
+                                      }}
+                                      className="text-[10px] font-bold text-purple-700 hover:underline cursor-pointer"
+                                    >
+                                      Copy IFSC
+                                    </button>
+                                  </div>
                                 </div>
                               )}
 
                               {selectedOrder.refundDetails?.refundMethod === "upi" && (
-                                <div className="text-[11px] text-stone-700 font-medium">
-                                  <p><strong>UPI ID:</strong> <span className="font-mono text-purple-700 font-bold">{selectedOrder.refundDetails.upiDetails?.upiId || selectedOrder.refundDetails.upiDetails?.maskedUpiId}</span></p>
+                                <div className="space-y-1 text-[11px] text-stone-700 font-medium">
+                                  <div className="flex items-center justify-between bg-stone-50 p-1.5 rounded border border-stone-200">
+                                    <p><strong>UPI ID:</strong> <span className="font-mono text-purple-700 font-bold">{selectedOrder.refundDetails.upiDetails?.upiId || selectedOrder.refundDetails.upiDetails?.maskedUpiId}</span></p>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(selectedOrder.refundDetails.upiDetails?.upiId || selectedOrder.refundDetails.upiDetails?.maskedUpiId);
+                                        toast.success("UPI ID copied!");
+                                      }}
+                                      className="text-[10px] font-bold text-purple-700 hover:underline cursor-pointer ml-2"
+                                    >
+                                      Copy UPI
+                                    </button>
+                                  </div>
                                 </div>
                               )}
 
