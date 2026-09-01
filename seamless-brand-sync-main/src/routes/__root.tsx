@@ -21,6 +21,7 @@ import { CartDrawer } from "../components/CartDrawer";
 import { SearchModal } from "../components/SearchModal";
 import { MobileNav } from "../components/MobileNav";
 import { ScrollTagline } from "../components/ScrollTagline";
+import { FloatingScrollbar } from "../components/FloatingScrollbar";
 
 function NotFoundComponent() {
   return (
@@ -174,6 +175,7 @@ function RootComponent() {
         {!isAdminRoute && <SearchModal />}
         {!isAuthPage && !isAdminRoute && <ScrollTagline />}
         <FloatingNotificationContainer />
+        <FloatingScrollbar />
         {!isAuthPage && !isAdminRoute && <div className="h-14 lg:hidden" />}
       </StoreProvider>
     </QueryClientProvider>
