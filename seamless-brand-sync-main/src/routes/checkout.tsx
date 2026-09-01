@@ -331,9 +331,10 @@ function Checkout() {
           name: finalAddress.fullName,
           email: finalEmail,
           contact: finalAddress.phone || user?.phone || "",
-          method: paymentMethod === "cod" ? undefined : paymentMethod,
         },
-        theme: { color: "#F46A1E" }, // MOCS Orange Theme
+        theme: { color: "#F46A1E", backdrop_color: "rgba(0,0,0,0.6)" },
+        retry: { enabled: false },
+        send_sms_hash: false,
         handler: async (response: {
           razorpay_order_id: string;
           razorpay_payment_id: string;

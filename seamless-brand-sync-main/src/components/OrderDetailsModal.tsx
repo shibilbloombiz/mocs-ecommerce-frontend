@@ -1,5 +1,7 @@
+import { Fragment } from "react";
 import { X, Calendar, MapPin, CreditCard, Check } from "lucide-react";
 import { cn, getImageUrl, formatDate, formatDateTime } from "@/lib/utils";
+
 
 interface OrderDetailsModalProps {
   isOpen: boolean;
@@ -79,7 +81,10 @@ export function OrderDetailsModal({
                     <span className="font-semibold text-sm text-stone-900">₹{item.price * item.qty}</span>
                     {["Delivered", "delivered"].includes(selectedOrder.orderStatus || selectedOrder.status) && (
                       <button
-                        onClick={() => onReview(item.product, selectedOrder._id, item.color || "Default", item.size || null)}
+                        onClick={() => {
+                          const prodId = typeof item.product === "object" ? (item.product?._id || item.product?.id) : item.product;
+                          onReview(String(prodId || ""), selectedOrder._id, item.color || "Default", item.size || null);
+                        }}
                         className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary hover:bg-primary/20 transition cursor-pointer"
                       >
                         Review
@@ -163,52 +168,232 @@ export function OrderDetailsModal({
             </div>
           </div>
 
-          {/* Status History Timeline */}
+          {/* Status History & Return/Refund Lifecycle Tracker */}
           {selectedOrder.statusHistory && selectedOrder.statusHistory.length > 0 && (
             <div className="space-y-4 border-t border-stone-100 pt-6">
               <h4 className="font-display text-xs font-black uppercase tracking-widest text-primary text-left">
-                Order Status Tracker
+                {["Return Requested", "Return Accepted", "Out for Pickup", "Item Picked Up", "Returned", "Refund Initiated", "Refunded"].includes(selectedOrder.orderStatus)
+                  ? "Return & Refund Tracking"
+                  : "Order Status Tracker"}
               </h4>
               
-              {["Cancelled", "Returned", "Return Requested", "Return Accepted"].includes(selectedOrder.orderStatus) ? (
-                <div className={cn(
-                  "rounded-2xl border p-4 text-xs font-bold text-center",
-                  selectedOrder.orderStatus === "Cancelled" 
-                    ? "bg-red-50 border-red-200 text-red-600"
-                    : selectedOrder.orderStatus === "Return Requested"
-                      ? "bg-purple-50 border-purple-200 text-purple-600"
-                      : selectedOrder.orderStatus === "Return Accepted"
-                        ? "bg-sky-50 border-sky-200 text-sky-600"
-                        : "bg-stone-50 border-stone-200 text-stone-600"
-                )}>
-                  {selectedOrder.orderStatus === "Cancelled" && `This order was cancelled: ${selectedOrder.cancelReason || "No reason provided"}`}
-                  {selectedOrder.orderStatus === "Return Requested" && `Return requested: ${selectedOrder.returnReason || "No reason provided"}`}
-                  {selectedOrder.orderStatus === "Return Accepted" && `Return accepted: Your order will be fetched back within 7 days.`}
-                  {selectedOrder.orderStatus === "Returned" && `This order was returned${selectedOrder.paymentStatus === "Refunded" || selectedOrder.paymentStatus === "refunded" ? " and refunded" : ""}: ${selectedOrder.returnReason || "No reason provided"}`}
+              {selectedOrder.orderStatus === "Cancelled" ? (
+                <div className="space-y-3">
+                  <div className="rounded-2xl border p-4 text-xs font-bold text-center bg-red-50 border-red-200 text-red-600">
+                    This order was cancelled: {selectedOrder.cancelReason || "No reason provided"}
+                  </div>
+
+                  {/* Amazon/Flipkart Style Refund Payout Card for Prepaid Cancelled Orders */}
+                  {selectedOrder.refundDetails && (
+                    <div className="rounded-2xl border border-purple-200/80 bg-purple-50/30 p-4 space-y-3 text-left">
+                      <div className="flex items-center justify-between border-b border-purple-150 pb-2">
+                        <span className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                          <CreditCard className="h-4 w-4 text-purple-600" />
+                          Prepaid Cancellation Refund
+                        </span>
+                        <span className={cn(
+                          "rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider border",
+                          selectedOrder.refundDetails?.refundStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded"
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                            : selectedOrder.refundDetails?.refundStatus === "Pending Approval" || selectedOrder.paymentStatus === "Refund Pending Approval"
+                            ? "bg-amber-100 text-amber-800 border-amber-300"
+                            : "bg-purple-100 text-purple-800 border-purple-300"
+                        )}>
+                          {selectedOrder.refundDetails?.refundStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded" 
+                            ? "Refund Credited" 
+                            : selectedOrder.refundDetails?.refundStatus === "Pending Approval" || selectedOrder.paymentStatus === "Refund Pending Approval"
+                            ? "Pending Admin Approval"
+                            : "Refund Initiated"}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <span className="text-stone-400 text-[10px] font-bold uppercase tracking-wider block">Refund Destination</span>
+                          <p className="font-bold text-stone-850 mt-0.5">
+                            Original Payment Source ({selectedOrder.paymentMethod || "Online / Razorpay"})
+                          </p>
+                          {selectedOrder.razorpayPaymentId && (
+                            <p className="text-[10px] text-stone-500 font-mono truncate">Payment Ref: {selectedOrder.razorpayPaymentId}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <span className="text-stone-400 text-[10px] font-bold uppercase tracking-wider block">Refund Amount</span>
+                          <p className="font-display font-extrabold text-stone-900 text-sm mt-0.5">
+                            ₹{selectedOrder.refundDetails?.refundAmount || selectedOrder.total}
+                          </p>
+                          {selectedOrder.refundDetails?.refundTransactionId ? (
+                            <p className="text-[10px] font-mono text-emerald-700 font-bold mt-0.5">
+                              UTR / Ref: {selectedOrder.refundDetails.refundTransactionId}
+                            </p>
+                          ) : (
+                            <p className="text-[10px] text-amber-700 font-semibold mt-0.5">
+                              {selectedOrder.refundDetails?.refundStatus === "Pending Approval" || selectedOrder.paymentStatus === "Refund Pending Approval"
+                                ? "Awaiting admin verification & approval"
+                                : "Est. Credit: 1–2 business days"}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {(selectedOrder.refundDetails?.refundStatus === "Pending Approval" || selectedOrder.paymentStatus === "Refund Pending Approval") && (
+                        <p className="text-[10.5px] text-stone-500 pt-2 border-t border-purple-100/70 leading-relaxed">
+                          ℹ️ Your cancellation & refund request is under review by our admin team. Once approved, the funds will be transferred directly to your payment source.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : ["Return Requested", "Return Accepted", "Out for Pickup", "Item Picked Up", "Returned", "Refund Initiated", "Refunded"].includes(selectedOrder.orderStatus) ? (
+                <div className="space-y-4">
+                  {/* Return & Refund Stepper Tracker */}
+                  <div className="w-full pt-3 pb-2 select-none">
+                    {(() => {
+                      const returnSteps = ["Return Requested", "Return Accepted", "Item Picked Up", "Refund Initiated", "Refunded"];
+                      const currentStatus = selectedOrder.orderStatus === "Returned" ? "Item Picked Up" : selectedOrder.orderStatus;
+                      const currentStepIndex = returnSteps.findIndex(s => s.toLowerCase() === currentStatus.toLowerCase());
+                      const clampedStepIndex = currentStepIndex >= 0 ? currentStepIndex : 0;
+                      
+                      const getReturnStatusDate = (statusName: string) => {
+                        const match = selectedOrder.statusHistory?.find((h: any) => h.status.toLowerCase() === statusName.toLowerCase() || (statusName === "Item Picked Up" && h.status.toLowerCase() === "returned"));
+                        return match ? formatDate(match.updatedAt) : null;
+                      };
+
+                      return (
+                        <div className="flex items-center justify-between w-full">
+                          {returnSteps.map((step, idx) => {
+                            const isCompleted = idx < clampedStepIndex;
+                            const isActive = idx === clampedStepIndex;
+                            const stepDate = getReturnStatusDate(step);
+
+                            return (
+                              <Fragment key={step}>
+                                {/* Node */}
+                                <div className="flex flex-col items-center relative shrink-0">
+                                  <div
+                                    className={cn(
+                                      "h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-xs select-none",
+                                      isCompleted
+                                        ? "bg-purple-600 text-white border-2 border-purple-600"
+                                        : isActive
+                                        ? "bg-white text-purple-600 border-2 border-purple-600 ring-4 ring-purple-100 shadow-md scale-105"
+                                        : "bg-stone-50 text-stone-300 border-2 border-stone-200"
+                                    )}
+                                  >
+                                    {isCompleted ? (
+                                      <Check className="h-4 w-4 stroke-[3]" />
+                                    ) : (
+                                      <span className="text-xs font-extrabold font-mono">{idx + 1}</span>
+                                    )}
+                                  </div>
+
+                                  {/* Label & Date */}
+                                  <div className="absolute top-10 sm:top-11 flex flex-col items-center w-20 sm:w-24 text-center pointer-events-none">
+                                    <span
+                                      className={cn(
+                                        "text-[8.5px] sm:text-[9.5px] font-extrabold uppercase tracking-tight leading-tight",
+                                        isActive
+                                          ? "text-purple-700 font-black"
+                                          : isCompleted
+                                          ? "text-stone-850"
+                                          : "text-stone-400"
+                                      )}
+                                    >
+                                      {step === "Return Accepted" ? "Approved" : step === "Item Picked Up" ? "Picked Up" : step}
+                                    </span>
+                                    {stepDate && (
+                                      <span className="text-[7.5px] sm:text-[8px] font-bold text-stone-400 mt-0.5 whitespace-nowrap">
+                                        {stepDate}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Connecting Segment */}
+                                {idx < returnSteps.length - 1 && (
+                                  <div className="flex-1 h-[2.5px] mx-1 sm:mx-1.5 rounded-full overflow-hidden bg-stone-200/80">
+                                    <div
+                                      className={cn(
+                                        "h-full transition-all duration-500",
+                                        idx < clampedStepIndex ? "bg-purple-600 w-full" : "w-0"
+                                      )}
+                                    />
+                                  </div>
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                    <div className="h-10 sm:h-11" />
+                  </div>
+
+                  {/* Amazon/Flipkart-Style Refund Payout Destination Card */}
+                  <div className="rounded-2xl border border-purple-200/80 bg-purple-50/30 p-4 space-y-3">
+                    <div className="flex items-center justify-between border-b border-purple-150 pb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                        <CreditCard className="h-4 w-4 text-purple-600" />
+                        Refund Payout Details
+                      </span>
+                      <span className={cn(
+                        "rounded-full px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider border",
+                        selectedOrder.orderStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded"
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-300"
+                          : "bg-purple-100 text-purple-800 border-purple-300"
+                      )}>
+                        {selectedOrder.orderStatus === "Refunded" || selectedOrder.paymentStatus?.toLowerCase() === "refunded" ? "Refund Credited" : "Refund in Progress"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <span className="text-stone-400 text-[10px] font-bold uppercase tracking-wider block">Refund Destination</span>
+                        {selectedOrder.refundDetails?.refundMethod === "bank" ? (
+                          <p className="font-bold text-stone-850 mt-0.5">
+                            {selectedOrder.refundDetails?.bankDetails?.bankName || "Bank Transfer"} (A/C: {selectedOrder.refundDetails?.bankDetails?.maskedAccountNumber || "••••"})
+                          </p>
+                        ) : selectedOrder.refundDetails?.refundMethod === "upi" ? (
+                          <p className="font-bold text-stone-850 mt-0.5">
+                            UPI ID: <span className="font-mono text-purple-700">{selectedOrder.refundDetails?.upiDetails?.maskedUpiId || selectedOrder.refundDetails?.upiDetails?.upiId}</span>
+                          </p>
+                        ) : (
+                          <p className="font-bold text-stone-850 mt-0.5">Original Payment Source ({selectedOrder.paymentMethod})</p>
+                        )}
+                        {selectedOrder.refundDetails?.bankDetails?.accountHolderName && (
+                          <p className="text-[11px] text-stone-500">Beneficiary: {selectedOrder.refundDetails?.bankDetails?.accountHolderName}</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <span className="text-stone-400 text-[10px] font-bold uppercase tracking-wider block">Refund Amount</span>
+                        <p className="font-display font-extrabold text-stone-900 text-sm mt-0.5">
+                          ₹{selectedOrder.refundDetails?.refundAmount || selectedOrder.total}
+                        </p>
+                        {selectedOrder.refundDetails?.refundTransactionId ? (
+                          <p className="text-[10px] font-mono text-emerald-700 font-bold mt-0.5">
+                            UTR / Ref: {selectedOrder.refundDetails.refundTransactionId}
+                          </p>
+                        ) : (
+                          <p className="text-[10px] text-stone-500 font-semibold mt-0.5">
+                            Est. Credit: {["online", "upi", "card", "prepaid", "razorpay"].includes((selectedOrder.paymentMethod || "").toLowerCase()) ? "1–2 business days after product collection" : "2–3 business days after pickup"}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {selectedOrder.returnReason && (
+                      <div className="pt-2 border-t border-purple-100 text-[11px] text-stone-600">
+                        <span className="font-bold text-stone-700">Return Reason: </span>
+                        {selectedOrder.returnReason}
+                      </div>
+                    )}
+                  </div>
                 </div>
               ) : (
-                /* Stepper Grid Container */
-                <div className="relative flex items-center justify-between px-2 pt-2 pb-8 select-none">
-                  {/* Connecting Line Background */}
-                  <div className="absolute left-8 right-8 top-6 h-0.5 bg-stone-150 -translate-y-1/2" />
-                  
-                  {/* Connecting Line Active Fill */}
-                  <div 
-                    className="absolute left-8 top-6 h-0.5 bg-emerald-500 -translate-y-1/2 transition-all duration-500" 
-                    style={{ 
-                      width: `${
-                        (() => {
-                          const steps = ["Placed", "Confirmed", "Processing", "Shipped", "Out for Delivery", "Delivered"];
-                          const currentStatus = selectedOrder.orderStatus || selectedOrder.status || "Placed";
-                          const index = steps.findIndex(s => s.toLowerCase() === currentStatus.toLowerCase());
-                          const clampedIndex = index >= 0 ? index : 0;
-                          return clampedIndex >= steps.length - 1 ? 100 : (clampedIndex / (steps.length - 1)) * 100;
-                        })()
-                      }%`,
-                      maxWidth: "calc(100% - 4rem)"
-                    }}
-                  />
-
+                /* Standard Forward Delivery Stepper */
+                <div className="w-full pt-3 pb-2 select-none">
                   {(() => {
                     const steps = ["Placed", "Confirmed", "Processing", "Shipped", "Out for Delivery", "Delivered"];
                     const currentStatus = selectedOrder.orderStatus || selectedOrder.status || "Placed";
@@ -220,49 +405,81 @@ export function OrderDetailsModal({
                       return match ? formatDate(match.updatedAt) : null;
                     };
 
-                    return steps.map((step, idx) => {
-                      const isCompleted = idx <= clampedStepIndex;
-                      const isActive = idx === clampedStepIndex;
-                      const stepDate = getStatusDate(step);
-                      
-                      return (
-                        <div key={step} className="relative z-10 flex flex-col items-center flex-1">
-                          <div className={cn(
-                            "h-8 w-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 bg-white",
-                            isActive 
-                              ? "border-emerald-500 text-emerald-600 bg-emerald-50 scale-110 shadow-md shadow-emerald-500/10" 
-                              : isCompleted 
-                                ? "border-emerald-500 text-emerald-600 bg-emerald-50/50" 
-                                : "border-stone-200 text-stone-400"
-                          )}>
-                            {isCompleted ? (
-                              <Check className="h-4 w-4 stroke-[3]" />
-                            ) : (
-                              <span className="text-xs font-bold">{idx + 1}</span>
-                            )}
-                          </div>
-                          <div className="absolute top-10 text-center w-24">
-                            <p className={cn(
-                              "text-[9px] font-extrabold tracking-tight leading-tight uppercase",
-                              isActive ? "text-emerald-600" : isCompleted ? "text-stone-850" : "text-stone-400"
-                            )}>
-                              {step}
-                            </p>
-                            {stepDate && (
-                              <p className="text-[8px] text-stone-450 mt-0.5 font-bold">
-                                {stepDate}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    });
+                    return (
+                      <div className="flex items-center justify-between w-full">
+                        {steps.map((step, idx) => {
+                          const isCompleted = idx < clampedStepIndex;
+                          const isActive = idx === clampedStepIndex;
+                          const stepDate = getStatusDate(step);
+
+                          return (
+                            <Fragment key={step}>
+                              {/* Node */}
+                              <div className="flex flex-col items-center relative shrink-0">
+                                <div
+                                  className={cn(
+                                    "h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center transition-all duration-300 shadow-xs select-none",
+                                    isCompleted
+                                      ? "bg-emerald-500 text-white border-2 border-emerald-500"
+                                      : isActive
+                                      ? "bg-white text-emerald-600 border-2 border-emerald-500 ring-4 ring-emerald-100 shadow-md scale-105"
+                                      : "bg-stone-50 text-stone-300 border-2 border-stone-200"
+                                  )}
+                                >
+                                  {isCompleted ? (
+                                    <Check className="h-4 w-4 stroke-[3]" />
+                                  ) : (
+                                    <span className="text-xs font-extrabold font-mono">{idx + 1}</span>
+                                  )}
+                                </div>
+
+                                {/* Label & Date */}
+                                <div className="absolute top-10 sm:top-11 flex flex-col items-center w-20 sm:w-24 text-center pointer-events-none">
+                                  <span
+                                    className={cn(
+                                      "text-[8.5px] sm:text-[9.5px] font-extrabold uppercase tracking-tight leading-tight",
+                                      isActive
+                                        ? "text-emerald-600 font-black"
+                                        : isCompleted
+                                        ? "text-stone-850"
+                                        : "text-stone-400"
+                                    )}
+                                  >
+                                    {step}
+                                  </span>
+                                  {stepDate && (
+                                    <span className="text-[7.5px] sm:text-[8px] font-bold text-stone-400 mt-0.5 whitespace-nowrap">
+                                      {stepDate}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Connecting Segment */}
+                              {idx < steps.length - 1 && (
+                                <div className="flex-1 h-[2.5px] mx-1 sm:mx-1.5 rounded-full overflow-hidden bg-stone-200/80">
+                                  <div
+                                    className={cn(
+                                      "h-full transition-all duration-500",
+                                      idx < clampedStepIndex ? "bg-emerald-500 w-full" : "w-0"
+                                    )}
+                                  />
+                                </div>
+                              )}
+                            </Fragment>
+                          );
+                        })}
+                      </div>
+                    );
                   })()}
+                  <div className="h-10 sm:h-11" />
                 </div>
               )}
+
             </div>
           )}
         </div>
+
 
         <div className="mt-8 flex justify-end gap-3 border-t border-stone-100 pt-4">
           {["Placed", "Confirmed", "Processing", "pending", "paid"].includes(selectedOrder.orderStatus || selectedOrder.status) && (

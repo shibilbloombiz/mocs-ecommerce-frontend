@@ -37,12 +37,17 @@ const statusStyles: Record<string, string> = {
   delivered: "bg-emerald-100 text-emerald-800 border border-emerald-300/60",
   Cancelled: "bg-red-100 text-red-800 border border-red-300/60",
   cancelled: "bg-red-100 text-red-800 border border-red-300/60",
-  "Return Requested": "bg-orange-100 text-orange-850 border border-orange-300/60",
-  return_requested: "bg-orange-100 text-orange-850 border border-orange-300/60",
-  "Return Accepted": "bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-300/60",
-  return_accepted: "bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-300/60",
-  Returned: "bg-stone-100 text-stone-700 border border-stone-300/60",
-  returned: "bg-stone-100 text-stone-700 border border-stone-300/60",
+  "Return Requested": "bg-purple-100 text-purple-800 border border-purple-300/60",
+  return_requested: "bg-purple-100 text-purple-800 border border-purple-300/60",
+  "Return Accepted": "bg-sky-100 text-sky-800 border border-sky-300/60",
+  return_accepted: "bg-sky-100 text-sky-800 border border-sky-300/60",
+  "Out for Pickup": "bg-amber-100 text-amber-800 border border-amber-300/60",
+  "Item Picked Up": "bg-indigo-100 text-indigo-800 border border-indigo-300/60",
+  Returned: "bg-teal-100 text-teal-800 border border-teal-300/60",
+  returned: "bg-teal-100 text-teal-800 border border-teal-300/60",
+  "Refund Initiated": "bg-cyan-100 text-cyan-800 border border-cyan-300/60",
+  Refunded: "bg-emerald-100 text-emerald-800 border border-emerald-300/60",
+  refunded: "bg-emerald-100 text-emerald-800 border border-emerald-300/60",
 };
 
 const isItemRefundedOrReturned = (item: any, order: any) => {
@@ -54,10 +59,14 @@ const isItemRefundedOrReturned = (item: any, order: any) => {
     order.status === "return_requested" || 
     order.orderStatus === "Return Accepted" || 
     order.status === "return_accepted" || 
+    order.orderStatus === "Item Picked Up" || 
+    order.orderStatus === "Refund Initiated" || 
+    order.orderStatus === "Refunded" || 
     order.paymentStatus === "Refunded" || 
     order.paymentStatus === "refunded";
   if (!hasReturnStatus && !order.returnReason) return false;
   if (order.items?.length === 1) return true;
+
   const reason = (order.returnReason || "").toLowerCase();
   return reason.includes(item.name.toLowerCase());
 };
@@ -99,7 +108,15 @@ function OrdersPage() {
       setLoading(true);
       const backendOrders = await apiClient.orders.list();
       if (Array.isArray(backendOrders)) {
-        setOrders(backendOrders);
+        // Exclude unpaid online payment attempts where customer cancelled or never completed online payment
+        const validOrders = backendOrders.filter((o) => {
+          if (o.isDeleted) return false;
+          const isOnline = (o.paymentMethod || "").toLowerCase() === "online";
+          const isUnpaid = ["pending", "failed", "cancelled"].includes((o.paymentStatus || "").toLowerCase());
+          if (isOnline && isUnpaid && !o.paidAt) return false;
+          return true;
+        });
+        setOrders(validOrders);
       } else {
         setOrders([]);
       }
@@ -110,6 +127,7 @@ function OrdersPage() {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     if (!isAuthed()) {
@@ -122,8 +140,20 @@ function OrdersPage() {
   const handleCancelOrder = async () => {
     if (!cancelOrderId) return;
     try {
+      const isPaidOnline = selectedOrder && (
+        selectedOrder.paymentStatus === "Paid" || 
+        selectedOrder.paidAt || 
+        ["online", "upi", "card", "prepaid", "razorpay"].includes((selectedOrder?.paymentMethod || "").toLowerCase())
+      );
+
       await apiClient.orders.cancel(cancelOrderId, cancelReason);
-      toast.success("Order cancelled successfully");
+
+      if (isPaidOnline) {
+        toast.success(`Order cancelled! ₹${selectedOrder?.total || ""} refund request has been submitted for admin approval.`);
+      } else {
+        toast.success("Order cancelled successfully");
+      }
+
       setCancelModal(false);
       setCancelReason("");
       setDetailModalOpen(false);
@@ -133,14 +163,10 @@ function OrdersPage() {
     }
   };
 
-  const handleReturnOrder = async () => {
+  const handleReturnOrder = async (payload: any) => {
     if (!returnOrderId) return;
-    if (selectedOrder && selectedOrder.items?.length > 1 && returnItems.length === 0) {
-      toast.error("Please select at least one item to return");
-      return;
-    }
     try {
-      let finalReason = returnReason;
+      let finalReason = payload?.reason || returnReason;
       if (selectedOrder && selectedOrder.items?.length > 1) {
         const selectedDetails = selectedOrder.items
           .filter((item: any) => {
@@ -148,10 +174,27 @@ function OrdersPage() {
             return returnItems.includes(key);
           })
           .map((item: any) => `${item.name} (Size ${item.size}, ${item.color})`);
-        finalReason = `[Returned Items: ${selectedDetails.join(", ")}] — Reason: ${returnReason}`;
+        if (selectedDetails.length > 0) {
+          finalReason = `[Items: ${selectedDetails.join(", ")}] — ${payload?.reason || returnReason}`;
+        }
       }
-      await apiClient.orders.returnOrder(returnOrderId, finalReason);
-      toast.success("Return request submitted successfully");
+
+      await apiClient.orders.returnOrder(returnOrderId, {
+        reason: finalReason,
+        refundMethod: payload?.refundMethod || "bank",
+        bankDetails: payload?.bankDetails,
+        upiDetails: payload?.upiDetails,
+        saveAccount: payload?.saveAccount,
+      });
+
+      const isOnline = ["online", "upi", "card", "prepaid", "razorpay"].includes(
+        (selectedOrder?.paymentMethod || "").toLowerCase()
+      );
+      toast.success(
+        isOnline
+          ? "Return request submitted! For your online order, your refund will be transferred within 1–2 business days after product collection."
+          : "Return request submitted! Your refund will be credited within 2–3 business days after product pickup."
+      );
       setReturnModal(false);
       setReturnReason("");
       setReturnItems([]);
@@ -161,6 +204,7 @@ function OrdersPage() {
       toast.error(formatUserError(err, "Failed to submit return request. Please try again."));
     }
   };
+
 
   const handleCreateReview = async () => {
     if (!reviewProduct) return;
@@ -369,7 +413,8 @@ function OrdersPage() {
                                   onClick={() => {
                                     if (order.items && order.items.length === 1) {
                                       const firstItem = order.items[0];
-                                      setReviewProduct(firstItem.product);
+                                      const prodId = typeof firstItem.product === "object" ? (firstItem.product?._id || firstItem.product?.id) : firstItem.product;
+                                      setReviewProduct(String(prodId || ""));
                                       setReviewOrder(order._id);
                                       setReviewColor(firstItem.color || "Default");
                                       setReviewSize(firstItem.size || null);

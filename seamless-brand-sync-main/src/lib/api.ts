@@ -170,7 +170,14 @@ export const apiClient = {
         method: "PUT",
         body: JSON.stringify(data),
       }),
+    getRefundAccount: () => api<any>("/api/users/refund-account"),
+    updateRefundAccount: (data: any) =>
+      api<any>("/api/users/refund-account", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
     list: (q = "") => api<any>(`/api/users${q ? `?${q}` : ""}`),
+
     create: (data: any) =>
       api("/api/users", {
         method: "POST",
@@ -237,12 +244,43 @@ export const apiClient = {
         method: "PATCH",
         body: JSON.stringify({ reason }),
       }),
-    returnOrder: (id: string, reason: string) =>
+    returnOrder: (
+      id: string,
+      data: {
+        reason: string;
+        refundMethod?: "bank" | "upi" | "original";
+        bankDetails?: {
+          accountHolderName: string;
+          accountNumber: string;
+          ifscCode: string;
+          bankName?: string;
+        };
+        upiDetails?: {
+          upiId: string;
+        };
+        saveAccount?: boolean;
+      } | string
+    ) =>
       api<any>(`/api/orders/${id}/return`, {
         method: "PUT",
-        body: JSON.stringify({ reason }),
+        body: JSON.stringify(typeof data === "string" ? { reason: data } : data),
+      }),
+    processRefund: (
+      id: string,
+      data: {
+        transactionId?: string;
+        utr?: string;
+        refundAmount?: number;
+        refundMethod?: string;
+        adminNotes?: string;
+      }
+    ) =>
+      api<any>(`/api/orders/${id}/refund`, {
+        method: "PUT",
+        body: JSON.stringify(data),
       }),
   },
+
   queries: {
     create: (data: { name: string; email: string; subject: string; message: string }) =>
       api<any>("/api/queries", {
@@ -308,18 +346,20 @@ export const apiClient = {
         return [];
       }
     },
-    create: (data: { productId: string; rating: number; text: string; color?: string; size?: number }) =>
-      api<any>("/api/reviews", {
+    create: (data: { productId: any; rating: number; text: string; color?: string; size?: number }) => {
+      const cleanProductId = typeof data.productId === "object" ? (data.productId?._id || data.productId?.id) : data.productId;
+      return api<any>("/api/reviews", {
         method: "POST",
         body: JSON.stringify({
-          productId: data.productId,
-          product: data.productId,
+          productId: cleanProductId,
+          product: cleanProductId,
           rating: data.rating,
           text: data.text,
           color: data.color,
           size: data.size,
         }),
-      }),
+      });
+    },
     update: (id: string, data: { rating?: number; text?: string }) =>
       api<any>(`/api/reviews/${id}`, {
         method: "PUT",
