@@ -28,8 +28,8 @@ export function MaterialsSection({ products }: { products?: any[] }) {
 
   const currentSpecs = activeTab === "sole" ? puSoleSpecs : upperSpecs;
 
-  const soleImg = products?.[0]?.image || blackSandals;
-  const upperImg = products?.[1]?.image || heroShoe;
+  const soleImg = "/about-products/trans_mocs-sandal-buckle.png";
+  const upperImg = "/about-products/trans_mocs-cross-slide.png";
   const currentImg = activeTab === "sole" ? soleImg : upperImg;
 
   return (
@@ -79,17 +79,55 @@ export function MaterialsSection({ products }: { products?: any[] }) {
         {/* Desktop Interactive Explorer Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           
-          {/* Left Column: Original MOCS Product Imagery */}
-          <div className="lg:col-span-6 relative flex items-center justify-center min-h-[340px] sm:min-h-[420px]">
-            <div className="absolute w-[300px] h-[300px] rounded-full bg-[#F26522]/20 filter blur-3xl" />
-            <motion.img
-              key={activeTab}
-              initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9, rotate: -4 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.6 }}
-              src={currentImg}
-              alt="MOCS Original Footwear Product Structure"
-              className="w-full max-w-[440px] h-auto object-contain drop-shadow-[0_30px_45px_rgba(0,0,0,0.95)] z-10"
+          {/* Left Column: Pure Floating Transparent Footwear */}
+          <div className="lg:col-span-6 relative flex flex-col items-center justify-center min-h-[380px] sm:min-h-[460px]">
+            {/* Ambient Backlight Glow */}
+            <div className="absolute w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] rounded-full bg-[#F26522]/15 blur-3xl pointer-events-none z-0" />
+
+            {/* Continuous Smooth Levitation Container */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      y: [0, -18, 0],
+                      rotate: [0, -1.8, 0],
+                    }
+              }
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="relative z-10 w-full flex items-center justify-center select-none"
+            >
+              <motion.img
+                key={activeTab}
+                initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                src={currentImg}
+                alt="MOCS Floating Footwear Structure"
+                className="w-full max-w-[420px] sm:max-w-[480px] h-auto object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)] filter"
+              />
+            </motion.div>
+
+            {/* Floating Dynamic Ground Contact Shadow */}
+            <motion.div
+              animate={
+                prefersReducedMotion
+                  ? {}
+                  : {
+                      scale: [1, 0.84, 1],
+                      opacity: [0.55, 0.25, 0.55],
+                    }
+              }
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="w-3/5 max-w-[280px] h-8 bg-black/90 rounded-[100%] blur-xl z-0 pointer-events-none mt-2"
             />
           </div>
 

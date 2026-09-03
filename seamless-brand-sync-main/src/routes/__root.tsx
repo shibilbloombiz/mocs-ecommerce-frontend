@@ -22,6 +22,8 @@ import { SearchModal } from "../components/SearchModal";
 import { MobileNav } from "../components/MobileNav";
 import { ScrollTagline } from "../components/ScrollTagline";
 import { FloatingScrollbar } from "../components/FloatingScrollbar";
+import { PageLoader } from "../components/PageLoader";
+import { NavigationProgressBar } from "../components/NavigationProgressBar";
 
 function NotFoundComponent() {
   return (
@@ -115,6 +117,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "preload", as: "image", href: "/hero-comfort-banner.jpg", fetchPriority: "high" as const },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Montserrat:wght@700;800;900&display=swap",
@@ -156,6 +159,8 @@ function RootComponent() {
   const renderContent = () => (
     <QueryClientProvider client={queryClient}>
       <StoreProvider>
+        <NavigationProgressBar />
+        <PageLoader />
         {!isAdminRoute && !isAuthPage && <Navbar />}
         <main
           className={
@@ -167,7 +172,9 @@ function RootComponent() {
           }
         >
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-          <Outlet />
+          <div key={pathname} className="route-content-view">
+            <Outlet />
+          </div>
         </main>
         {!isAuthPage && !isAdminRoute && <Footer />}
         {!isAuthPage && !isAdminRoute && <MobileNav />}

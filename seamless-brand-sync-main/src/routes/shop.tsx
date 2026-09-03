@@ -99,13 +99,13 @@ export const Route = createFileRoute("/shop")({
   loader: async () => {
     try {
       const res = await apiClient.products.list("limit=100");
-      if (res && res.items) {
+      if (res && res.items && res.items.length > 0) {
         return { products: formatApiProducts(res.items) };
       }
     } catch (err) {
       console.warn("Failed to load products from API", err);
     }
-    return { products: [] };
+    return { products: mockProducts };
   },
   head: () => ({
     meta: [

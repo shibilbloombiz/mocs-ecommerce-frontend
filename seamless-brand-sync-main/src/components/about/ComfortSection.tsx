@@ -6,10 +6,7 @@ export function ComfortSection({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  const comfortProductImg =
-    products && products.length > 1 && products[1]?.image
-      ? products[1].image
-      : products?.[0]?.image || lifestyleWomen;
+  const comfortProductImg = "/about-products/trans_mocs-wedge-slide.png";
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -47,20 +44,20 @@ export function ComfortSection({ products }: { products?: any[] }) {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="lg:col-span-6 relative"
           >
-            <div className="relative aspect-[4/3] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10 bg-[#191B1D]">
+            <div className="relative aspect-[4/3] sm:aspect-[16/10] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10 bg-[#191B1D] flex items-center justify-center p-6 sm:p-8">
               <img
                 src={comfortProductImg}
                 alt="MOCS Original Footwear Product Craftsmanship"
-                className="w-full h-full object-cover filter brightness-95 hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-contain filter drop-shadow-2xl hover:scale-105 transition-transform duration-700"
                 loading="lazy"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
               <div className="absolute bottom-6 left-6 text-white">
                 <span className="text-xs font-bold tracking-widest text-[#F26522] uppercase block">
-                  MATERIAL SELECTION
+                  CRAFT & ERGONOMICS
                 </span>
                 <span className="text-lg font-black uppercase">
-                  Ergonomic Air-Pockets & Cushioning
+                  Contoured PU Footbed & Arch Support
                 </span>
               </div>
             </div>

@@ -7,7 +7,7 @@ export function ResponsibleManufacturing({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  const manufacturingImg = products?.[4]?.image || products?.[0]?.image || shoe4;
+  const manufacturingImg = "/about-products/mocs-sustainable-hero.jpg";
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -29,25 +29,25 @@ export function ResponsibleManufacturing({ products }: { products?: any[] }) {
           {/* Left Column: Hero Original MOCS Manufacturing & Product Image */}
           <motion.div
             style={{ scale: imageScale }}
-            className="lg:col-span-6 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10 bg-[#191B1D]"
+            className="lg:col-span-6 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl border border-black/10 dark:border-white/10 bg-[#191B1D] group"
           >
             <img
               src={manufacturingImg}
               alt="MOCS Sustainable & Responsible Footwear Manufacturing"
-              className="w-full h-full object-cover filter brightness-95"
+              className="w-full h-full object-cover filter brightness-95 group-hover:scale-105 transition-transform duration-700"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
             <div className="absolute bottom-6 left-6 right-6 text-white flex items-center justify-between">
               <div>
                 <span className="text-xs font-bold tracking-widest text-[#F26522] uppercase block">
-                  ECO-EFFICIENCY
+                  ECO-EFFICIENCY & PRECISION
                 </span>
-                <span className="text-lg font-black uppercase">
-                  Zero-Waste Chemical Pouring
+                <span className="text-lg sm:text-xl font-black uppercase">
+                  Durable Craftsmanship & Direct-Molded PU
                 </span>
               </div>
-              <Recycle className="w-8 h-8 text-[#F26522]" />
+              <Recycle className="w-8 h-8 text-[#F26522] shrink-0 ml-4" />
             </div>
           </motion.div>
 

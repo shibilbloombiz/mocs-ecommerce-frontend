@@ -82,26 +82,95 @@ export function formatUserError(err: unknown, fallback = "Something went wrong. 
   return cleaned || fallback;
 }
 
+type CacheEntry = {
+  data: any;
+  timestamp: number;
+};
+
+// In-memory cache for fast GET responses across SSR and client navigation
+const apiCache = new Map<string, CacheEntry>();
+const DEFAULT_CACHE_TTL_MS = 60_000; // 60 seconds fresh TTL
+const DEFAULT_TIMEOUT_MS = 2500; // 2.5s max to guarantee sub-3s response
+
+export function invalidateApiCache(prefix?: string) {
+  if (!prefix) {
+    apiCache.clear();
+    return;
+  }
+  for (const key of apiCache.keys()) {
+    if (key.includes(prefix)) {
+      apiCache.delete(key);
+    }
+  }
+}
+
+export interface ApiOptions extends RequestInit {
+  timeoutMs?: number;
+  skipCache?: boolean;
+}
+
 export async function api<T = unknown>(
   path: string,
-  options: RequestInit = {},
+  options: ApiOptions = {},
 ): Promise<T> {
+  const method = (options.method || "GET").toUpperCase();
+  const isGet = method === "GET";
   const token = getToken();
+  const cacheKey = `${method}:${path}:${token ? "auth" : "anon"}`;
+  const now = Date.now();
+
+  // Invalidate cache on mutations
+  if (!isGet) {
+    if (path.includes("/products")) invalidateApiCache("/api/products");
+    if (path.includes("/settings")) invalidateApiCache("/api/settings");
+    if (path.includes("/categories")) invalidateApiCache("/api/categories");
+    if (path.includes("/collections")) invalidateApiCache("/api/collections");
+    if (path.includes("/reviews")) invalidateApiCache("/api/reviews");
+  }
+
+  // Check cache for GET requests
+  const cached = isGet && !options.skipCache ? apiCache.get(cacheKey) : undefined;
+  if (cached && (now - cached.timestamp < DEFAULT_CACHE_TTL_MS)) {
+    return cached.data as T;
+  }
+
   const headers = new Headers(options.headers);
   if (!headers.has("Content-Type") && options.body) {
     headers.set("Content-Type", "application/json");
   }
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
+  // Setup strict timeout (default 2.5s) to guarantee sub-3s loading time
+  const timeoutMs = options.timeoutMs ?? (isGet ? DEFAULT_TIMEOUT_MS : 8000);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+
+  if (options.signal) {
+    options.signal.addEventListener("abort", () => controller.abort());
+  }
+
   let res: Response;
   try {
     res = await fetch(`${API_BASE_URL}${path}`, {
-      cache: "no-store",
       ...options,
       headers,
+      signal: controller.signal,
     });
-  } catch {
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    // If request timed out or network failed but we have stale cache, return it immediately
+    if (cached) {
+      console.warn(`[API] Returning stale cache for ${path} due to network/timeout error`);
+      return cached.data as T;
+    }
+    if (err?.name === "AbortError" || controller.signal.aborted) {
+      throw new Error("Request timed out. Please check your connection.");
+    }
     throw new Error("Unable to connect to the server. Please check your internet connection.");
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   if (!res.ok) {
@@ -113,6 +182,11 @@ export async function api<T = unknown>(
       errorText = await res.text().catch(() => "");
     }
     
+    // If backend returns 5xx but we have stale cache, gracefully fall back
+    if (res.status >= 500 && cached) {
+      return cached.data as T;
+    }
+
     if (res.status === 404) {
       throw new Error(errorText && !errorText.includes("/api/") ? errorText : "The requested item or page could not be found.");
     }
@@ -129,7 +203,19 @@ export async function api<T = unknown>(
     const friendly = formatUserError(errorText || res.statusText);
     throw new Error(friendly);
   }
-  return res.status === 204 ? (undefined as T) : ((await res.json()) as T);
+
+  if (res.status === 204) {
+    return undefined as T;
+  }
+
+  const data = (await res.json()) as T;
+
+  // Cache successful GET results
+  if (isGet) {
+    apiCache.set(cacheKey, { data, timestamp: Date.now() });
+  }
+
+  return data;
 }
 
 // Endpoints mirror mern-reference/routes/*.js — wire to your Express server.

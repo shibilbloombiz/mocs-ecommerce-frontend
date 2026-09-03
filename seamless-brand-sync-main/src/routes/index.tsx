@@ -18,6 +18,7 @@ import { AdCarousel } from "@/components/AdCarousel";
 import { SandalsCarousel } from "@/components/SandalsCarousel";
 import { QualityPromise } from "@/components/QualityPromise";
 import { ReviewsMarquee } from "@/components/ReviewsMarquee";
+import { products as fallbackProducts } from "@/lib/products";
 
 export function formatApiProducts(items: any[]): import("@/lib/products").Product[] {
   if (!items || !Array.isArray(items)) return [];
@@ -106,8 +107,13 @@ export const Route = createFileRoute("/")({
             }))
           : [];
 
+      const resolvedProducts =
+        productsRes?.items && Array.isArray(productsRes.items) && productsRes.items.length > 0
+          ? formatApiProducts(productsRes.items)
+          : fallbackProducts;
+
       return {
-        products: productsRes?.items ? formatApiProducts(productsRes.items) : [],
+        products: resolvedProducts,
         heroSlides,
         categoriesBanners:
           categoryBannersRes?.value &&
@@ -133,8 +139,11 @@ export const Route = createFileRoute("/")({
             : [],
       };
     } catch (err) {
-      console.warn("Homepage loader failed, using empty fallback:", err);
-      return EMPTY_LOADER_DATA;
+      console.warn("Homepage loader failed, using fallback:", err);
+      return {
+        ...EMPTY_LOADER_DATA,
+        products: fallbackProducts,
+      };
     }
   },
   head: ({ loaderData }) => {

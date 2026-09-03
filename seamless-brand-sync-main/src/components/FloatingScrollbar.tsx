@@ -23,7 +23,7 @@ export function FloatingScrollbar() {
   const dragStartY = useRef(0);
   const dragStartScrollY = useRef(0);
 
-  const trackPadding = 10;
+  const trackPadding = 0;
 
   const updateDimensions = useCallback(() => {
     if (typeof window === "undefined") return;
@@ -36,10 +36,12 @@ export function FloatingScrollbar() {
     setDimensions({ docHeight, winHeight });
   }, []);
 
-  // Butter-Smooth Physics Animation Loop (Lerp Damping)
+  const isScrollingRef = useRef(false);
+
+  // Butter-Smooth Physics Animation Loop (Runs on-demand, stops when settled)
   useEffect(() => {
     const maxScroll = Math.max(dimensions.docHeight - dimensions.winHeight, 1);
-    const availableTrackHeight = Math.max(dimensions.winHeight - trackPadding * 2, 10);
+    const availableTrackHeight = Math.max(dimensions.winHeight, 10);
     const rawThumbHeight = (dimensions.winHeight / dimensions.docHeight) * availableTrackHeight;
     const thumbHeight = Math.min(Math.max(rawThumbHeight, 44), availableTrackHeight * 0.4);
     const maxThumbTravel = Math.max(availableTrackHeight - thumbHeight, 1);
@@ -48,7 +50,7 @@ export function FloatingScrollbar() {
       if (!isDraggingRef.current) {
         const scrollY = window.scrollY || window.pageYOffset || 0;
         const ratio = Math.min(Math.max(scrollY / maxScroll, 0), 1);
-        targetPos.current = trackPadding + ratio * maxThumbTravel;
+        targetPos.current = ratio * maxThumbTravel;
 
         // Smooth Lerp (0.22 factor for fluid liquid response)
         currentPos.current += (targetPos.current - currentPos.current) * 0.22;
@@ -60,27 +62,54 @@ export function FloatingScrollbar() {
       }
 
       const percent = Math.round(
-        ((currentPos.current - trackPadding) / maxThumbTravel) * 100
+        (currentPos.current / maxThumbTravel) * 100
       );
       setScrollPercentage(Math.min(Math.max(percent, 0), 100));
+
+      const diff = Math.abs(targetPos.current - currentPos.current);
+      // If user stopped scrolling and dragging and position has settled, halt loop
+      if (!isDraggingRef.current && !isScrollingRef.current && diff < 0.2) {
+        rafId.current = null;
+        return;
+      }
 
       rafId.current = requestAnimationFrame(animate);
     };
 
-    rafId.current = requestAnimationFrame(animate);
+    const startAnimation = () => {
+      if (!rafId.current) {
+        rafId.current = requestAnimationFrame(animate);
+      }
+    };
+
+    // Initial position sync
+    startAnimation();
+
+    const onScrollTick = () => {
+      isScrollingRef.current = true;
+      startAnimation();
+    };
+
+    window.addEventListener("scroll", onScrollTick, { passive: true });
 
     return () => {
-      if (rafId.current) cancelAnimationFrame(rafId.current);
+      window.removeEventListener("scroll", onScrollTick);
+      if (rafId.current) {
+        cancelAnimationFrame(rafId.current);
+        rafId.current = null;
+      }
     };
   }, [dimensions]);
 
   const handleScroll = useCallback(() => {
     setIsScrolling(true);
+    isScrollingRef.current = true;
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
     }
     hideTimeoutRef.current = setTimeout(() => {
       setIsScrolling(false);
+      isScrollingRef.current = false;
     }, 1800);
   }, []);
 
@@ -110,7 +139,7 @@ export function FloatingScrollbar() {
   }
 
   const maxScroll = Math.max(dimensions.docHeight - dimensions.winHeight, 1);
-  const availableTrackHeight = Math.max(dimensions.winHeight - trackPadding * 2, 10);
+  const availableTrackHeight = Math.max(dimensions.winHeight, 10);
   const rawThumbHeight = (dimensions.winHeight / dimensions.docHeight) * availableTrackHeight;
   const thumbHeight = Math.min(Math.max(rawThumbHeight, 44), availableTrackHeight * 0.4);
   const maxThumbTravel = Math.max(availableTrackHeight - thumbHeight, 1);
@@ -136,7 +165,7 @@ export function FloatingScrollbar() {
         behavior: "instant" as any,
       });
 
-      const newPos = trackPadding + (clampedScrollY / maxScroll) * maxThumbTravel;
+      const newPos = (clampedScrollY / maxScroll) * maxThumbTravel;
       currentPos.current = newPos;
       targetPos.current = newPos;
     };
@@ -159,7 +188,7 @@ export function FloatingScrollbar() {
   const handleTrackClick = (e: React.MouseEvent) => {
     if (isDragging) return;
     const clickY = e.clientY;
-    const targetThumbCenter = clickY - thumbHeight / 2 - trackPadding;
+    const targetThumbCenter = clickY - thumbHeight / 2;
     const newRatio = Math.min(Math.max(targetThumbCenter / maxThumbTravel, 0), 1);
     window.scrollTo({
       top: newRatio * maxScroll,
@@ -175,13 +204,13 @@ export function FloatingScrollbar() {
       onClick={handleTrackClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`fixed right-1 sm:right-1.5 top-0 bottom-0 z-[999999] w-4 sm:w-5 select-none pointer-events-auto transition-all duration-500 ease-out flex justify-center ${
+      className={`fixed right-0 top-0 bottom-0 z-[999999] w-3 sm:w-3.5 select-none pointer-events-auto transition-all duration-500 ease-out flex justify-end ${
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-1 pointer-events-none"
       }`}
       style={{ background: "transparent" }}
       aria-hidden="true"
     >
-      {/* Precision Floating Glass Capsule Thumb */}
+      {/* Precision Floating Glass Capsule Thumb - Flush to right edge, no end gaps */}
       <div
         ref={thumbRef}
         onMouseDown={handleMouseDown}
@@ -189,16 +218,16 @@ export function FloatingScrollbar() {
           height: `${thumbHeight}px`,
           willChange: "transform",
         }}
-        className={`group relative rounded-full cursor-grab active:cursor-grabbing transition-all duration-200 ease-out ${
+        className={`group relative rounded-l-full cursor-grab active:cursor-grabbing transition-all duration-200 ease-out ${
           isHovered || isDragging
-            ? "w-2.5 sm:w-3 shadow-[0_0_16px_rgba(244,106,30,0.65)] ring-2 ring-[#F46A1E]/30"
+            ? "w-2.5 sm:w-3 shadow-[0_0_16px_rgba(244,106,30,0.65)] ring-1 ring-[#F46A1E]/30"
             : "w-1.5 sm:w-2 shadow-[0_0_10px_rgba(244,106,30,0.4)]"
         }`}
       >
         {/* Multi-Stop Ultra-Vibrant Liquid Orange Gradient */}
-        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-[#ff8c3a] via-[#F46A1E] to-[#cf4d07] transition-all duration-200">
+        <div className="absolute inset-0 rounded-l-full bg-gradient-to-b from-[#ff8c3a] via-[#F46A1E] to-[#cf4d07] transition-all duration-200">
           {/* Subtle Top Glass Reflection */}
-          <div className="absolute top-1 inset-x-0.5 h-3 rounded-full bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
+          <div className="absolute top-1 inset-x-0.5 h-3 rounded-l-full bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
         </div>
 
         {/* Floating Percentage Indicator Capsule (on hover & drag) */}

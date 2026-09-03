@@ -1,14 +1,10 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import userUploadedShoe from "@/assets/media__1786102779226.png";
-import blackSandals from "@/assets/black sandals.png";
+import mocsLogo from "@/assets/mocs-logo.png";
 
 export function AboutHero({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  // Primary hero sneaker image from the uploaded asset
-  const heroShoeImg = userUploadedShoe || (products && products.length > 0 && products[0]?.image) || blackSandals;
 
   // Scroll Parallax — use smaller ranges so transforms stay cheap
   const { scrollYProgress } = useScroll({
@@ -17,7 +13,7 @@ export function AboutHero({ products }: { products?: any[] }) {
   });
 
   const textY   = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -50]);
-  const shoeY   = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -110]);
+  const logoY   = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -90]);
   const bgTextY = useTransform(scrollYProgress, [0, 1], prefersReducedMotion ? [0, 0] : [0, -25]);
 
   return (
@@ -109,66 +105,66 @@ export function AboutHero({ products }: { products?: any[] }) {
             </motion.div>
           </motion.div>
 
-          {/* Right Column: Pure Floating Animated Footwear */}
+          {/* Right Column: Floating Original MOCS Brand Logo */}
           <motion.div
-            style={{ y: shoeY, willChange: "transform" }}
-            className="lg:col-span-5 relative flex items-center justify-center min-h-[360px] sm:min-h-[460px]"
+            style={{ y: logoY, willChange: "transform" }}
+            className="lg:col-span-5 relative flex items-center justify-center min-h-[340px] sm:min-h-[440px]"
           >
             <motion.div
               initial={
                 prefersReducedMotion
                   ? false
-                  : { opacity: 0, scale: 1.12, rotate: 4 }
+                  : { opacity: 0, scale: 0.92 }
               }
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-10 w-full max-w-[440px] sm:max-w-[520px] lg:max-w-[600px] p-4 flex items-center justify-center select-none"
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.9, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="relative z-10 w-full max-w-[460px] sm:max-w-[540px] p-4 flex flex-col items-center justify-center select-none"
             >
-              {/* Continuous Levitation Float Wrapper — only translateY for GPU compositing, no rotateZ to avoid repaints */}
+              {/* Continuous Levitation Float Wrapper */}
               <motion.div
                 animate={
                   prefersReducedMotion
                     ? {}
-                    : { y: [0, -20, 0] }
+                    : { y: [0, -18, 0] }
                 }
                 transition={{
-                  duration: 5.5,
+                  duration: 5.2,
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
                 style={{ willChange: "transform" }}
-                className="relative flex items-center justify-center w-full"
+                className="relative flex flex-col items-center justify-center w-full"
               >
-                {/* Floating Ground Shadow — use opacity-only to avoid blurring every frame */}
-                <motion.div
-                  animate={
-                    prefersReducedMotion
-                      ? {}
-                      : { opacity: [0.55, 0.22, 0.55] }
-                  }
-                  transition={{
-                    duration: 5.5,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                  style={{ willChange: "opacity" }}
-                  className="absolute -bottom-10 w-4/5 h-14 bg-black/90 rounded-[100%] blur-2xl z-0 pointer-events-none"
-                />
-
-                {/* Ambient Orange Glow Ring — static radial gradient, no filter blur */}
+                {/* Ambient Warm Orange Glow Ring */}
                 <div
-                  className="absolute w-[340px] h-[340px] rounded-full opacity-60 pointer-events-none"
+                  className="absolute w-[360px] sm:w-[460px] h-[360px] sm:h-[460px] rounded-full pointer-events-none opacity-75"
                   style={{
-                    background: "radial-gradient(circle, rgba(242,101,34,0.28) 0%, rgba(242,101,34,0.08) 55%, transparent 75%)",
+                    background: "radial-gradient(circle, rgba(242,101,34,0.36) 0%, rgba(242,101,34,0.08) 55%, transparent 75%)",
                     transform: "translateZ(0)",
                   }}
                 />
 
-                {/* Pure Floating Footwear Image */}
-                <img
-                  src={heroShoeImg}
-                  alt="MOCS Original Olive Sneaker"
-                  className="w-full h-auto object-contain drop-shadow-[0_35px_55px_rgba(0,0,0,0.95)] pointer-events-auto"
+                {/* Pure Floating Logo Only — No Card, No Box, Ultra HD Vector Quality */}
+                <motion.img
+                  src={mocsLogo}
+                  alt="MOCS Original Brand Logo"
+                  className="w-full max-w-[360px] sm:max-w-[460px] lg:max-w-[500px] h-auto object-contain filter drop-shadow-[0_20px_40px_rgba(242,101,34,0.45)] drop-shadow-[0_12px_24px_rgba(0,0,0,0.95)] select-none pointer-events-auto"
+                />
+
+                {/* Floating Ground Shadow */}
+                <motion.div
+                  animate={
+                    prefersReducedMotion
+                      ? {}
+                      : { opacity: [0.55, 0.22, 0.55], scale: [1, 0.85, 1] }
+                  }
+                  transition={{
+                    duration: 5.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  style={{ willChange: "opacity, transform" }}
+                  className="w-4/5 h-12 bg-black/95 rounded-[100%] blur-2xl z-0 pointer-events-none mt-8"
                 />
               </motion.div>
             </motion.div>
