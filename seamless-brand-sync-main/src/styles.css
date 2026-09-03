@@ -212,17 +212,14 @@
 @keyframes routeFadeIn {
   0% {
     opacity: 0;
-    transform: translateY(4px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 .route-content-view {
-  animation: routeFadeIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  will-change: opacity, transform;
+  animation: routeFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @utility text-gradient {

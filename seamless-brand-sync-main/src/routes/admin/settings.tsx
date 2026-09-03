@@ -1,6 +1,7 @@
 import { createFileRoute, useBlocker } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Save, Plus, Trash2, Sliders, Image, Sparkles, ChevronDown } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Save, Plus, Trash2, Sliders, Image, Sparkles, ChevronDown, Check, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { apiClient, API_BASE_URL } from "@/lib/api";
 import { cn, getImageUrl } from "@/lib/utils";
@@ -26,6 +27,11 @@ export const Route = createFileRoute("/admin/settings")({
 function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auth Page Customizations State
   const [authSettings, setAuthSettings] = useState<any>({
@@ -377,6 +383,7 @@ function AdminSettingsPage() {
       setOriginalPromiseCollage(JSON.parse(JSON.stringify(promiseCollage)));
       setOriginalAuthSettings(JSON.parse(JSON.stringify(authSettings)));
       setOriginalAdvertisements(JSON.parse(JSON.stringify(advertisements)));
+      setOriginalAnnouncementBar(JSON.parse(JSON.stringify(announcementBar)));
       toast.success("Settings updated successfully!");
       return true;
     } catch (err: any) {
@@ -385,6 +392,17 @@ function AdminSettingsPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDiscardChanges = () => {
+    setHeroSlides(JSON.parse(JSON.stringify(originalSlides)));
+    setCategoriesBanners(JSON.parse(JSON.stringify(originalCategoriesBanners)));
+    setCollectionsBanners(JSON.parse(JSON.stringify(originalCollectionsBanners)));
+    setPromiseCollage(JSON.parse(JSON.stringify(originalPromiseCollage)));
+    setAuthSettings(JSON.parse(JSON.stringify(originalAuthSettings)));
+    setAdvertisements(JSON.parse(JSON.stringify(originalAdvertisements)));
+    setAnnouncementBar(JSON.parse(JSON.stringify(originalAnnouncementBar)));
+    toast.info("Unsaved changes discarded");
   };
 
   const addPromiseBanner = () => {
@@ -708,43 +726,107 @@ function AdminSettingsPage() {
           getImageUrl={getImageUrl}
         />
 
-        {/* Sticky Floating Save Changes Button in Bottom Right */}
-        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 pointer-events-auto">
-          <button
-            onClick={handleSaveSettings}
-            disabled={saving}
-            aria-label="Save settings changes"
+      </div>
+
+      {/* Floating Save Changes Pill / Action Bar (Portaled directly to document.body) */}
+      {(() => {
+        const floatingBar = (
+          <div
             className={cn(
-              "group relative flex items-center gap-2.5 rounded-full px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm font-bold uppercase tracking-wider text-white shadow-2xl transition-all duration-300 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 active:scale-95",
-              isDirty
-                ? "bg-primary hover:bg-primary-glow ring-4 ring-primary/30 shadow-[0_10px_35px_-5px_rgba(244,106,30,0.55)]"
-                : "bg-primary/95 hover:bg-primary backdrop-blur-md shadow-xl shadow-black/20"
+              "fixed bottom-5 right-4 sm:bottom-8 sm:right-8 z-50 pointer-events-auto transition-all duration-300",
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             )}
           >
-            {saving ? (
-              <>
-                <div className="h-4 w-4 sm:h-4.5 sm:w-4.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>Saving Changes...</span>
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 sm:h-4.5 sm:w-4.5 transition-transform group-hover:scale-110" />
-                <span>Save Changes</span>
-                {isDirty && (
-                  <span className="relative flex h-2 w-2 ml-0.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-                  </span>
-                )}
-              </>
-            )}
-          </button>
-        </div>
-      </div>
+            <div
+              className={cn(
+                "flex items-center gap-1.5 sm:gap-2.5 rounded-full p-1.5 sm:p-2 backdrop-blur-xl border shadow-2xl transition-all duration-300",
+                isDirty
+                  ? "bg-card/95 border-primary/50 ring-4 ring-primary/20 shadow-[0_12px_40px_-8px_rgba(244,106,30,0.5)]"
+                  : "bg-card/90 border-border/70 hover:border-border shadow-xl shadow-black/10"
+              )}
+            >
+              {isDirty ? (
+                <>
+                  <div className="flex items-center gap-2 pl-3 pr-1 text-xs select-none">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-80" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary" />
+                    </span>
+                    <span className="font-semibold text-foreground hidden md:inline">Unsaved Changes</span>
+                  </div>
+
+                  <button
+                    onClick={handleDiscardChanges}
+                    disabled={saving}
+                    type="button"
+                    aria-label="Discard unsaved changes"
+                    title="Discard unsaved changes"
+                    className="flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Discard</span>
+                  </button>
+
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={saving}
+                    type="button"
+                    aria-label="Save settings changes"
+                    className="group relative flex items-center gap-2 rounded-full px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold uppercase tracking-wider text-white bg-gradient-to-r from-[#f46a1e] to-[#e0580c] hover:brightness-110 shadow-lg shadow-[#f46a1e]/35 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 transition-transform group-hover:scale-110" />
+                        <span>Save Changes</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1.5 pl-3 pr-2 text-xs text-muted-foreground font-medium select-none hidden sm:flex">
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    <span className="text-[11px] uppercase tracking-wider font-bold text-muted-foreground/80">Saved</span>
+                  </div>
+
+                  <button
+                    onClick={handleSaveSettings}
+                    disabled={saving}
+                    type="button"
+                    aria-label="Save settings changes"
+                    className="group relative flex items-center gap-2 rounded-full px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-white bg-primary hover:bg-primary-glow shadow-md shadow-primary/20 transition-all duration-200 cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+                  >
+                    {saving ? (
+                      <>
+                        <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-3.5 w-3.5 transition-transform group-hover:scale-110" />
+                        <span>Save Changes</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        );
+
+        return mounted && typeof document !== "undefined"
+          ? createPortal(floatingBar, document.body)
+          : floatingBar;
+      })()}
 
       {/* Centered Route Leave Blocker Modal */}
       {blocker.status === "blocked" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-card space-y-4 text-left">
             <h3 className="font-display text-lg font-bold text-foreground">Unsaved Changes</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
