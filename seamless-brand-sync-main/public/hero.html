@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MOCS Footwear — Engineered Fluid Performance</title>
+  <meta name="description" content="Experience the next generation of PU footwear by MOCS. Liquid comfort, responsive cushioning, and visionary industrial design.">
+
+  <!-- Google Fonts: Unbounded (Headings) & Space Grotesk (Body/UI) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS RESET & DESIGN TOKENS
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --font-heading: 'Unbounded', system-ui, -apple-system, sans-serif;
+      --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      --color-orange-glow: #ff6a00;
+      --color-orange-deep: #ea580c;
+      --color-orange-hot: #ffa142;
+      --color-bg-black: #050504;
+      --color-surface-dark: rgba(18, 18, 20, 0.72);
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--color-bg-black);
+      color: #ffffff;
+      font-family: var(--font-body);
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    /* Full-screen Hero Shell */
+    .hero-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 50%, #1a0b02 0%, #050504 75%);
+    }
+
+    /* WebGL Canvas */
+    #gl-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    /* Bottom 44% Readability Dark Gradient */
+    .bottom-gradient {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 44%;
+      background: linear-gradient(
+        to top,
+        rgba(5, 5, 4, 0.94) 0%,
+        rgba(5, 5, 4, 0.76) 24%,
+        rgba(5, 5, 4, 0.38) 36%,
+        transparent 100%
+      );
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       TOP NAVIGATION
+       ========================================================================== */
+    .top-nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(18px, 3.2vw, 36px) clamp(20px, 4.5vw, 56px);
+      padding-top: calc(clamp(18px, 3.2vw, 36px) + env(safe-area-inset-top, 0px));
+      pointer-events: none;
+    }
+
+    .top-nav * {
+      pointer-events: auto;
+    }
+
+    /* Brand Logo */
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #ffffff;
+      font-family: var(--font-heading);
+      letter-spacing: -0.02em;
+    }
+
+    .brand-logo .brand-main {
+      font-size: clamp(16px, 1.8vw, 22px);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, #ffffff 40%, var(--color-orange-hot) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-logo .brand-divider {
+      color: var(--color-orange-glow);
+      font-weight: 400;
+      opacity: 0.8;
+      font-size: 14px;
+    }
+
+    .brand-logo .brand-sub {
+      font-size: clamp(10px, 1.1vw, 13px);
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      color: rgba(255, 255, 255, 0.72);
+      text-transform: uppercase;
+    }
+
+    /* Navigation Links */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(20px, 2.5vw, 36px);
+      background: rgba(255, 255, 255, 0.04);
+      padding: 8px 24px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.75);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      transition: color 0.25s ease, transform 0.25s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    .nav-link.has-badge::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      right: -8px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--color-orange-glow);
+      box-shadow: 0 0 8px var(--color-orange-glow);
+    }
+
+    /* Cart Action Pill */
+    .cart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 9999px;
+      padding: 9px 18px;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+    }
+
+    .cart-btn:hover {
+      background: rgba(255, 106, 0, 0.16);
+      border-color: rgba(255, 106, 0, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .cart-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 19px;
+      height: 19px;
+      background: var(--color-orange-glow);
+      color: #050504;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    /* Responsive Nav Rules */
+    @media (max-width: 700px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* ==========================================================================
+       CENTER PRODUCT TYPOGRAPHY & CALL TO ACTION (UNDER THE SHOE)
+       ========================================================================== */
+    .product-info-wrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: clamp(96px, 14.5vh, 150px);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 clamp(20px, 4vw, 48px);
+      pointer-events: none;
+    }
+
+    .product-info-wrap * {
+      pointer-events: auto;
+    }
+
+    .product-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 900px;
+    }
+
+    /* Counter: 01 / 03 */
+    .product-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--color-orange-glow);
+      margin-bottom: clamp(6px, 1.2vh, 12px);
+      text-shadow: 0 0 16px rgba(255, 106, 0, 0.45);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    /* Product Title */
+    .product-title {
+      font-family: var(--font-heading);
+      font-size: clamp(26px, 5.2vw, 64px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: clamp(8px, 1.2vh, 14px);
+      text-shadow: 0 4px 28px rgba(0, 0, 0, 0.7);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    /* Product Tagline */
+    .product-tagline {
+      font-size: clamp(13px, 1.4vw, 17px);
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.72);
+      letter-spacing: 0.04em;
+      margin-bottom: clamp(16px, 2.4vh, 26px);
+      max-width: 580px;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.8);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    /* Product Action Row */
+    .product-action-row {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(16px, 2.2vw, 24px);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    .product-price {
+      font-family: var(--font-heading);
+      font-size: clamp(18px, 2vw, 24px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    /* Orange Pill Button */
+    .shop-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--color-orange-glow);
+      color: #050504;
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: clamp(13px, 1.2vw, 15px);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: clamp(10px, 1.3vh, 14px) clamp(22px, 2.5vw, 32px);
+      border-radius: 9999px;
+      box-shadow:
+        0 4px 24px rgba(255, 106, 0, 0.45),
+        0 0 1px 1px rgba(255, 255, 255, 0.3) inset;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.25s ease;
+    }
+
+    .shop-pill-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      background: #ff781a;
+      box-shadow:
+        0 8px 32px rgba(255, 106, 0, 0.65),
+        0 0 1px 1px rgba(255, 255, 255, 0.5) inset;
+    }
+
+    .shop-pill-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .shop-pill-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.25s ease;
+    }
+
+    .shop-pill-btn:hover svg {
+      transform: translateX(3px);
+    }
+
+    /* Text Transition Classes */
+    .text-out {
+      opacity: 0 !important;
+      transform: translateY(28px) !important;
+      filter: blur(10px) !important;
+      transition: opacity 0.5s ease-in, transform 0.5s ease-in, filter 0.5s ease-in !important;
+    }
+
+    .text-in {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+      transition-property: opacity, transform, filter;
+      transition-duration: 0.9s;
+      transition-timing-function: var(--ease-out-expo);
+    }
+
+    /* Stagger Delays for Text In */
+    .stagger-1 { transition-delay: 0ms; }
+    .stagger-2 { transition-delay: 90ms; }
+    .stagger-3 { transition-delay: 180ms; }
+    .stagger-4 { transition-delay: 270ms; }
+
+    /* ==========================================================================
+       BOTTOM CONTROLS BAR (DOTS & ARROWS)
+       ========================================================================== */
+    .bottom-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(18px, 3vh, 32px) clamp(20px, 4.5vw, 56px);
+      padding-bottom: calc(clamp(18px, 3vh, 32px) + env(safe-area-inset-bottom, 0px));
+      pointer-events: none;
+    }
+
+    .bottom-bar * {
+      pointer-events: auto;
+    }
+
+    /* Progress Dots */
+    .progress-dots {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 8px 14px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .dot-btn {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.28);
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: width 0.45s var(--ease-out-expo), background-color 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .dot-btn:hover {
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .dot-btn.active {
+      width: 32px;
+      background: var(--color-orange-glow);
+      box-shadow: 0 0 14px rgba(255, 106, 0, 0.7);
+    }
+
+    /* Arrow Buttons */
+    .nav-arrows {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: clamp(42px, 4.2vw, 52px);
+      height: clamp(42px, 4.2vw, 52px);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+    }
+
+    .arrow-btn:hover {
+      background: var(--color-orange-glow);
+      border-color: var(--color-orange-glow);
+      color: #050504;
+      transform: scale(1.08);
+      box-shadow: 0 4px 20px rgba(255, 106, 0, 0.45);
+    }
+
+    .arrow-btn:active {
+      transform: scale(0.96);
+    }
+
+    .arrow-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Accessibility focus indicators */
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--color-orange-glow);
+      outline-offset: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="hero-container" id="hero-container">
+    <!-- WebGL Background & Shoe Canvas -->
+    <canvas id="gl-canvas"></canvas>
+
+    <!-- Bottom Readability Gradient -->
+    <div class="bottom-gradient" aria-hidden="true"></div>
+
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <a href="#" class="brand-logo" aria-label="MOCS Footwear Home">
+        <span class="brand-main">MOCS</span>
+        <span class="brand-divider">/</span>
+        <span class="brand-sub">FOOTWEAR</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Primary Navigation">
+        <a href="#men" class="nav-link">Men</a>
+        <a href="#women" class="nav-link">Women</a>
+        <a href="#kids" class="nav-link">Kids</a>
+        <a href="#new" class="nav-link has-badge">New</a>
+      </nav>
+
+      <button class="cart-btn" aria-label="Shopping Cart with 0 items">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span>Cart</span>
+        <span class="cart-badge">0</span>
+      </button>
+    </header>
+
+    <!-- Center Product Info (Under Shoe) -->
+    <div class="product-info-wrap">
+      <div class="product-content">
+        <div class="product-counter text-in stagger-1" id="ui-counter">01 / 03</div>
+        <h1 class="product-title text-in stagger-2" id="ui-title">AERO-PULSE 01</h1>
+        <p class="product-tagline text-in stagger-3" id="ui-tagline">Engineered Hyper-Responsive PU Foam</p>
+        <div class="product-action-row text-in stagger-4" id="ui-actions">
+          <span class="product-price" id="ui-price">$189</span>
+          <a href="#shop" class="shop-pill-btn" id="ui-shop-btn">
+            <span>Shop now</span>
+            <svg viewBox="0 0 20 20" fill="none">
+              <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Controls: Dots & Navigation Arrows -->
+    <footer class="bottom-bar">
+      <div class="progress-dots" role="tablist" aria-label="Product Showcase Navigation" id="ui-dots">
+        <button class="dot-btn active" data-index="0" role="tab" aria-selected="true" aria-label="Shoe 1: AERO-PULSE 01"></button>
+        <button class="dot-btn" data-index="1" role="tab" aria-selected="false" aria-label="Shoe 2: HYDRO-DRIFT 02"></button>
+        <button class="dot-btn" data-index="2" role="tab" aria-selected="false" aria-label="Shoe 3: SOLAR-GLIDE 03"></button>
+      </div>
+
+      <div class="nav-arrows">
+        <button class="arrow-btn" id="ui-prev" aria-label="Previous Footwear Model">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="arrow-btn" id="ui-next" aria-label="Next Footwear Model">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ==========================================================================
+       VANILLA JAVASCRIPT & WEBGL IMPLEMENTATION
+       ========================================================================== -->
+  <script>
+    /**
+     * =========================================================================
+     * MOCS FOOTWEAR - PRODUCT CONFIGURATION
+     * Edit this array to customize shoe styles, color palettes, and copy.
+     * To swap in a real transparent PNG shoe, simply set the `image` property
+     * to the file URL. If `image` is omitted or null, the procedural Path2D
+     * engine renders a studio-quality vector shoe texture automatically.
+     * =========================================================================
+     */
+    const PRODUCTS = [
+      {
+        id: "aero-pulse-01",
+        name: "AERO-PULSE 01",
+        tagline: "Engineered Hyper-Responsive PU Foam",
+        price: "$189",
+        category: "HIGH-RESPONSE RUNNER",
+        colors: {
+          upper: "#1c1c1f",
+          toeCap: "#2a2a2e",
+          accent: "#ff6a00",
+          accentSecondary: "#ffa347",
+          laces: "#ffffff",
+          midsole: "#f4f4f6",
+          midsoleAccent: "#ff6a00",
+          outsole: "#0f0f12"
+        },
+        image: null // e.g. "./assets/shoe1.png"
+      },
+      {
+        id: "hydro-drift-02",
+        name: "HYDRO-DRIFT 02",
+        tagline: "All-Terrain Hydrophobic Breathable Knit",
+        price: "$215",
+        category: "TRAIL & SLIPSTREAM",
+        colors: {
+          upper: "#111114",
+          toeCap: "#222226",
+          accent: "#ff8c00",
+          accentSecondary: "#ffc83b",
+          laces: "#ff8c00",
+          midsole: "#2b2b30",
+          midsoleAccent: "#1a1a1d",
+          outsole: "#ff8c00"
+        },
+        image: null // e.g. "./assets/shoe2.png"
+      },
+      {
+        id: "solar-glide-03",
+        name: "SOLAR-GLIDE 03",
+        tagline: "Ultra-Lightweight Daily Recovery Moccasin",
+        price: "$165",
+        category: "LUXURY ERGONOMIC MOCCASIN",
+        colors: {
+          upper: "#261e1b",
+          toeCap: "#3b2b24",
+          accent: "#ea580c",
+          accentSecondary: "#f59e0b",
+          laces: "#d8ccbc",
+          midsole: "#faf7f2",
+          midsoleAccent: "#ea580c",
+          outsole: "#1a1614"
+        },
+        image: null // e.g. "./assets/shoe3.png"
+      }
+    ];
+
+    // =========================================================================
+    // PROCEDURAL HIGH-RES PATH2D SHOE GENERATOR (1024 x 640)
+    // Generates sleek, modern athletic footwear with side-view toe-up attitude.
+    // =========================================================================
+    function createShoeTextureCanvas(product, index) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 640;
+      const ctx = canvas.getContext("2d");
+      const c = product.colors;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Pivot: slightly rotate toe-up (~5 degrees) around heel/ball
+      ctx.save();
+      ctx.translate(512, 340);
+      ctx.rotate(-0.08); // ~4.6 deg toe spring angle
+      ctx.translate(-512, -340);
+
+      // --- 1. Soft Ambient Cast Shadow under Upper onto Midsole ---
+      ctx.save();
+      ctx.filter = "blur(12px)";
+      ctx.fillStyle = "rgba(0, 0, 0, 0.45)";
+      ctx.beginPath();
+      ctx.ellipse(512, 420, 360, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // --- 2. Outsole (Ground Contact Tread) ---
+      const outsolePath = new Path2D();
+      outsolePath.moveTo(210, 420);
+      outsolePath.bezierCurveTo(210, 455, 320, 465, 480, 460);
+      outsolePath.bezierCurveTo(640, 455, 780, 435, 845, 385);
+      outsolePath.lineTo(840, 375);
+      outsolePath.bezierCurveTo(775, 420, 635, 442, 480, 448);
+      outsolePath.bezierCurveTo(320, 452, 215, 440, 210, 420);
+      outsolePath.closePath();
+
+      const outGrad = ctx.createLinearGradient(200, 460, 850, 400);
+      outGrad.addColorStop(0, c.outsole);
+      outGrad.addColorStop(0.5, c.accent);
+      outGrad.addColorStop(1, c.outsole);
+      ctx.fillStyle = outGrad;
+      ctx.fill(outsolePath);
+
+      // Tread Grooves / Grip Sipes
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,0,0,0.4)";
+      ctx.lineWidth = 3;
+      for (let x = 280; x < 800; x += 36) {
+        ctx.beginPath();
+        ctx.moveTo(x, 430);
+        ctx.lineTo(x + 16, 455);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // --- 3. Sculpted Midsole (PU Foam Cushioning Bed) ---
+      const midPath = new Path2D();
+      midPath.moveTo(205, 400);
+      midPath.bezierCurveTo(200, 430, 215, 448, 290, 452);
+      midPath.bezierCurveTo(440, 458, 620, 444, 760, 412);
+      midPath.bezierCurveTo(810, 400, 848, 382, 855, 360); // toe tip
+      midPath.bezierCurveTo(845, 360, 800, 372, 730, 376); // forefoot top
+      midPath.bezierCurveTo(620, 382, 450, 384, 340, 380); // arch top
+      midPath.bezierCurveTo(270, 378, 220, 382, 205, 400); // heel cup
+      midPath.closePath();
+
+      const midGrad = ctx.createLinearGradient(200, 360, 850, 460);
+      midGrad.addColorStop(0, c.midsole);
+      midGrad.addColorStop(0.4, "#ffffff");
+      midGrad.addColorStop(0.7, c.midsole);
+      midGrad.addColorStop(1, c.midsole);
+      ctx.fillStyle = midGrad;
+      ctx.shadowColor = "rgba(0,0,0,0.25)";
+      ctx.shadowBlur = 10;
+      ctx.fill(midPath);
+      ctx.shadowColor = "transparent";
+
+      // Midsole Dynamic Cushioning Chamber / Air Core
+      const chamberPath = new Path2D();
+      chamberPath.moveTo(270, 418);
+      chamberPath.bezierCurveTo(340, 415, 430, 420, 490, 425);
+      chamberPath.bezierCurveTo(490, 438, 430, 444, 340, 442);
+      chamberPath.bezierCurveTo(270, 440, 260, 430, 270, 418);
+      chamberPath.closePath();
+
+      const chGrad = ctx.createLinearGradient(270, 420, 490, 435);
+      chGrad.addColorStop(0, c.accent);
+      chGrad.addColorStop(0.5, c.accentSecondary);
+      chGrad.addColorStop(1, c.accent);
+      ctx.fillStyle = chGrad;
+      ctx.fill(chamberPath);
+
+      // MOCS Debossed Midsole Branding
+      ctx.save();
+      ctx.font = "800 13px 'Unbounded', sans-serif";
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.fillText("MOCS PU•CORE", 330, 410);
+      ctx.restore();
+
+      // --- 4. Main Upper Body ---
+      const upperPath = new Path2D();
+      upperPath.moveTo(215, 385); // Heel base
+      upperPath.bezierCurveTo(210, 340, 225, 270, 270, 220); // Heel counter curve up
+      upperPath.bezierCurveTo(285, 205, 320, 215, 350, 245); // Ankle collar scoop
+      upperPath.bezierCurveTo(380, 265, 430, 230, 475, 185); // Tongue rise
+      upperPath.bezierCurveTo(520, 205, 620, 265, 720, 310); // Instep slope
+      upperPath.bezierCurveTo(780, 335, 830, 345, 848, 358); // Toe bumper
+      upperPath.bezierCurveTo(840, 368, 780, 375, 710, 376); // Front sole junction
+      upperPath.bezierCurveTo(560, 380, 380, 382, 215, 385); // Sole line back to heel
+      upperPath.closePath();
+
+      const upperGrad = ctx.createLinearGradient(240, 180, 780, 380);
+      upperGrad.addColorStop(0, c.upper);
+      upperGrad.addColorStop(0.45, "#25252b");
+      upperGrad.addColorStop(1, c.upper);
+      ctx.fillStyle = upperGrad;
+      ctx.fill(upperPath);
+
+      // Upper Texture Knit / PU Mold Hatch Lines
+      ctx.save();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 28; i++) {
+        ctx.beginPath();
+        ctx.moveTo(320 + i * 16, 230 + i * 4);
+        ctx.bezierCurveTo(400 + i * 14, 270 + i * 3, 500 + i * 12, 330, 520 + i * 10, 378);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // --- 5. Heel Counter (Reinforced Carbon/Matte Cup) ---
+      const heelPath = new Path2D();
+      heelPath.moveTo(215, 385);
+      heelPath.bezierCurveTo(210, 330, 225, 265, 270, 225);
+      heelPath.bezierCurveTo(285, 245, 290, 290, 285, 340);
+      heelPath.bezierCurveTo(280, 368, 260, 382, 215, 385);
+      heelPath.closePath();
+
+      const heelGrad = ctx.createLinearGradient(210, 230, 285, 380);
+      heelGrad.addColorStop(0, c.toeCap);
+      heelGrad.addColorStop(1, "#0d0d0f");
+      ctx.fillStyle = heelGrad;
+      ctx.fill(heelPath);
+
+      // --- 6. Toe Cap (Abrasion Shield) ---
+      const toePath = new Path2D();
+      toePath.moveTo(710, 345);
+      toePath.bezierCurveTo(760, 325, 820, 338, 848, 358);
+      toePath.bezierCurveTo(840, 372, 790, 376, 725, 376);
+      toePath.bezierCurveTo(705, 374, 695, 355, 710, 345);
+      toePath.closePath();
+
+      const toeGrad = ctx.createLinearGradient(700, 330, 850, 375);
+      toeGrad.addColorStop(0, c.toeCap);
+      toeGrad.addColorStop(1, c.upper);
+      ctx.fillStyle = toeGrad;
+      ctx.fill(toePath);
+
+      // --- 7. MOCS Aerodynamic Signature Fluid Wing Stripe ---
+      const wingPath = new Path2D();
+      wingPath.moveTo(330, 310);
+      wingPath.bezierCurveTo(450, 290, 600, 280, 740, 335);
+      wingPath.bezierCurveTo(680, 345, 540, 352, 400, 356);
+      wingPath.bezierCurveTo(360, 355, 335, 335, 330, 310);
+      wingPath.closePath();
+
+      const wingGrad = ctx.createLinearGradient(330, 300, 740, 350);
+      wingGrad.addColorStop(0, c.accent);
+      wingGrad.addColorStop(0.65, c.accentSecondary);
+      wingGrad.addColorStop(1, c.accent);
+      ctx.fillStyle = wingGrad;
+      ctx.shadowColor = c.accent;
+      ctx.shadowBlur = 18;
+      ctx.fill(wingPath);
+      ctx.shadowColor = "transparent";
+
+      // Secondary Fluid Accent Ribbon
+      const ribbonPath = new Path2D();
+      ribbonPath.moveTo(380, 290);
+      ribbonPath.bezierCurveTo(480, 265, 590, 280, 690, 328);
+      ribbonPath.lineTo(670, 334);
+      ribbonPath.bezierCurveTo(570, 290, 470, 275, 380, 298);
+      ribbonPath.closePath();
+      ctx.fillStyle = "#ffffff";
+      ctx.globalAlpha = 0.85;
+      ctx.fill(ribbonPath);
+      ctx.globalAlpha = 1.0;
+
+      // --- 8. Eyestay, Laces & Collar Trim ---
+      // Ankle Collar Padded Lip
+      ctx.save();
+      ctx.lineWidth = 9;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = c.laces;
+      ctx.beginPath();
+      ctx.moveTo(270, 220);
+      ctx.bezierCurveTo(295, 205, 330, 225, 360, 255);
+      ctx.stroke();
+      ctx.restore();
+
+      // Dynamic Speed Lacing Criss-Cross
+      const laceCoords = [
+        [415, 235, 455, 220],
+        [445, 255, 495, 238],
+        [480, 275, 535, 258],
+        [520, 295, 575, 280],
+        [565, 312, 615, 300]
+      ];
+
+      ctx.save();
+      ctx.lineWidth = 5.5;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = c.laces;
+      ctx.shadowColor = "rgba(0,0,0,0.5)";
+      ctx.shadowBlur = 6;
+      laceCoords.forEach(([x1, y1, x2, y2]) => {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.bezierCurveTo(x1 + 15, y1 - 10, x2 - 15, y2 - 5, x2, y2);
+        ctx.stroke();
+
+        // Metallic Eyelet Rings
+        ctx.fillStyle = "#a1a1aa";
+        ctx.beginPath();
+        ctx.arc(x1, y1, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(x2, y2, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+
+      // Heel Pull-Tab Ribbon
+      const tabPath = new Path2D();
+      tabPath.moveTo(260, 225);
+      tabPath.bezierCurveTo(245, 200, 235, 175, 250, 165);
+      tabPath.bezierCurveTo(260, 160, 270, 185, 275, 215);
+      tabPath.closePath();
+      ctx.fillStyle = c.accent;
+      ctx.fill(tabPath);
+
+      // Specular Top Rim Highlight (Gloss sheen across shoe crest)
+      ctx.save();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.38)";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(480, 190);
+      ctx.bezierCurveTo(550, 230, 680, 290, 810, 340);
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.restore(); // restore rotation & translation
+      return canvas;
+    }
+
+    // =========================================================================
+    // RAW WEBGL1 SHADERS
+    // Fullscreen triangle vertex shader + domain-warped liquid fragment shader
+    // =========================================================================
+    const VERTEX_SHADER_SRC = `
+      attribute vec2 aPosition;
+      varying vec2 vUv;
+
+      void main() {
+        vUv = aPosition * 0.5 + 0.5;
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+      }
+    `;
+
+    const FRAGMENT_SHADER_SRC = `
+      precision highp float;
+
+      varying vec2 vUv;
+
+      uniform vec2 uResolution;
+      uniform float uTime;
+      uniform vec2 uMouse;
+      uniform float uS;
+      uniform float uSurge;
+      uniform sampler2D uShoeTex;
+
+      // 5-Octave Rotation Matrix between octaves
+      const mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+
+      // Fast, smooth 2D noise generator
+      float hash(vec2 p) {
+        p = 50.0 * fract(p * 0.3183099 + vec2(0.71, 0.113));
+        return -1.0 + 2.0 * fract(p.x * p.y * (p.x + p.y));
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i + vec2(0.0, 0.0)),
+                       hash(i + vec2(1.0, 0.0)), u.x),
+                   mix(hash(i + vec2(0.0, 1.0)),
+                       hash(i + vec2(1.0, 1.0)), u.x), u.y);
+      }
+
+      // 5-Octave Fractional Brownian Motion (fBM)
+      float fbm(vec2 p) {
+        float val = 0.0;
+        val += 0.5000 * noise(p); p = m * p;
+        val += 0.2500 * noise(p); p = m * p;
+        val += 0.1250 * noise(p); p = m * p;
+        val += 0.0625 * noise(p); p = m * p;
+        val += 0.03125 * noise(p);
+        return val * 0.5 + 0.5;
+      }
+
+      // Domain-Warped Fluid Function
+      float getFluid(vec2 p, float t, out vec2 outQ, out vec2 outR) {
+        // q = vec2(fbm(p+t), fbm(p+(5.2,1.3)-t*1.2))
+        vec2 q = vec2(
+          fbm(p + vec2(t)),
+          fbm(p + vec2(5.2, 1.3) - t * 1.2)
+        );
+
+        // r = vec2(fbm(p+3.5q+(1.7,9.2)+t*1.5), fbm(p+3.5q+(8.3,2.8)-t))
+        vec2 r = vec2(
+          fbm(p + 3.5 * q + vec2(1.7, 9.2) + t * 1.5),
+          fbm(p + 3.5 * q + vec2(8.3, 2.8) - t)
+        );
+
+        outQ = q;
+        outR = r;
+
+        // f = fbm(p+3.5r)
+        return fbm(p + 3.5 * r);
+      }
+
+      void main() {
+        vec2 uv = vUv;
+        vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
+
+        // Normalized space: p = (uv-0.5)*aspect*1.6 and t = time*0.09
+        vec2 p = (uv - 0.5) * aspect * 1.6;
+        float t = uTime * 0.09;
+
+        // --- Mouse Interaction (Push & Swirl near cursor) ---
+        vec2 mouseP = (uMouse - 0.5) * aspect * 1.6;
+        vec2 mDelta = p - mouseP;
+        float mDist = length(mDelta);
+        float mForce = smoothstep(0.72, 0.0, mDist);
+        p += vec2(-mDelta.y, mDelta.x) * (mForce * 0.38) + mDelta * (mForce * 0.18);
+
+        // --- Transition Surge Vortex (Center Swirl during sink/rise swap) ---
+        vec2 cDelta = p - vec2(0.0, (0.57 - 0.5) * 1.6);
+        float cDist = length(cDelta);
+        float swirl = uSurge * 2.6 * exp(-cDist * 1.55);
+        float cosS = cos(swirl);
+        float sinS = sin(swirl);
+        p = vec2(p.x * cosS - p.y * sinS, p.x * sinS + p.y * cosS);
+
+        // --- Evaluate Domain Warped Fluid ---
+        vec2 q, r;
+        float f = getFluid(p, t, q, r);
+
+        // --- Finite Differences Normal (offset 0.02, scale 35) ---
+        float eps = 0.02;
+        vec2 dummyQ, dummyR;
+        float fRight = getFluid(p + vec2(eps, 0.0), t, dummyQ, dummyR);
+        float fUp    = getFluid(p + vec2(0.0, eps), t, dummyQ, dummyR);
+
+        float dfdx = (fRight - f) / eps;
+        float dfdy = (fUp - f) / eps;
+        vec3 nor = normalize(vec3(-dfdx * 35.0, -dfdy * 35.0, 1.0));
+
+        // Diffuse & Specular Lighting
+        vec3 lightDir = normalize(vec3(-0.5, 0.6, 0.65));
+        float diff = clamp(dot(nor, lightDir), 0.0, 1.0);
+
+        vec3 viewDir = vec3(0.0, 0.0, 1.0);
+        vec3 halfDir = normalize(lightDir + viewDir);
+        float spec = pow(clamp(dot(nor, halfDir), 0.0, 1.0), 22.0);
+
+        // --- Color Ramp by f ---
+        // Black #050504
+        vec3 col = vec3(0.02, 0.02, 0.016);
+
+        // Deep Orange (0.6, 0.15, 0.02) from f 0.30 to 0.48
+        col = mix(col, vec3(0.60, 0.15, 0.02), smoothstep(0.30, 0.48, f));
+
+        // Orange #ff6a00 (1.0, 0.416, 0.0) from f 0.46 to 0.62
+        col = mix(col, vec3(1.0, 0.416, 0.0), smoothstep(0.46, 0.62, f));
+
+        // Hot Orange (1.0, 0.68, 0.25) from f 0.62 to 0.80
+        col = mix(col, vec3(1.0, 0.68, 0.25), smoothstep(0.62, 0.80, f));
+
+        // Darker black ribbons where q.y is high
+        col *= 1.0 - smoothstep(0.42, 0.88, q.y) * 0.72;
+
+        // Apply diffuse shading
+        col *= (0.65 + 0.50 * diff);
+
+        // Specular highlight only on orange regions (f > 0.30)
+        float isOrange = smoothstep(0.30, 0.50, f);
+        col += spec * vec3(1.0, 0.88, 0.65) * 1.35 * isOrange;
+
+        // Thin bright edge line around f ≈ 0.48
+        float edge = 1.0 - smoothstep(0.0, 0.018, abs(f - 0.48));
+        col += edge * vec3(1.0, 0.75, 0.35) * 0.82;
+
+        // --- Soft Dark Radial Vignette behind Shoe (so shoe stays readable) ---
+        vec2 shoeCenterPos = vec2(0.5, 0.57);
+        float shoeDist = length((uv - shoeCenterPos) * aspect);
+        float shoeBgVig = smoothstep(0.16, 0.46, shoeDist);
+        col *= mix(0.40, 1.0, shoeBgVig);
+
+        // Dark screen edge vignette
+        float edgeVig = uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y) * 16.0;
+        col *= clamp(pow(edgeVig, 0.25), 0.0, 1.0);
+
+        // --- SHOE RENDERING & LIQUID SINK/RISE TRANSITION ---
+        // Size: W = min(width*0.86, height*0.5*1.6), center at (0.5, 0.57) of screen
+        float shoeAspect = 1024.0 / 640.0; // 1.6
+        float shoeW = min(uResolution.x * 0.86, uResolution.y * 0.5 * shoeAspect);
+        float shoeH = shoeW / shoeAspect;
+
+        vec2 shoeSizeUV = vec2(shoeW / uResolution.x, shoeH / uResolution.y);
+
+        // Idle Bob: sin(time*1.2)*0.012 & sink down 0.28 of its size as uS increases
+        float bob = sin(uTime * 1.2) * 0.012;
+        float sinkOffset = -uS * (0.28 * shoeSizeUV.y);
+        vec2 currentCenter = vec2(0.5, 0.57 + bob + sinkOffset);
+
+        // Scale to 0.82 as uS goes up
+        float currentScale = mix(1.0, 0.82, uS);
+        vec2 effectiveSize = shoeSizeUV * currentScale;
+
+        // Soft contact shadow ellipse under the shoe (fades when submerged)
+        vec2 shadowOrigin = vec2(0.5, 0.57 - shoeSizeUV.y * 0.45);
+        vec2 shadowDistVec = (uv - shadowOrigin) * aspect;
+        float shadowRadius = length(vec2(shadowDistVec.x / (shoeSizeUV.x * 0.42 * aspect.x), shadowDistVec.y / (shoeSizeUV.y * 0.11)));
+        float contactShadow = smoothstep(1.0, 0.0, shadowRadius) * 0.65 * (1.0 - uS);
+        col *= (1.0 - contactShadow);
+
+        // Shoe tilt slightly with mouse x
+        float tilt = (uMouse.x - 0.5) * -0.06;
+        float cosT = cos(tilt);
+        float sinT = sin(tilt);
+
+        // Compute Shoe Local UV Coordinates
+        vec2 delta = uv - currentCenter;
+        delta.x *= aspect.x;
+        vec2 rotDelta = vec2(delta.x * cosT - delta.y * sinT, delta.x * sinT + delta.y * cosT);
+        rotDelta.x /= aspect.x;
+
+        vec2 shoeUV = rotDelta / effectiveSize + 0.5;
+
+        // Check if pixel is within shoe bounds
+        if (shoeUV.x >= 0.0 && shoeUV.x <= 1.0 && shoeUV.y >= 0.0 && shoeUV.y <= 1.0) {
+          // Refraction wobble added to texture coordinates, scaled by uS
+          vec2 sampleUV = shoeUV;
+          vec2 wobble = vec2(
+            sin(shoeUV.y * 24.0 + uTime * 4.2),
+            cos(shoeUV.x * 22.0 + uTime * 3.6)
+          ) * (0.026 * uS);
+          sampleUV += wobble;
+          sampleUV = clamp(sampleUV, 0.002, 0.998);
+
+          vec4 shoeTex = texture2D(uShoeTex, sampleUV);
+
+          if (shoeTex.a > 0.008) {
+            // Wavy liquid surface line rises from below shoe to above it:
+            // surf = mix(-0.5, 0.5, uS) + 0.04*sin(x*7+time*2.4) + noise ripple
+            float xPhase = shoeUV.x * 7.0 + uTime * 2.4;
+            float waveRipple = 0.04 * sin(xPhase) + 0.016 * sin(shoeUV.x * 18.0 - uTime * 3.8);
+            float surf = mix(-0.5, 0.5, uS) + waveRipple;
+
+            float shoeRelY = shoeUV.y - 0.5;
+            float dSurf = shoeRelY - surf;
+
+            // Above line: visible & crisp. Below line: faint, darkened underwater ghost tinted with fluid
+            vec3 underwaterCol = mix(col * 0.70, shoeTex.rgb * 0.22, 0.32);
+            float underwaterAlpha = shoeTex.a * 0.32;
+
+            float aboveFactor = smoothstep(-0.018, 0.018, dSurf);
+            vec3 shoeColor = mix(underwaterCol, shoeTex.rgb, aboveFactor);
+            float shoeAlpha = mix(underwaterAlpha, shoeTex.a, aboveFactor);
+
+            // Glowing orange rim hugging the surface line (strongest mid-transition)
+            float rimDist = abs(dSurf);
+            float rim = (1.0 - smoothstep(0.0, 0.038, rimDist)) * shoeTex.a;
+            float rimIntensity = (0.35 + 1.65 * sin(uS * 3.14159));
+            vec3 rimColor = vec3(1.0, 0.65, 0.18) * 2.6;
+
+            // Blend Shoe over Fluid Background
+            col = mix(col, shoeColor, shoeAlpha);
+            col += rim * rimColor * rimIntensity;
+          }
+        }
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    // =========================================================================
+    // HERO APPLICATION CONTROLLER
+    // =========================================================================
+    class MocsHeroApp {
+      constructor() {
+        this.canvas = document.getElementById("gl-canvas");
+        this.gl = this.canvas.getContext("webgl") || this.canvas.getContext("experimental-webgl");
+
+        this.currentIndex = 0;
+        this.targetIndex = 0;
+        this.isTransitioning = false;
+
+        // Uniform state variables
+        this.uS = 0.0;
+        this.uSurge = 0.0;
+        this.uTime = 0.0;
+        this.integratedTime = 0.0;
+        this.lastTime = performance.now();
+
+        // Smoothed mouse position (lerp 0.05 per frame)
+        this.targetMouse = { x: 0.5, y: 0.5 };
+        this.smoothedMouse = { x: 0.5, y: 0.5 };
+
+        // Autoplay timer
+        this.autoplayInterval = 5600; // 5.6s
+        this.autoplayTimer = null;
+        this.prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        // Texture storage
+        this.textures = [];
+
+        // DOM elements
+        this.uiCounter = document.getElementById("ui-counter");
+        this.uiTitle = document.getElementById("ui-title");
+        this.uiTagline = document.getElementById("ui-tagline");
+        this.uiPrice = document.getElementById("ui-price");
+        this.uiActions = document.getElementById("ui-actions");
+        this.uiDots = Array.from(document.querySelectorAll(".dot-btn"));
+        this.uiPrev = document.getElementById("ui-prev");
+        this.uiNext = document.getElementById("ui-next");
+
+        this.init();
+      }
+
+      init() {
+        if (!this.gl) {
+          console.warn("WebGL not available. Falling back to CSS radial background.");
+          return;
+        }
+
+        this.initWebGL();
+        this.createTextures();
+        this.bindEvents();
+        this.updateUI(0, false);
+        this.startAutoplay();
+        this.render(performance.now());
+      }
+
+      // Compile Shader Helper
+      createShader(type, source) {
+        const gl = this.gl;
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error("Shader Compile Error:", gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+
+      initWebGL() {
+        const gl = this.gl;
+        const vs = this.createShader(gl.VERTEX_SHADER, VERTEX_SHADER_SRC);
+        const fs = this.createShader(gl.FRAGMENT_SHADER, FRAGMENT_SHADER_SRC);
+
+        this.program = gl.createProgram();
+        gl.attachShader(this.program, vs);
+        gl.attachShader(this.program, fs);
+        gl.linkProgram(this.program);
+
+        if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+          console.error("Program Link Error:", gl.getProgramInfoLog(this.program));
+          return;
+        }
+
+        gl.useProgram(this.program);
+
+        // Fullscreen single triangle: [-1,-1], [3,-1], [-1,3]
+        const vertices = new Float32Array([
+          -1, -1,
+           3, -1,
+          -1,  3
+        ]);
+
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+        const aPosition = gl.getAttribLocation(this.program, "aPosition");
+        gl.enableVertexAttribArray(aPosition);
+        gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+
+        // Uniform Locations
+        this.uResolutionLoc = gl.getUniformLocation(this.program, "uResolution");
+        this.uTimeLoc = gl.getUniformLocation(this.program, "uTime");
+        this.uMouseLoc = gl.getUniformLocation(this.program, "uMouse");
+        this.uSLoc = gl.getUniformLocation(this.program, "uS");
+        this.uSurgeLoc = gl.getUniformLocation(this.program, "uSurge");
+        this.uShoeTexLoc = gl.getUniformLocation(this.program, "uShoeTex");
+
+        this.handleResize();
+      }
+
+      // Generate or load textures for each shoe
+      createTextures() {
+        const gl = this.gl;
+        this.textures = PRODUCTS.map((product, index) => {
+          const tex = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+          if (product.image) {
+            // Support external PNG image loading
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              gl.bindTexture(gl.TEXTURE_2D, tex);
+              gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+              gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            };
+            img.src = product.image;
+          } else {
+            // Procedural Path2D 1024x640 canvas
+            const canvas = createShoeTextureCanvas(product, index);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          }
+
+          return tex;
+        });
+
+        // Bind initial shoe texture
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, this.textures[this.currentIndex]);
+        gl.uniform1i(this.uShoeTexLoc, 0);
+      }
+
+      handleResize() {
+        // Capped DPR at 1.25, and scaled down 0.8x under 700px width for silky mobile 60fps
+        const rawDpr = window.devicePixelRatio || 1;
+        let dpr = Math.min(rawDpr, 1.25);
+        if (window.innerWidth < 700) {
+          dpr *= 0.8;
+        }
+
+        const width = Math.floor(window.innerWidth * dpr);
+        const height = Math.floor(window.innerHeight * dpr);
+
+        if (this.canvas.width !== width || this.canvas.height !== height) {
+          this.canvas.width = width;
+          this.canvas.height = height;
+          this.gl.viewport(0, 0, width, height);
+        }
+      }
+
+      bindEvents() {
+        window.addEventListener("resize", () => this.handleResize(), { passive: true });
+
+        // Mouse tracking with normalized coords
+        window.addEventListener("pointermove", (e) => {
+          this.targetMouse.x = e.clientX / window.innerWidth;
+          this.targetMouse.y = 1.0 - (e.clientY / window.innerHeight);
+        }, { passive: true });
+
+        // Prev & Next Buttons
+        this.uiPrev.addEventListener("click", () => {
+          this.resetAutoplay();
+          this.navigate(this.currentIndex - 1);
+        });
+
+        this.uiNext.addEventListener("click", () => {
+          this.resetAutoplay();
+          this.navigate(this.currentIndex + 1);
+        });
+
+        // Dots Navigation
+        this.uiDots.forEach((dot, idx) => {
+          dot.addEventListener("click", () => {
+            if (idx === this.currentIndex) return;
+            this.resetAutoplay();
+            this.navigate(idx);
+          });
+        });
+
+        // Keyboard Arrows Navigation
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            this.resetAutoplay();
+            this.navigate(this.currentIndex + 1);
+          } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            this.resetAutoplay();
+            this.navigate(this.currentIndex - 1);
+          }
+        });
+
+        // Touch Swipe Navigation (> 50px threshold)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        window.addEventListener("touchstart", (e) => {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener("touchend", (e) => {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(deltaX) > 50 && Math.abs(deltaX) > Math.abs(deltaY)) {
+            this.resetAutoplay();
+            if (deltaX < 0) {
+              this.navigate(this.currentIndex + 1); // Swipe left -> Next
+            } else {
+              this.navigate(this.currentIndex - 1); // Swipe right -> Prev
+            }
+          }
+        }, { passive: true });
+      }
+
+      // Navigation handler with state blocking
+      navigate(newIndex) {
+        if (this.isTransitioning) return;
+
+        const count = PRODUCTS.length;
+        this.targetIndex = (newIndex % count + count) % count;
+        if (this.targetIndex === this.currentIndex) return;
+
+        this.startTransition();
+      }
+
+      // Cubic EaseInOut: 0 -> 1
+      easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      }
+
+      startTransition() {
+        this.isTransitioning = true;
+        const sinkDuration = 1150; // 1150 ms sink
+        const riseDuration = 1400; // 1400 ms rise
+
+        // 1. Text Out Animation immediately
+        this.setTextAnimation(false);
+
+        const startTime = performance.now();
+
+        const stepSink = (currentTime) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / sinkDuration, 1.0);
+
+          // uS: 0 to 1 with easeInOutCubic
+          this.uS = this.easeInOutCubic(progress);
+          // surge: sin(t * PI / 2)
+          this.uSurge = Math.sin(progress * Math.PI * 0.5);
+
+          if (progress < 1.0) {
+            requestAnimationFrame(stepSink);
+          } else {
+            // Midpoint reached: Swap Texture & Text
+            this.currentIndex = this.targetIndex;
+            const gl = this.gl;
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, this.textures[this.currentIndex]);
+
+            this.updateUI(this.currentIndex, true);
+
+            // Phase 2: Rise
+            const riseStartTime = performance.now();
+            const stepRise = (riseCurrentTime) => {
+              const riseElapsed = riseCurrentTime - riseStartTime;
+              const riseProgress = Math.min(riseElapsed / riseDuration, 1.0);
+
+              // uS: 1 to 0 with (1 - easeInOutCubic)
+              this.uS = 1.0 - this.easeInOutCubic(riseProgress);
+              // surge: cos(t * PI / 2)
+              this.uSurge = Math.cos(riseProgress * Math.PI * 0.5);
+
+              if (riseProgress < 1.0) {
+                requestAnimationFrame(stepRise);
+              } else {
+                // Transition Complete
+                this.uS = 0.0;
+                this.uSurge = 0.0;
+                this.isTransitioning = false;
+              }
+            };
+
+            requestAnimationFrame(stepRise);
+          }
+        };
+
+        requestAnimationFrame(stepSink);
+      }
+
+      setTextAnimation(isIn) {
+        const elements = [this.uiCounter, this.uiTitle, this.uiTagline, this.uiActions];
+        if (isIn) {
+          elements.forEach((el) => {
+            el.classList.remove("text-out");
+            el.classList.add("text-in");
+          });
+        } else {
+          elements.forEach((el) => {
+            el.classList.remove("text-in");
+            el.classList.add("text-out");
+          });
+        }
+      }
+
+      updateUI(index, animateIn = true) {
+        const prod = PRODUCTS[index];
+        this.uiCounter.textContent = `0${index + 1} / 0${PRODUCTS.length}`;
+        this.uiTitle.textContent = prod.name;
+        this.uiTagline.textContent = prod.tagline;
+        this.uiPrice.textContent = prod.price;
+
+        // Update Dots
+        this.uiDots.forEach((dot, idx) => {
+          const isActive = idx === index;
+          dot.classList.toggle("active", isActive);
+          dot.setAttribute("aria-selected", isActive ? "true" : "false");
+        });
+
+        if (animateIn) {
+          // Trigger staggered text-in animation
+          requestAnimationFrame(() => {
+            this.setTextAnimation(true);
+          });
+        }
+      }
+
+      startAutoplay() {
+        if (this.prefersReducedMotion) return;
+        this.autoplayTimer = setInterval(() => {
+          if (!this.isTransitioning) {
+            this.navigate(this.currentIndex + 1);
+          }
+        }, this.autoplayInterval);
+      }
+
+      resetAutoplay() {
+        if (this.autoplayTimer) {
+          clearInterval(this.autoplayTimer);
+          this.startAutoplay();
+        }
+      }
+
+      render(currentTime) {
+        const dt = Math.min((currentTime - this.lastTime) * 0.001, 0.1);
+        this.lastTime = currentTime;
+
+        // Integrate time with surge acceleration: speed up by (1 + surge * 2.5)
+        this.integratedTime += dt * (1.0 + this.uSurge * 2.5);
+
+        // Lerp mouse coordinates (0.05 per frame)
+        this.smoothedMouse.x += (this.targetMouse.x - this.smoothedMouse.x) * 0.05;
+        this.smoothedMouse.y += (this.targetMouse.y - this.smoothedMouse.y) * 0.05;
+
+        const gl = this.gl;
+        gl.useProgram(this.program);
+
+        gl.uniform2f(this.uResolutionLoc, this.canvas.width, this.canvas.height);
+        gl.uniform1f(this.uTimeLoc, this.integratedTime);
+        gl.uniform2f(this.uMouseLoc, this.smoothedMouse.x, this.smoothedMouse.y);
+        gl.uniform1f(this.uSLoc, this.uS);
+        gl.uniform1f(this.uSurgeLoc, this.uSurge);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+        requestAnimationFrame((t) => this.render(t));
+      }
+    }
+
+    // Initialize Hero App on DOM Load
+    window.addEventListener("DOMContentLoaded", () => {
+      window.mocsApp = new MocsHeroApp();
+    });
+  </script>
+</body>
+</html>
