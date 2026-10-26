@@ -73,7 +73,9 @@ export function Navbar() {
           className={cn(
             "transition-colors duration-300 ease-in-out",
             transparent
-              ? "bg-transparent border-transparent text-black shadow-none"
+              ? isHome
+                ? "bg-transparent border-transparent text-white shadow-none"
+                : "bg-transparent border-transparent text-black shadow-none"
               : "bg-black/70 backdrop-blur-md border-b border-white/10 text-white shadow-md"
           )}
         >
