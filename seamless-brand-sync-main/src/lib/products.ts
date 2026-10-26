@@ -46,7 +46,7 @@ const baseSizes = [6, 7, 8, 9, 10, 11, 12];
 
 // Helper: generate a 6-view gallery for each product from the available assets.
 // In production these would be distinct front/side/back/top/sole/lifestyle
-// photos served from Cloudinary or storage.
+// photos served from local storage.
 const buildViews = (primary: string, alt: string, lifestyle: string): ProductView[] => [
   { label: "Front", src: primary },
   { label: "Side", src: alt },

@@ -1,0 +1,34 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Serve existing files and directories directly
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Return real 404 for missing static assets (don't disguise missing JS/CSS as index.html)
+  RewriteCond %{REQUEST_URI} \.(?:js|mjs|css|png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|ttf|eot|map|json)$ [NC]
+  RewriteRule ^ - [R=404,L]
+
+  # All other application requests route to index.html for React SPA client-side routing
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Gzip compression for Hostinger / Apache
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json application/xml image/svg+xml
+</IfModule>
+
+# Cache-Control headers for static assets
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+</IfModule>
