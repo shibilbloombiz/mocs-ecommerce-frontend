@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MOCS Footwear — Viscous Fluid Performance</title>
+  <meta name="description" content="Experience MOCS Footwear. Real-time WebGL fluid simulation with responsive footwear transitions.">
+
+  <!-- Google Fonts: Unbounded (headings) and Space Grotesk (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       CSS RESET & VARIABLES
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --font-heading: 'Unbounded', system-ui, -apple-system, sans-serif;
+      --font-body: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+      --color-orange: #ff6600;
+      --color-black: #030303;
+      --ease-fluid: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      background-color: var(--color-black);
+      color: #ffffff;
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+
+    /* Full-screen Hero Shell with Static Radial Fallback */
+    .hero-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 45%, #8c2a00 0%, #1a0802 45%, #030303 75%);
+    }
+
+    /* WebGL Canvas */
+    #gl-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    /* Bottom 38% Readability Dark Gradient (Balanced for 65% Orange / 35% Black) */
+    .bottom-gradient {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 38%;
+      background: linear-gradient(
+        to top,
+        rgba(3, 3, 3, 0.92) 0%,
+        rgba(3, 3, 3, 0.50) 45%,
+        transparent 100%
+      );
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ==========================================================================
+       TOP NAVIGATION
+       ========================================================================== */
+    .top-nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(16px, 3vh, 32px) clamp(20px, 4vw, 48px);
+      padding-top: calc(clamp(16px, 3vh, 32px) + env(safe-area-inset-top, 0px));
+      padding-left: calc(clamp(20px, 4vw, 48px) + env(safe-area-inset-left, 0px));
+      padding-right: calc(clamp(20px, 4vw, 48px) + env(safe-area-inset-right, 0px));
+      pointer-events: none;
+    }
+
+    .top-nav * {
+      pointer-events: auto;
+    }
+
+    /* Brand Logo */
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #ffffff;
+      font-family: var(--font-heading);
+      font-size: clamp(15px, 1.8vw, 19px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      transition: opacity 0.25s ease;
+    }
+
+    .brand-logo:hover {
+      opacity: 0.85;
+    }
+
+    .brand-logo .logo-slash {
+      color: var(--color-orange);
+      font-weight: 700;
+    }
+
+    .brand-logo .logo-sub {
+      font-family: var(--font-body);
+      font-size: clamp(11px, 1.1vw, 13px);
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    /* Center Nav Links (Hidden under 700px) */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: clamp(18px, 2.5vw, 36px);
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.25s ease;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      background: var(--color-orange);
+      transition: width 0.3s var(--ease-fluid);
+    }
+
+    .nav-links a:hover {
+      color: #ffffff;
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    /* Right Pill Button (Cart) */
+    .cart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 9px 18px;
+      border-radius: 9999px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s ease;
+    }
+
+    .cart-btn:hover {
+      background: rgba(255, 102, 0, 0.15);
+      border-color: rgba(255, 102, 0, 0.45);
+      transform: translateY(-1px);
+    }
+
+    .cart-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      background: var(--color-orange);
+      color: #030303;
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    @media (max-width: 700px) {
+      .nav-links {
+        display: none;
+      }
+    }
+
+    /* ==========================================================================
+       CENTER PRODUCT TYPOGRAPHY & CTA (UNDER THE SHOE)
+       ========================================================================== */
+    .product-info-wrap {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: clamp(86px, 13.5vh, 140px);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 clamp(20px, 4vw, 48px);
+      pointer-events: none;
+    }
+
+    .product-info-wrap * {
+      pointer-events: auto;
+    }
+
+    .product-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 860px;
+    }
+
+    /* Product Name with compact line-height */
+    .product-title {
+      font-family: var(--font-heading);
+      font-size: clamp(28px, 5.2vw, 66px);
+      font-weight: 800;
+      line-height: 0.94;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin-bottom: clamp(6px, 1vh, 10px);
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.7);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    /* Product Tagline */
+    .product-tagline {
+      font-size: clamp(13px, 1.35vw, 16px);
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.74);
+      letter-spacing: 0.03em;
+      margin-bottom: clamp(14px, 2.2vh, 24px);
+      max-width: 560px;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    /* Action Row (Price + Shop Pill) */
+    .product-action-row {
+      display: inline-flex;
+      align-items: center;
+      gap: clamp(16px, 2vw, 24px);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+    }
+
+    .product-price {
+      font-family: var(--font-heading);
+      font-size: clamp(18px, 2vw, 24px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+    }
+
+    /* Orange Pill Button */
+    .shop-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--color-orange);
+      color: #030303;
+      text-decoration: none;
+      font-family: var(--font-body);
+      font-size: clamp(13px, 1.2vw, 15px);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: clamp(10px, 1.3vh, 14px) clamp(22px, 2.5vw, 32px);
+      border-radius: 9999px;
+      transition: transform 0.3s var(--ease-fluid), background-color 0.25s ease;
+    }
+
+    .shop-pill-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      background: #ff781a;
+    }
+
+    .shop-pill-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .shop-pill-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.25s ease;
+    }
+
+    .shop-pill-btn:hover svg {
+      transform: translateX(3px);
+    }
+
+    /* Text Transition Out State */
+    .text-out {
+      opacity: 0 !important;
+      transform: translateY(28px) !important;
+      filter: blur(10px) !important;
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease !important;
+    }
+
+    /* Text Transition In Stagger Delays */
+    .text-in-0 {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+      transition: opacity 0.85s var(--ease-fluid), transform 0.85s var(--ease-fluid), filter 0.85s var(--ease-fluid);
+      transition-delay: 0ms;
+    }
+
+    .text-in-1 {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+      transition: opacity 0.9s var(--ease-fluid), transform 0.9s var(--ease-fluid), filter 0.9s var(--ease-fluid);
+      transition-delay: 90ms;
+    }
+
+    .text-in-2 {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+      transition: opacity 0.95s var(--ease-fluid), transform 0.95s var(--ease-fluid), filter 0.95s var(--ease-fluid);
+      transition-delay: 180ms;
+    }
+
+    .text-in-3 {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0px);
+      transition: opacity 1.0s var(--ease-fluid), transform 1.0s var(--ease-fluid), filter 1.0s var(--ease-fluid);
+      transition-delay: 270ms;
+    }
+
+    /* ==========================================================================
+       BOTTOM CONTROLS (DOTS LEFT, ROUND ARROWS RIGHT)
+       ========================================================================== */
+    .bottom-controls {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: clamp(16px, 3vh, 32px) clamp(20px, 4vw, 48px);
+      padding-bottom: calc(clamp(16px, 3vh, 32px) + env(safe-area-inset-bottom, 0px));
+      padding-left: calc(clamp(20px, 4vw, 48px) + env(safe-area-inset-left, 0px));
+      padding-right: calc(clamp(20px, 4vw, 48px) + env(safe-area-inset-right, 0px));
+      pointer-events: none;
+    }
+
+    .bottom-controls * {
+      pointer-events: auto;
+    }
+
+    /* Bottom Left Controls: Counter + Dots */
+    .bottom-left-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .product-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-heading);
+      font-size: clamp(11px, 1.1vw, 13px);
+      font-weight: 700;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--color-orange);
+    }
+
+    .product-counter .counter-slash {
+      color: rgba(255, 255, 255, 0.35);
+      font-weight: 400;
+    }
+
+    .counter-divider {
+      width: 1px;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Progress Dots */
+    .dots-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dot-btn {
+      width: 10px;
+      height: 10px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.28);
+      border: none;
+      cursor: pointer;
+      outline: none;
+      padding: 0;
+      transition: width 0.35s var(--ease-fluid), background-color 0.3s ease, opacity 0.25s ease;
+    }
+
+    .dot-btn:hover {
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .dot-btn.active {
+      width: 32px;
+      background: var(--color-orange);
+    }
+
+    /* Arrow Buttons */
+    .arrows-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .arrow-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      outline: none;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background-color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+    }
+
+    .arrow-btn:hover {
+      background: var(--color-orange);
+      border-color: var(--color-orange);
+      color: #030303;
+      transform: scale(1.08);
+    }
+
+    .arrow-btn:active {
+      transform: scale(0.96);
+    }
+
+    .arrow-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+    }
+
+    button:focus-visible, a:focus-visible {
+      outline: 2px solid var(--color-orange);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Full-screen Hero Shell -->
+  <main class="hero-container" id="hero">
+    <!-- WebGL Fluid Canvas -->
+    <canvas id="gl-canvas"></canvas>
+
+    <!-- Dark Gradient for Text Readability over bottom 44% -->
+    <div class="bottom-gradient" aria-hidden="true"></div>
+
+    <!-- Top Navigation -->
+    <nav class="top-nav" aria-label="Main Navigation">
+      <a href="/" class="brand-logo" aria-label="MOCS Footwear Homepage">
+        MOCS <span class="logo-slash">/</span> <span class="logo-sub">Footwear</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#men">Men</a></li>
+        <li><a href="#women">Women</a></li>
+        <li><a href="#kids">Kids</a></li>
+        <li><a href="#new">New</a></li>
+      </ul>
+
+      <a href="#cart" class="cart-btn" aria-label="Shopping Cart">
+        <span>Cart</span>
+        <span class="cart-badge" id="cart-count">0</span>
+      </a>
+    </nav>
+
+    <!-- Center Product Information Under Shoe -->
+    <section class="product-info-wrap" aria-live="polite">
+      <div class="product-content">
+        <h1 class="product-title text-in-0" id="product-title">LADIES BUCKLE SLIDE</h1>
+        <p class="product-tagline text-in-1" id="product-tagline">
+          Contoured anatomical footbed with crystal-embellished buckle strap and toe post.
+        </p>
+        <div class="product-action-row text-in-2" id="product-action-row">
+          <span class="product-price" id="product-price">₹399</span>
+          <a href="#shop" class="shop-pill-btn" id="shop-btn">
+            <span>Shop now</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Controls: Counter + Dots (Left) and Round Arrow Buttons (Right) -->
+    <footer class="bottom-controls">
+      <div class="bottom-left-controls">
+        <span class="product-counter" id="product-counter">01 <span class="counter-slash">/</span> 03</span>
+        <div class="counter-divider" aria-hidden="true"></div>
+        <div class="dots-container" id="dots-container" role="tablist" aria-label="Product Slides"></div>
+      </div>
+
+      <div class="arrows-container">
+        <button class="arrow-btn" id="prev-btn" aria-label="Previous Product">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <button class="arrow-btn" id="next-btn" aria-label="Next Product">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </div>
+    </footer>
+  </main>
+
+  <!-- ==========================================================================
+       VANILLA JAVASCRIPT & OPTIMIZED WEBGL ENGINE
+       ========================================================================== -->
+  <script>
+    /**
+     * AUTHENTIC MOCS FOOTWEAR PRODUCTS
+     */
+    const PRODUCTS = [
+      {
+        id: "ladies-buckle-slide",
+        name: "LADIES BUCKLE SLIDE",
+        tagline: "Contoured anatomical footbed with crystal-embellished buckle strap and toe post.",
+        price: "₹399",
+        category: "SIGNATURE SLIDE",
+        image: "/about-products/trans_mocs-sandal-buckle.png",
+        colors: {
+          upper: "#141416",
+          toeCap: "#222226",
+          accent: "#ff6600",
+          accentSecondary: "#ff9933",
+          laces: "#ffffff",
+          midsole: "#f4f4f6",
+          midsoleAccent: "#ff6600",
+          outsole: "#0f0f12"
+        }
+      },
+      {
+        id: "comfort-wedge-slide",
+        name: "COMFORT WEDGE SLIDE",
+        tagline: "Shock-absorbing PU wedge with wood-textured grain and rhinestone square buckle.",
+        price: "₹499",
+        category: "ELEVATED COMFORT",
+        image: "/about-products/trans_mocs-wedge-slide.png",
+        colors: {
+          upper: "#1c1c20",
+          toeCap: "#ff6600",
+          accent: "#ff6600",
+          accentSecondary: "#ffb366",
+          laces: "#ff6600",
+          midsole: "#2b2b30",
+          midsoleAccent: "#1a1a1d",
+          outsole: "#ff6600"
+        }
+      },
+      {
+        id: "patent-cross-slide",
+        name: "PATENT CROSSOVER SLIDE",
+        tagline: "High-gloss crossover straps engineered with lightweight arch contouring.",
+        price: "₹349",
+        category: "LIFESTYLE LUXURY",
+        image: "/about-products/trans_mocs-cross-slide.png",
+        colors: {
+          upper: "#261e1b",
+          toeCap: "#3b2b24",
+          accent: "#ff6600",
+          accentSecondary: "#ffa347",
+          laces: "#d8ccbc",
+          midsole: "#faf7f2",
+          midsoleAccent: "#ff6600",
+          outsole: "#1a1614"
+        }
+      }
+    ];
+
+    // High-Res Shoe Texture Canvas Generator with Real Product Image Support
+    function createShoeTextureCanvas(product, onLoaded) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1024;
+      canvas.height = 640;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return canvas;
+
+      const renderProductImage = (img) => {
+        ctx.clearRect(0, 0, 1024, 640);
+        const maxW = 760;
+        const maxH = 520;
+        const scale = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight);
+        const dw = img.naturalWidth * scale;
+        const dh = img.naturalHeight * scale;
+
+        ctx.save();
+        ctx.translate(512, 330);
+        ctx.rotate(-0.02);
+        ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
+        ctx.restore();
+
+        if (onLoaded) onLoaded(canvas);
+      };
+
+      if (product.image) {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => renderProductImage(img);
+        img.src = product.image;
+        if (img.complete && img.naturalWidth > 0) {
+          renderProductImage(img);
+        }
+        return canvas;
+      }
+
+      const c = product.colors;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+      ctx.translate(512, 340);
+      ctx.rotate(-0.08);
+      ctx.translate(-512, -340);
+
+      // Outsole Tread
+      const outsolePath = new Path2D();
+      outsolePath.moveTo(210, 420);
+      outsolePath.bezierCurveTo(210, 455, 320, 465, 480, 460);
+      outsolePath.bezierCurveTo(640, 455, 780, 435, 845, 385);
+      outsolePath.lineTo(840, 375);
+      outsolePath.bezierCurveTo(775, 420, 635, 442, 480, 448);
+      outsolePath.bezierCurveTo(320, 452, 215, 440, 210, 420);
+      outsolePath.closePath();
+
+      const outGrad = ctx.createLinearGradient(200, 460, 850, 400);
+      outGrad.addColorStop(0, c.outsole);
+      outGrad.addColorStop(0.5, c.accent);
+      outGrad.addColorStop(1, c.outsole);
+      ctx.fillStyle = outGrad;
+      ctx.fill(outsolePath);
+
+      // Tread Sipes
+      ctx.save();
+      ctx.strokeStyle = "rgba(0,0,0,0.45)";
+      ctx.lineWidth = 3;
+      for (let x = 280; x < 800; x += 36) {
+        ctx.beginPath();
+        ctx.moveTo(x, 430);
+        ctx.lineTo(x + 16, 455);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Sculpted Midsole
+      const midPath = new Path2D();
+      midPath.moveTo(205, 400);
+      midPath.bezierCurveTo(200, 430, 215, 448, 290, 452);
+      midPath.bezierCurveTo(440, 458, 620, 444, 760, 412);
+      midPath.bezierCurveTo(810, 400, 848, 382, 855, 360);
+      midPath.bezierCurveTo(845, 360, 800, 372, 730, 376);
+      midPath.bezierCurveTo(620, 382, 450, 384, 340, 380);
+      midPath.bezierCurveTo(270, 378, 220, 382, 205, 400);
+      midPath.closePath();
+
+      const midGrad = ctx.createLinearGradient(200, 360, 850, 460);
+      midGrad.addColorStop(0, c.midsole);
+      midGrad.addColorStop(0.4, "#ffffff");
+      midGrad.addColorStop(0.7, c.midsole);
+      midGrad.addColorStop(1, c.midsole);
+      ctx.fillStyle = midGrad;
+      ctx.fill(midPath);
+
+      // Accent Cushioning Chamber
+      const chamberPath = new Path2D();
+      chamberPath.moveTo(270, 418);
+      chamberPath.bezierCurveTo(340, 415, 430, 420, 490, 425);
+      chamberPath.bezierCurveTo(490, 438, 430, 444, 340, 442);
+      chamberPath.bezierCurveTo(270, 440, 260, 430, 270, 418);
+      chamberPath.closePath();
+
+      const chGrad = ctx.createLinearGradient(270, 420, 490, 435);
+      chGrad.addColorStop(0, c.accent);
+      chGrad.addColorStop(0.5, c.accentSecondary);
+      chGrad.addColorStop(1, c.accent);
+      ctx.fillStyle = chGrad;
+      ctx.fill(chamberPath);
+
+      // Debossed branding
+      ctx.save();
+      ctx.font = "800 13px 'Unbounded', sans-serif";
+      ctx.fillStyle = "rgba(0,0,0,0.3)";
+      ctx.fillText("MOCS PU•CORE", 330, 410);
+      ctx.restore();
+
+      // Main Upper
+      const upperPath = new Path2D();
+      upperPath.moveTo(215, 385);
+      upperPath.bezierCurveTo(210, 340, 225, 270, 270, 220);
+      upperPath.bezierCurveTo(285, 205, 320, 215, 350, 245);
+      upperPath.bezierCurveTo(380, 265, 430, 230, 475, 185);
+      upperPath.bezierCurveTo(520, 205, 620, 265, 720, 310);
+      upperPath.bezierCurveTo(780, 335, 830, 345, 848, 358);
+      upperPath.bezierCurveTo(840, 368, 780, 375, 710, 376);
+      upperPath.bezierCurveTo(560, 380, 380, 382, 215, 385);
+      upperPath.closePath();
+
+      const upperGrad = ctx.createLinearGradient(240, 180, 780, 380);
+      upperGrad.addColorStop(0, c.upper);
+      upperGrad.addColorStop(0.5, "#25252b");
+      upperGrad.addColorStop(1, c.upper);
+      ctx.fillStyle = upperGrad;
+      ctx.fill(upperPath);
+
+      // Heel Counter
+      const heelPath = new Path2D();
+      heelPath.moveTo(215, 385);
+      heelPath.bezierCurveTo(210, 330, 225, 265, 270, 225);
+      heelPath.bezierCurveTo(285, 245, 290, 290, 285, 340);
+      heelPath.bezierCurveTo(280, 368, 260, 382, 215, 385);
+      heelPath.closePath();
+      ctx.fillStyle = c.toeCap;
+      ctx.fill(heelPath);
+
+      // Toe Cap
+      const toePath = new Path2D();
+      toePath.moveTo(710, 345);
+      toePath.bezierCurveTo(760, 325, 820, 338, 848, 358);
+      toePath.bezierCurveTo(840, 372, 790, 376, 725, 376);
+      toePath.bezierCurveTo(705, 374, 695, 355, 710, 345);
+      toePath.closePath();
+      ctx.fillStyle = c.toeCap;
+      ctx.fill(toePath);
+
+      // Fluid Wing Stripe
+      const wingPath = new Path2D();
+      wingPath.moveTo(330, 310);
+      wingPath.bezierCurveTo(450, 290, 600, 280, 740, 335);
+      wingPath.bezierCurveTo(680, 345, 540, 352, 400, 356);
+      wingPath.bezierCurveTo(360, 355, 335, 335, 330, 310);
+      wingPath.closePath();
+
+      const wingGrad = ctx.createLinearGradient(330, 300, 740, 350);
+      wingGrad.addColorStop(0, c.accent);
+      wingGrad.addColorStop(0.65, c.accentSecondary);
+      wingGrad.addColorStop(1, c.accent);
+      ctx.fillStyle = wingGrad;
+      ctx.fill(wingPath);
+
+      // Laces
+      ctx.save();
+      ctx.strokeStyle = c.laces;
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+      const lacePairs = [
+        [445, 235, 490, 215],
+        [480, 248, 525, 230],
+        [518, 262, 560, 245],
+        [555, 278, 595, 262],
+        [590, 295, 628, 280]
+      ];
+      for (const [x1, y1, x2, y2] of lacePairs) {
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.bezierCurveTo(x1 + 10, y1 - 10, x2 - 10, y2 - 5, x2, y2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      ctx.restore();
+      return canvas;
+    }
+
+    // High-Efficiency Shaders (3-Octave Viscous Paint)
+    const VERTEX_SHADER_SRC = `
+      attribute vec2 aPosition;
+      varying vec2 vUv;
+      void main() {
+        vUv = aPosition * 0.5 + 0.5;
+        gl_Position = vec4(aPosition, 0.0, 1.0);
+      }
+    `;
+
+    const FRAGMENT_SHADER_SRC = `
+      precision highp float;
+
+      varying vec2 vUv;
+
+      uniform vec2 uResolution;
+      uniform float uTime;
+      uniform vec2 uMouse;
+      uniform float uTilt;
+      uniform float uS;
+      uniform float uSurge;
+      uniform sampler2D uShoeTex;
+
+      const mat2 m = mat2(1.6, 1.2, -1.2, 1.6);
+
+      float hash(vec2 p) {
+        p = 50.0 * fract(p * 0.3183099 + vec2(0.71, 0.113));
+        return -1.0 + 2.0 * fract(p.x * p.y * (p.x + p.y));
+      }
+
+      float noise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i + vec2(0.0, 0.0)),
+                       hash(i + vec2(1.0, 0.0)), u.x),
+                   mix(hash(i + vec2(0.0, 1.0)),
+                       hash(i + vec2(1.0, 1.0)), u.x), u.y) * 0.5 + 0.5;
+      }
+
+      // 3 Octaves only for fast execution and viscous broad ribbons
+      float fbm(vec2 p) {
+        float val = 0.0;
+        val += 0.5333 * noise(p); p = m * p;
+        val += 0.2667 * noise(p); p = m * p;
+        val += 0.1333 * noise(p);
+        return val * (1.0 / 0.9333);
+      }
+
+      float getFluid(vec2 p, float t) {
+        vec2 q = vec2(
+          fbm(p + vec2(t)),
+          fbm(p + vec2(5.2, 1.3) - t * 1.2)
+        );
+
+        vec2 r = vec2(
+          fbm(p + 3.0 * q + vec2(1.7, 9.2) + t * 1.5),
+          fbm(p + 3.0 * q + vec2(8.3, 2.8) - t)
+        );
+
+        return fbm(p + 3.0 * r);
+      }
+
+      // Physical paint ridge centered at the 65% orange / 35% black boundary
+      float H(float val) {
+        float diff = (val - 0.34) * 7.2;
+        return val * 0.7 + exp(-diff * diff) * 0.25;
+      }
+
+      void main() {
+        vec2 uv = vUv;
+        vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
+
+        // Coordinate space: slow, luxurious viscous movement
+        vec2 p = (uv - 0.5) * aspect * 1.25;
+        float t = uTime * 0.015;
+
+        // Subtle desktop cursor push
+        vec2 mouseP = (uMouse - 0.5) * aspect * 1.25;
+        vec2 d = p - mouseP;
+        p -= d * exp(-dot(d, d) * 9.0) * 0.5;
+
+        // Transition surge swirl
+        vec2 centerP = vec2(0.0, (0.56 - 0.5) * 1.25);
+        vec2 c = p - centerP;
+        p += vec2(-c.y, c.x) * (uSurge * 2.2 * exp(-dot(c, c) * 3.5));
+
+        float f = getFluid(p, t);
+
+        // Two separate paints: calibrated to 65% orange, 35% deep glossy black
+        float pm = smoothstep(0.26, 0.42, f);
+
+        vec3 deepOrange = vec3(0.55, 0.12, 0.01);
+        vec3 pureOrange = vec3(1.0, 0.40, 0.02);
+        vec3 orangeShade = mix(deepOrange, pureOrange, smoothstep(0.32, 0.52, f));
+        vec3 basePaint = mix(vec3(0.012), orangeShade, pm);
+
+        // Finite differences normal of H(f)
+        float eps = 0.012;
+        float fR = getFluid(p + vec2(eps, 0.0), t);
+        float fU = getFluid(p + vec2(0.0, eps), t);
+        float hC = H(f);
+        float dhdx = (H(fR) - hC) / eps;
+        float dhdy = (H(fU) - hC) / eps;
+        vec3 n = normalize(vec3(-dhdx * 16.0, -dhdy * 16.0, 1.0));
+
+        // 2-Light diffuse
+        vec3 L1 = normalize(vec3(-0.5, 0.6, 0.65));
+        vec3 L2 = normalize(vec3(0.7, -0.4, 0.5));
+        vec3 col = basePaint * (0.6 + 0.55 * max(dot(n, L1), 0.0) + 0.2 * max(dot(n, L2), 0.0));
+
+        // Soft specular highlight (strictly no neon/bloom)
+        col += vec3(1.0, 0.9, 0.8) * pow(max(dot(reflect(-L1, n), vec3(0.0, 0.0, 1.0)), 0.0), 45.0) * 0.4;
+
+        // Soft vignette behind shoe for text readability
+        vec2 cVig = (uv - vec2(0.5, 0.56)) * aspect;
+        col *= (1.0 - (0.28 * (1.0 - uSurge * 0.4)) * exp(-dot(cVig * vec2(0.8, 1.1), cVig * vec2(0.8, 1.1)) * 2.2));
+
+        // Subtle edge vignette
+        vec2 edgeDist = (uv - 0.5) * 2.0;
+        col *= clamp(1.0 - 0.12 * dot(edgeDist, edgeDist), 0.0, 1.0);
+
+        // Shoe placement and transitions
+        float shoeAspect = 1.6;
+        float shoeW = min(uResolution.x * 0.86, uResolution.y * 0.50 * shoeAspect);
+        float shoeH = shoeW / shoeAspect;
+        vec2 shoeSizeUV = vec2(shoeW / uResolution.x, shoeH / uResolution.y);
+
+        // Dynamic contact shadow under the shoe
+        vec2 shadowDelta = (uv - vec2(0.5, 0.56 - shoeSizeUV.y * 0.34)) * aspect;
+        col *= (1.0 - exp(-dot(shadowDelta * vec2(1.0, 4.4), shadowDelta * vec2(1.0, 4.4)) * 14.0) * 0.42 * (1.0 - uS));
+
+        float shoeScale = mix(1.0, 0.82, uS);
+        float downOffset = 0.28 * shoeSizeUV.y * uS;
+        vec2 shoeCenter = vec2(0.5, 0.56 + sin(uTime * 0.6) * 0.008 - downOffset);
+
+        vec2 shoeUV = (uv - shoeCenter) / (shoeSizeUV * shoeScale);
+        float cosT = cos(uTilt), sinT = sin(uTilt);
+        shoeUV = vec2(shoeUV.x * cosT - shoeUV.y * sinT, shoeUV.x * sinT + shoeUV.y * cosT);
+        vec2 texCoord = shoeUV + 0.5;
+
+        if (texCoord.x >= 0.0 && texCoord.x <= 1.0 && texCoord.y >= 0.0 && texCoord.y <= 1.0) {
+          vec2 wobble = vec2(
+            sin(texCoord.y * 10.0 + uTime * 1.5) * 0.020 * uS,
+            cos(texCoord.x * 9.0 + uTime * 1.2) * 0.015 * uS
+          );
+          vec4 shoeTex = texture2D(uShoeTex, clamp(texCoord + wobble, 0.0, 1.0));
+
+          if (shoeTex.a > 0.01) {
+            float shoeLocalX = (texCoord.x - 0.5) * 6.0;
+            float waveRipple = 0.03 * sin(shoeLocalX * 5.0 + uTime * 1.2) + (noise(vec2(shoeLocalX * 3.5, uTime * 0.6)) - 0.5) * 0.025;
+            float surfThreshold = mix(-0.55, 0.55, uS) + waveRipple;
+            float localY = texCoord.y - 0.5;
+
+            float distToSurf = abs(localY - surfThreshold);
+            float rim = (1.0 - smoothstep(0.0, 0.035, distToSurf)) * (1.0 - uS * 0.5);
+
+            if (localY >= surfThreshold) {
+              vec3 shoeCol = mix(shoeTex.rgb, vec3(1.0, 0.45, 0.05), rim * 0.40);
+              col = mix(col, shoeCol, shoeTex.a);
+            } else {
+              float ghostAlpha = 0.30 * (1.0 - uS) * shoeTex.a;
+              col = mix(col, shoeTex.rgb * vec3(0.12, 0.05, 0.02), ghostAlpha);
+            }
+          }
+        }
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `;
+
+    // Production Hero Engine
+    (function initMocsHero() {
+      const hero = document.getElementById("hero");
+      const canvas = document.getElementById("gl-canvas");
+      const counterEl = document.getElementById("product-counter");
+      const titleEl = document.getElementById("product-title");
+      const taglineEl = document.getElementById("product-tagline");
+      const actionRowEl = document.getElementById("product-action-row");
+      const priceEl = document.getElementById("product-price");
+      const dotsContainer = document.getElementById("dots-container");
+      const prevBtn = document.getElementById("prev-btn");
+      const nextBtn = document.getElementById("next-btn");
+
+      let gl = canvas.getContext("webgl", {
+        alpha: false,
+        depth: false,
+        stencil: false,
+        antialias: false,
+        preserveDrawingBuffer: false,
+        powerPreference: "high-performance"
+      });
+
+      if (!gl) {
+        canvas.style.display = "none";
+        return;
+      }
+
+      function createShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+
+      const vs = createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER_SRC);
+      const fs = createShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER_SRC);
+      if (!vs || !fs) return;
+
+      const program = gl.createProgram();
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+      gl.useProgram(program);
+
+      const posBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const aPosition = gl.getAttribLocation(program, "aPosition");
+      gl.enableVertexAttribArray(aPosition);
+      gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 0, 0);
+
+      const uResolution = gl.getUniformLocation(program, "uResolution");
+      const uTime = gl.getUniformLocation(program, "uTime");
+      const uMouse = gl.getUniformLocation(program, "uMouse");
+      const uTilt = gl.getUniformLocation(program, "uTilt");
+      const uS = gl.getUniformLocation(program, "uS");
+      const uSurge = gl.getUniformLocation(program, "uSurge");
+      const uShoeTex = gl.getUniformLocation(program, "uShoeTex");
+      gl.uniform1i(uShoeTex, 0);
+
+      // Pre-upload shoe textures with async image reload support
+      const shoeTextures = PRODUCTS.map((product, idx) => {
+        const tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+
+        const sourceCanvas = createShoeTextureCanvas(product, (loadedCanvas) => {
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+          gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, loadedCanvas);
+          if (currentIndex === idx) {
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+          }
+        });
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, sourceCanvas);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return tex;
+      });
+
+      // Responsive resolution cap (1.0 mobile, 1.25 desktop)
+      function resize() {
+        const isMobile = window.innerWidth < 768;
+        const dprCap = isMobile ? 1.0 : 1.25;
+        const dpr = Math.min(window.devicePixelRatio || 1, dprCap) * (isMobile ? 0.85 : 1.0);
+        const w = Math.floor(window.innerWidth * dpr);
+        const h = Math.floor(window.innerHeight * dpr);
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+          gl.viewport(0, 0, w, h);
+          gl.uniform2f(uResolution, w, h);
+        }
+      }
+      window.addEventListener("resize", resize, { passive: true });
+      resize();
+
+      let targetMouseX = 0.5, targetMouseY = 0.5, smoothMouseX = 0.5, smoothMouseY = 0.5, smoothTilt = 0.0;
+      window.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "mouse") {
+          targetMouseX = e.clientX / window.innerWidth;
+          targetMouseY = 1.0 - (e.clientY / window.innerHeight);
+        }
+      }, { passive: true });
+
+      // Progress Dots
+      PRODUCTS.forEach((_, idx) => {
+        const dot = document.createElement("button");
+        dot.className = `dot-btn ${idx === 0 ? "active" : ""}`;
+        dot.setAttribute("role", "tab");
+        dot.setAttribute("aria-label", `Slide ${idx + 1}`);
+        dot.addEventListener("click", () => {
+          if (idx !== currentIndex && !isTransitioning) triggerTransition(idx);
+        });
+        dotsContainer.appendChild(dot);
+      });
+
+      let currentIndex = 0, isTransitioning = false, targetIndex = 0, transitionPhase = "none", transitionStart = 0;
+      const SINK_DURATION = 1150, RISE_DURATION = 1400;
+
+      function easeInOutCubic(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+
+      function updateDOMText(index) {
+        const p = PRODUCTS[index];
+        counterEl.innerHTML = `0${index + 1} <span class="counter-slash">/</span> 0${PRODUCTS.length}`;
+        titleEl.textContent = p.name;
+        taglineEl.textContent = p.tagline;
+        priceEl.textContent = p.price;
+        dotsContainer.querySelectorAll(".dot-btn").forEach((d, i) => d.classList.toggle("active", i === index));
+      }
+
+      function triggerTransition(nextIndex) {
+        if (isTransitioning || nextIndex === currentIndex) return;
+        isTransitioning = true;
+        targetIndex = nextIndex;
+        transitionPhase = "sink";
+        transitionStart = performance.now();
+
+        titleEl.className = "product-title text-out";
+        taglineEl.className = "product-tagline text-out";
+        actionRowEl.className = "product-action-row text-out";
+
+        resetAutoplay();
+      }
+
+      // Autoplay (7.0s) with Reduced Motion check
+      let autoplayTimer = null;
+      function resetAutoplay() {
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        clearInterval(autoplayTimer);
+        autoplayTimer = setInterval(() => {
+          if (!isTransitioning) triggerTransition((currentIndex + 1) % PRODUCTS.length);
+        }, 7000);
+      }
+      resetAutoplay();
+
+      prevBtn.addEventListener("click", () => {
+        if (!isTransitioning) triggerTransition((currentIndex - 1 + PRODUCTS.length) % PRODUCTS.length);
+      });
+      nextBtn.addEventListener("click", () => {
+        if (!isTransitioning) triggerTransition((currentIndex + 1) % PRODUCTS.length);
+      });
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") prevBtn.click();
+        else if (e.key === "ArrowRight") nextBtn.click();
+      });
+
+      // Touch Swipe
+      let touchStartX = 0, touchStartY = 0;
+      window.addEventListener("touchstart", (e) => {
+        if (e.touches && e.touches.length > 0) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      window.addEventListener("touchend", (e) => {
+        if (e.changedTouches && e.changedTouches.length > 0) {
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          const dy = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+            if (dx < 0) nextBtn.click();
+            else prevBtn.click();
+          }
+        }
+      }, { passive: true });
+
+      // Power-saving Viewport & Visibility Controls
+      let isVisible = true;
+      let isPageActive = true;
+
+      const observer = new IntersectionObserver((entries) => {
+        isVisible = entries[0].isIntersecting;
+        if (isVisible) lastTime = performance.now();
+      }, { threshold: 0.05 });
+      observer.observe(hero);
+
+      document.addEventListener("visibilitychange", () => {
+        isPageActive = !document.hidden;
+        if (isPageActive) lastTime = performance.now();
+      });
+
+      canvas.addEventListener("webglcontextlost", (e) => e.preventDefault(), false);
+
+      // Render Loop
+      let currentUS = 0.0, currentSurge = 0.0, fluidTime = 0.0, lastTime = performance.now();
+
+      function render(now) {
+        if (!isVisible || !isPageActive) {
+          requestAnimationFrame(render);
+          return;
+        }
+
+        const delta = Math.min((now - lastTime) / 1000, 0.1);
+        lastTime = now;
+
+        smoothMouseX += (targetMouseX - smoothMouseX) * 0.05;
+        smoothMouseY += (targetMouseY - smoothMouseY) * 0.05;
+        const targetTilt = (smoothMouseX - 0.5) * 0.09;
+        smoothTilt += (targetTilt - smoothTilt) * 0.05;
+
+        if (transitionPhase === "sink") {
+          const elapsed = now - transitionStart;
+          const p = Math.min(elapsed / SINK_DURATION, 1.0);
+          currentUS = easeInOutCubic(p);
+          currentSurge = Math.sin(p * Math.PI * 0.5);
+
+          if (p >= 1.0) {
+            currentIndex = targetIndex;
+            updateDOMText(currentIndex);
+            transitionPhase = "rise";
+            transitionStart = performance.now();
+
+            titleEl.className = "product-title text-in-0";
+            taglineEl.className = "product-tagline text-in-1";
+            actionRowEl.className = "product-action-row text-in-2";
+          }
+        } else if (transitionPhase === "rise") {
+          const elapsed = now - transitionStart;
+          const p = Math.min(elapsed / RISE_DURATION, 1.0);
+          currentUS = 1.0 - easeInOutCubic(p);
+          currentSurge = Math.cos(p * Math.PI * 0.5);
+
+          if (p >= 1.0) {
+            currentUS = 0.0;
+            currentSurge = 0.0;
+            transitionPhase = "none";
+            isTransitioning = false;
+          }
+        }
+
+        // Fluid ONLY moves when the carousel transitions, otherwise fixed
+        if (isTransitioning) {
+          fluidTime += delta * (1.2 + currentSurge * 2.2);
+        }
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, shoeTextures[currentIndex]);
+
+        gl.uniform1f(uTime, fluidTime);
+        gl.uniform2f(uMouse, smoothMouseX, smoothMouseY);
+        gl.uniform1f(uTilt, smoothTilt);
+        gl.uniform1f(uS, currentUS);
+        gl.uniform1f(uSurge, currentSurge);
+
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        requestAnimationFrame(render);
+      }
+
+      requestAnimationFrame(render);
+    })();
+  </script>
+</body>
+</html>
