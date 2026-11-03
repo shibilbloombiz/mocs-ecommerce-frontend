@@ -166,7 +166,8 @@ function AuthPage() {
                 if (res && res.token && res.user) {
                   login(res.token, res.user);
                   toast.success("Signed in with Google!", { id: "auth-toast" });
-                  window.location.href = targetRedirect;
+                  const isUserAdmin = res.user?.role === "admin" || res.user?.role === "superadmin";
+                  window.location.href = isUserAdmin ? "/admin/dashboard" : targetRedirect;
                 }
               }
             } catch (err: any) {
@@ -262,7 +263,8 @@ function AuthPage() {
 
       login(res.token, res.user);
       toast.success(mode === "login" ? "Welcome back" : "Account created", { id: "auth-toast" });
-      navigate({ to: targetRedirect });
+      const isUserAdmin = res.user?.role === "admin" || res.user?.role === "superadmin";
+      navigate({ to: isUserAdmin ? "/admin/dashboard" : targetRedirect });
     } catch (err: any) {
       const msg = err?.message ?? "Sign-in failed";
       if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
