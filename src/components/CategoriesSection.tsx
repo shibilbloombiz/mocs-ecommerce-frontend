@@ -33,7 +33,7 @@ export function CategoriesSection({ categoriesBanners }: CategoriesSectionProps)
           <div className="absolute inset-0 h-full w-full">
             {categoriesBanners[0]?.bg ? (
               <OptimizedImage
-                src={getImageUrl(categoriesBanners[0].bg, { width: 700, quality: 75 })}
+                src={getImageUrl(categoriesBanners[0].bg, { width: 1600, quality: 90 })}
                 alt={categoriesBanners[0].title}
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 containerClassName="h-full w-full"
@@ -84,7 +84,7 @@ export function CategoriesSection({ categoriesBanners }: CategoriesSectionProps)
               >
                 {cat.bg ? (
                   <OptimizedImage
-                    src={getImageUrl(cat.bg, { width: 450, quality: 75 })}
+                    src={getImageUrl(cat.bg, { width: 1000, quality: 90 })}
                     alt={cat.title}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     containerClassName="absolute inset-0 h-full w-full"

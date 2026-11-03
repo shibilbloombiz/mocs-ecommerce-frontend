@@ -150,7 +150,7 @@ export function NewArrivals({ products }: NewArrivalsProps) {
                     {/* Shoe Image Box */}
                     <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-stone-100/80 flex items-center justify-center p-2">
                       <OptimizedImage
-                        src={getImageUrl(product.image, { width: 450, quality: 75 })}
+                        src={getImageUrl(product.image, { width: 1000, quality: 90 })}
                         alt={product.name}
                         aspectRatio="1/1"
                         sizes="(max-width: 640px) 70vw, (max-width: 1024px) 40vw, 25vw"

@@ -9,8 +9,8 @@ export function cn(...inputs: ClassValue[]) {
 export function getImageUrl(url?: any, options: { width?: number; quality?: number } = {}): string {
   if (typeof url !== "string" || !url) return "";
   let normalizedUrl = url.trim().replace(/\\/g, "/");
-  const targetWidth = options.width || 700;
-  const targetQuality = options.quality || 75;
+  const targetWidth = options.width || 1200;
+  const targetQuality = options.quality || 90;
 
   if (
     normalizedUrl.startsWith("http://") ||

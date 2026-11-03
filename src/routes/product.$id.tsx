@@ -271,17 +271,17 @@ function ProductDetail() {
     }
   }, [allVariants, product]);
 
-  // Multi-view gallery: front / side / back / top / sole / lifestyle
+  // Product Gallery: STRICTLY images belonging to this specific product only
   const gallery: ProductView[] = useMemo(() => {
-    if (product.views && product.views.length > 0) return product.views;
-    return [
-      { label: "Front", src: product.image },
-      ...allBackendProducts
-        .filter((p) => p.id !== product.id)
-        .slice(0, 3)
-        .map<ProductView>((p) => ({ label: "Side", src: p.image })),
-    ];
-  }, [product, allBackendProducts]);
+    if (product.views && product.views.length > 0) {
+      const validViews = product.views.filter(
+        (v) => v && v.src && typeof v.src === "string" && v.src.trim() !== ""
+      );
+      if (validViews.length > 0) return validViews;
+    }
+    // Only this product's image — NEVER borrow or display other products in this gallery
+    return [{ label: "Front", src: product.image }];
+  }, [product]);
 
   const [active, setActive] = useState(0);
   const [size, setSize] = useState<number | null>(null);
@@ -522,7 +522,7 @@ function ProductDetail() {
             <AnimatePresence mode="wait">
               <motion.img
                 key={active}
-                src={getImageUrl(gallery[active]?.src || product.image)}
+                src={getImageUrl(gallery[active]?.src || product.image, { width: 1800, quality: 95 })}
                 alt={`${product.name} — ${gallery[active]?.label || "Front"}`}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -530,7 +530,7 @@ function ProductDetail() {
                 transition={{ duration: 0.2 }}
                 style={{ transformOrigin: zoom ? `${mousePos.x}% ${mousePos.y}%` : "center" }}
                 className={cn(
-                  "h-full w-full object-cover transition-transform duration-200",
+                  "h-full w-full object-contain p-4 transition-transform duration-200",
                   zoom && "scale-[2.5] cursor-zoom-in",
                 )}
               />
@@ -541,30 +541,32 @@ function ProductDetail() {
               </span>
             )}
           </div>
-          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6 max-w-[450px] mx-auto">
-            {gallery.map((view, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => setActive(i)}
-                onMouseEnter={() => setActive(i)}
-                aria-label={view?.label || "View"}
-                className={cn(
-                  "group relative aspect-square overflow-hidden rounded-xl border-2 bg-muted transition cursor-pointer",
-                  active === i ? "border-primary" : "border-transparent hover:border-border",
-                )}
-              >
-                <img
-                  src={getImageUrl(view?.src || product.image)}
-                  alt={view?.label || "View"}
-                  className="h-full w-full object-cover"
-                />
-                <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent py-1 text-center text-[10px] font-semibold uppercase tracking-wide">
-                  {view?.label || "View"}
-                </span>
-              </button>
-            ))}
-          </div>
+          {gallery.length > 1 && (
+            <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6 max-w-[450px] mx-auto">
+              {gallery.map((view, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActive(i)}
+                  onMouseEnter={() => setActive(i)}
+                  aria-label={view?.label || "View"}
+                  className={cn(
+                    "group relative aspect-square overflow-hidden rounded-xl border-2 bg-muted transition cursor-pointer p-1",
+                    active === i ? "border-primary ring-2 ring-primary/20" : "border-transparent hover:border-border",
+                  )}
+                >
+                  <img
+                    src={getImageUrl(view?.src || product.image, { width: 300, quality: 90 })}
+                    alt={`${product.name} view ${i + 1}`}
+                    className="h-full w-full object-contain"
+                  />
+                  <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent py-1 text-center text-[9px] font-semibold uppercase tracking-wide truncate px-1">
+                    {view?.label || "View"}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>

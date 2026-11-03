@@ -28,7 +28,7 @@ export function AdCarousel({ advertisements = [] }: { advertisements?: string[] 
           // Single image: static center card
           <div className="w-[90%] sm:w-[85%] lg:w-[80%] h-full rounded-[1.5rem] sm:rounded-[2.5rem] overflow-hidden bg-stone-950 shadow-soft">
             <OptimizedImage
-              src={getImageUrl(advertisements[0], { width: 1400, quality: 85 })}
+              src={getImageUrl(advertisements[0], { width: 1920, quality: 92 })}
               alt="Advertisement Banner"
               sizes="(max-width: 1024px) 90vw, 1200px"
               containerClassName="w-full h-full"
@@ -85,7 +85,7 @@ export function AdCarousel({ advertisements = [] }: { advertisements?: string[] 
                     )}
                   >
                     <OptimizedImage
-                      src={getImageUrl(advertisements[slide.idx], { width: 1400, quality: 85 })}
+                      src={getImageUrl(advertisements[slide.idx], { width: 1920, quality: 92 })}
                       alt={`Advertisement Banner #${slide.idx + 1}`}
                       sizes="(max-width: 1024px) 80vw, 1000px"
                       containerClassName="w-full h-full"

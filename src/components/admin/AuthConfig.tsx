@@ -37,9 +37,9 @@ export function AuthConfig({
                         className="h-full w-full object-cover brightness-[0.7] saturate-[0.8]"
                         onError={(e) => {
                           const fallbackImages = [
-                            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800",
-                            "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800",
-                            "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800"
+                            "/images/hero-bronze-slide.jpg",
+                            "/images/hero-wedge-rhinestone.jpg",
+                            "/images/hero-script-bow.jpg"
                           ];
                           e.currentTarget.src = fallbackImages[idx % fallbackImages.length];
                         }}

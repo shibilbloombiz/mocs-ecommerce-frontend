@@ -1,11 +1,11 @@
-const shoe1 = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800";
-const shoe2 = "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800";
-const shoe3 = "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800";
-const shoe4 = "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800";
-const shoe5 = "https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=800";
-const shoe6 = "https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&w=800";
-const lifestyleMen = "https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=800";
-const lifestyleWomen = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800";
+const shoe1 = "/products/mocs-rhinestone-wedge-cream-9056.png";
+const shoe2 = "/products/mocs-leather-comfort-sandal-brown-9057.png";
+const shoe3 = "/products/mocs-double-buckle-slide-charcoal-9057.png";
+const shoe4 = "/products/mocs-buckle-slide-mehandi-9058.png";
+const shoe5 = "/products/mocs-woven-leather-shoe-brown-10001.png";
+const shoe6 = "/products/mocs-velcro-casual-shoe-brown-1.png";
+const lifestyleMen = "/products/mocs-double-buckle-slide-charcoal-9057.png";
+const lifestyleWomen = "/images/hero-wedge-rhinestone.jpg";
 
 export type ProductView = {
   label: "Front" | "Side" | "Back" | "Top" | "Sole" | "Lifestyle";
@@ -70,7 +70,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 38,
     stock: 35,
-    image: "/about-products/trans_mocs-sandal-buckle.png",
+    image: "/products/mocs-buckle-slide-mehandi-9058.png",
     colors: [
       { name: "Onyx Black", hex: "#141416", stock: 20 },
       { name: "Sunset Orange", hex: "#ff6600", stock: 15 },
@@ -80,9 +80,9 @@ export const products: Product[] = [
     isNew: true,
     trending: true,
     views: [
-      { label: "Front", src: "/about-products/trans_mocs-sandal-buckle.png" },
-      { label: "Side", src: "/about-products/trans_mocs-sandal-buckle.png" },
-      { label: "Top", src: "/about-products/trans_mocs-sandal-buckle.png" },
+      { label: "Front", src: "/products/mocs-buckle-slide-mehandi-9058.png" },
+      { label: "Side", src: "/products/mocs-buckle-slide-mehandi-9058.png" },
+      { label: "Top", src: "/products/mocs-buckle-slide-mehandi-9058.png" },
     ],
   },
   {
@@ -98,7 +98,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 29,
     stock: 30,
-    image: "/about-products/trans_mocs-wedge-slide.png",
+    image: "/products/mocs-rhinestone-wedge-cream-9056.png",
     colors: [
       { name: "Charcoal Dark", hex: "#1c1c20", stock: 18 },
       { name: "Orange Pop", hex: "#ff6600", stock: 12 },
@@ -108,9 +108,9 @@ export const products: Product[] = [
     isNew: true,
     trending: true,
     views: [
-      { label: "Front", src: "/about-products/trans_mocs-wedge-slide.png" },
-      { label: "Side", src: "/about-products/trans_mocs-wedge-slide.png" },
-      { label: "Top", src: "/about-products/trans_mocs-wedge-slide.png" },
+      { label: "Front", src: "/products/mocs-rhinestone-wedge-cream-9056.png" },
+      { label: "Side", src: "/products/mocs-rhinestone-wedge-cream-9056.png" },
+      { label: "Top", src: "/products/mocs-rhinestone-wedge-cream-9056.png" },
     ],
   },
   {
@@ -126,7 +126,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 24,
     stock: 40,
-    image: "/about-products/trans_mocs-cross-slide.png",
+    image: "/products/mocs-bronze-double-bow-slide.png",
     colors: [
       { name: "Espresso Brown", hex: "#261e1b", stock: 25 },
       { name: "Warm Gold", hex: "#ffa347", stock: 15 },
@@ -136,9 +136,9 @@ export const products: Product[] = [
     isNew: true,
     trending: true,
     views: [
-      { label: "Front", src: "/about-products/trans_mocs-cross-slide.png" },
-      { label: "Side", src: "/about-products/trans_mocs-cross-slide.png" },
-      { label: "Top", src: "/about-products/trans_mocs-cross-slide.png" },
+      { label: "Front", src: "/products/mocs-bronze-double-bow-slide.png" },
+      { label: "Side", src: "/products/mocs-bronze-double-bow-slide.png" },
+      { label: "Top", src: "/products/mocs-bronze-double-bow-slide.png" },
     ],
   },
   {

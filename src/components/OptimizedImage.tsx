@@ -20,7 +20,7 @@ export function OptimizedImage({
   priority = false,
   aspectRatio,
   sizes,
-  fallbackSrc = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=75&w=480&auto=format&fit=crop",
+  fallbackSrc = "/products/mocs-bronze-double-bow-slide.png",
   ...props
 }: OptimizedImageProps) {
   const [error, setError] = useState(false);
@@ -29,16 +29,16 @@ export function OptimizedImage({
 
   // Optimized base URL (default ~480px width for fast 10-25KB transfer)
   const optimizedSrc = useMemo(() => {
-    return getImageUrl(rawSrc, { width: priority ? 800 : 480, quality: 75 });
+    return getImageUrl(rawSrc, { width: priority ? 1600 : 1000, quality: 90 });
   }, [rawSrc, priority]);
 
   // Multi-density responsive srcSet for instant sharp rendering on all screens
   const srcSet = useMemo(() => {
     if (!rawSrc || rawSrc.startsWith("data:")) return undefined;
     if (rawSrc.includes("images.unsplash.com")) {
-      const widths = [320, 480, 720, 1080];
+      const widths = [640, 960, 1200, 1600, 2000];
       return widths
-        .map((w) => `${getImageUrl(rawSrc, { width: w, quality: 75 })} ${w}w`)
+        .map((w) => `${getImageUrl(rawSrc, { width: w, quality: 90 })} ${w}w`)
         .join(", ");
     }
     return undefined;

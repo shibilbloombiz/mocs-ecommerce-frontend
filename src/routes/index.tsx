@@ -22,6 +22,7 @@ import { AdCarousel } from "@/components/AdCarousel";
 import { SandalsCarousel } from "@/components/SandalsCarousel";
 import { QualityPromise } from "@/components/QualityPromise";
 import { ReviewsMarquee } from "@/components/ReviewsMarquee";
+
 import { products as fallbackProducts } from "@/lib/products";
 
 export function formatApiProducts(items: any[]): import("@/lib/products").Product[] {
@@ -68,6 +69,7 @@ const EMPTY_LOADER_DATA = {
   collectionsBanners: null as any[] | null,
   promiseCollage: null as any[] | null,
   advertisements: [] as string[],
+  instagramFeed: null as InstagramPost[] | null,
 };
 
 export const Route = createFileRoute("/")({
@@ -84,6 +86,7 @@ export const Route = createFileRoute("/")({
         collectionBannersRes,
         promiseRes,
         adsRes,
+        instagramRes,
       ] = await Promise.all([
         apiClient.products.list("limit=100").catch(() => null),
         apiClient.settings.get("hero_slides").catch(() => null),
@@ -93,6 +96,7 @@ export const Route = createFileRoute("/")({
         apiClient.settings.get("collections_banners").catch(() => null),
         apiClient.settings.get("promise_collage").catch(() => null),
         apiClient.settings.get("advertisements").catch(() => null),
+        apiClient.settings.get("instagram_feed").catch(() => null),
       ]);
 
       // Map hero slides to the Slide shape with full image URLs (done server-side
@@ -107,7 +111,7 @@ export const Route = createFileRoute("/")({
               to: slide.to || slide.path || "/shop",
               bg:
                 getImageUrl(slide.bg || slide.image, { width: 1920, quality: 95 }) ||
-                "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1920",
+                "/images/hero-bronze-slide.jpg",
               mobileBg: slide.mobileBg
                 ? getImageUrl(slide.mobileBg, { width: 1080, quality: 92 })
                 : undefined,
@@ -159,6 +163,10 @@ export const Route = createFileRoute("/")({
           adsRes?.value && Array.isArray(adsRes.value) && adsRes.value.length > 0
             ? adsRes.value
             : [],
+        instagramFeed:
+          instagramRes?.value && Array.isArray(instagramRes.value) && instagramRes.value.length > 0
+            ? instagramRes.value
+            : null,
       };
     } catch (err) {
       console.warn("Homepage loader failed, using fallback:", err);
@@ -243,7 +251,7 @@ const DEFAULT_CATEGORY_BANNERS = [
     desc: "Awesome, clean & creative footwear collections engineered for everyday agility, comfort, and style.",
     cta: "Purchase Now!",
     to: "/shop",
-    bg: "https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=1200&auto=format&fit=crop",
+    bg: "/images/hero-bronze-slide.jpg",
   },
   {
     key: "women",
@@ -252,7 +260,7 @@ const DEFAULT_CATEGORY_BANNERS = [
     cta: "Discover More",
     to: "/shop",
     search: { category: "Women" },
-    bg: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800&auto=format&fit=crop",
+    bg: "/images/hero-wedge-rhinestone.jpg",
   },
   {
     key: "men",
@@ -261,7 +269,7 @@ const DEFAULT_CATEGORY_BANNERS = [
     cta: "Discover More",
     to: "/shop",
     search: { category: "Men" },
-    bg: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=800&auto=format&fit=crop",
+    bg: "/products/mocs-double-buckle-slide-charcoal-9057.png",
   },
   {
     key: "kids",
@@ -270,7 +278,7 @@ const DEFAULT_CATEGORY_BANNERS = [
     cta: "Discover More",
     to: "/shop",
     search: { category: "Kids" },
-    bg: "https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&w=800&auto=format&fit=crop",
+    bg: "/products/mocs-velcro-casual-shoe-brown-1.png",
   },
   {
     key: "trending",
@@ -279,7 +287,7 @@ const DEFAULT_CATEGORY_BANNERS = [
     cta: "Discover More",
     to: "/shop",
     search: { collection: "Trending" },
-    bg: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800&auto=format&fit=crop",
+    bg: "/images/hero-script-bow.jpg",
   },
 ];
 
@@ -287,21 +295,21 @@ const DEFAULT_COLLECTION_BANNERS = [
   {
     key: "sports",
     title: "SPORTS",
-    bg: "https://images.unsplash.com/photo-1517649763962-0c623066013b?q=70&auto=format&fit=crop&w=400",
+    bg: "/products/mocs-metal-bar-slide-navy.png",
     to: "/shop",
     search: { collection: "Sports" },
   },
   {
     key: "casual",
     title: "CASUAL",
-    bg: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=70&auto=format&fit=crop&w=400",
+    bg: "/products/mocs-leather-comfort-sandal-brown-9057.png",
     to: "/shop",
     search: { collection: "Casual" },
   },
   {
     key: "formal",
     title: "FORMAL",
-    bg: "https://images.unsplash.com/photo-1486308512493-ae6a625e368a?q=70&auto=format&fit=crop&w=400",
+    bg: "/products/mocs-woven-leather-shoe-brown-10001.png",
     to: "/shop",
     search: { collection: "Formal" },
   },
@@ -318,13 +326,53 @@ function Home() {
     collectionsBanners: rawCollectionBanners,
     promiseCollage: rawPromise,
     advertisements,
+    instagramFeed,
   } = Route.useLoaderData();
 
   // Use loader data directly; fall back to defaults if admin hasn't configured settings yet.
   const allProducts = products;
-  const categoriesBanners = rawCategoryBanners ?? DEFAULT_CATEGORY_BANNERS;
-  const collectionsBanners = rawCollectionBanners ?? DEFAULT_COLLECTION_BANNERS;
-  const promiseCollage = rawPromise ?? [];
+  const categoriesBanners = useMemo(() => {
+    if (!rawCategoryBanners || !Array.isArray(rawCategoryBanners) || rawCategoryBanners.length === 0) {
+      return DEFAULT_CATEGORY_BANNERS;
+    }
+    return rawCategoryBanners.map((b: any, i: number) => {
+      const defaultItem = DEFAULT_CATEGORY_BANNERS[i] || DEFAULT_CATEGORY_BANNERS[0];
+      const hasBg = b?.bg && typeof b.bg === "string" && b.bg.trim() !== "";
+      return {
+        ...defaultItem,
+        ...b,
+        bg: hasBg ? b.bg.trim() : defaultItem.bg,
+      };
+    });
+  }, [rawCategoryBanners]);
+  const collectionsBanners = useMemo(() => {
+    if (!rawCollectionBanners || !Array.isArray(rawCollectionBanners) || rawCollectionBanners.length === 0) {
+      return DEFAULT_COLLECTION_BANNERS;
+    }
+    return rawCollectionBanners.map((b: any, i: number) => {
+      const defaultItem = DEFAULT_COLLECTION_BANNERS[i % DEFAULT_COLLECTION_BANNERS.length];
+      const hasBg = b?.bg && typeof b.bg === "string" && b.bg.trim() !== "";
+      return {
+        ...defaultItem,
+        ...b,
+        bg: hasBg ? b.bg.trim() : defaultItem.bg,
+      };
+    });
+  }, [rawCollectionBanners]);
+  const promiseCollage = useMemo(() => {
+    if (!rawPromise || !Array.isArray(rawPromise) || rawPromise.length === 0) {
+      return undefined;
+    }
+    const hasAnyValidBg = rawPromise.some(
+      (item: any) => item?.bg && typeof item.bg === "string" && item.bg.trim() !== ""
+    );
+    return hasAnyValidBg ? rawPromise : undefined;
+  }, [rawPromise]);
+
+  const validAdvertisements = useMemo(() => {
+    if (!advertisements || !Array.isArray(advertisements)) return [];
+    return advertisements.filter((ad: any) => typeof ad === "string" && ad.trim() !== "");
+  }, [advertisements]);
 
   const trendingProducts = useMemo(() => {
     const list = allProducts.filter((p: any) => p.isTrending);
@@ -440,7 +488,7 @@ function Home() {
         <ScrollBrandReveal collections={collectionsBanners} />
       </div>
       <div className="content-visibility-auto">
-        <AdCarousel advertisements={advertisements} />
+        <AdCarousel advertisements={validAdvertisements} />
       </div>
       <div className="content-visibility-auto">
         <QualityPromise collage={promiseCollage} />
