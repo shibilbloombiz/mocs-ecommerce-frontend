@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { Leaf, ShieldCheck, Recycle } from "lucide-react";
-const shoe4 = "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800";
+const shoe4 = "/products/mocs-leather-comfort-sandal-brown-9057.png";
 
 export function ResponsibleManufacturing({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);

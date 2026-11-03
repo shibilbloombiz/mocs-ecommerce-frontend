@@ -63,17 +63,17 @@ function AuthPage() {
   // Dynamic Auth Visual Slides Config
   const [authSlides, setAuthSlides] = useState<any[]>([
     {
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800",
+      image: "/images/hero-bronze-slide.jpg",
       title: "Discover Your Style",
       subtitle: "Explore premium MOCS collections tailored just for you.",
     },
     {
-      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800",
+      image: "/images/hero-wedge-rhinestone.jpg",
       title: "Create Your Vision",
       subtitle: "Join our community to unlock custom footwear and personalized styles.",
     },
     {
-      image: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800",
+      image: "/images/hero-script-bow.jpg",
       title: "Crafted For Comfort",
       subtitle: "Every pair is built for active lifestyles and durable comfort.",
     },
@@ -301,7 +301,7 @@ function AuthPage() {
               src={
                 currentSlide?.image
                   ? getImageUrl(currentSlide.image, { width: 800, quality: 90 })
-                  : getImageUrl("https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800")
+                  : getImageUrl("/images/hero-bronze-slide.jpg")
               }
               alt="MOCS Footwear"
               initial={{ opacity: 0, scale: 1.05 }}

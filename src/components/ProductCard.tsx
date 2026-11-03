@@ -36,13 +36,13 @@ export const ProductCard = memo(function ProductCard({
           {/* Product Image with Pure Scale Animation on Hover */}
           <div className="relative h-full w-full overflow-hidden bg-stone-900">
             <OptimizedImage
-              src={getImageUrl(product.image, { width: 450, quality: 75 })}
+              src={getImageUrl(product.image, { width: 1000, quality: 90 })}
               alt={product.name}
               aspectRatio="1/1"
               priority={index < 4}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               containerClassName="h-full w-full relative z-10"
-              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108 transform-gpu will-change-transform"
+              className="h-full w-full object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-108 transform-gpu will-change-transform"
             />
           </div>
 
@@ -135,13 +135,13 @@ export const ProductCard = memo(function ProductCard({
         <div className="relative aspect-square overflow-hidden bg-stone-900">
           {/* Main Product Image with Smooth Scale on Hover */}
           <OptimizedImage
-            src={getImageUrl(product.image, { width: 450, quality: 75 })}
+            src={getImageUrl(product.image, { width: 1000, quality: 90 })}
             alt={product.name}
             aspectRatio="1/1"
             priority={index < 4}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             containerClassName="h-full w-full relative z-10"
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-108 transform-gpu will-change-transform"
+            className="h-full w-full object-contain p-3 transition-transform duration-500 ease-out group-hover:scale-108 transform-gpu will-change-transform"
           />
 
           {/* Top-Left Badges */}

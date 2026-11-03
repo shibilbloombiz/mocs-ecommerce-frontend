@@ -512,7 +512,7 @@ function AdminProducts() {
           stock: Number(shade.stock),
           category: categoryId,
           collection,
-          coverImage: shade.coverImage || "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600",
+          coverImage: shade.coverImage || "/products/mocs-bronze-double-bow-slide.png",
           additionalImages: cleanAdditionalImages,
           colors: [{ name: shade.colorName || "Default", hex: shade.colorHex || "#000000", stock: Number(shade.stock) }],
           description: shadeDescription,

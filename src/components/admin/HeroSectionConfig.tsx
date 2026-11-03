@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   Plus,
   Trash2,
@@ -13,89 +13,51 @@ import {
   Link2,
   Check,
   X,
-  Palette,
   Eye,
   ShoppingBag,
-  Wand2,
+  ArrowRight,
+  FolderOpen,
+  Info,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { HeroProduct } from "@/components/Hero";
 
-const PRESET_SHOE_IMAGES = [
-  { label: "Buckle Slide", path: "/about-products/trans_mocs-sandal-buckle.png" },
-  { label: "Crossover Slide", path: "/about-products/trans_mocs-cross-slide.png" },
-  { label: "Bow Sandal", path: "/about-products/trans_mocs-bow-sandal.png" },
-  { label: "Rhinestone Sandal", path: "/about-products/trans_mocs-sandal-rhinestone.png" },
-  { label: "Wedge Slide", path: "/about-products/trans_mocs-wedge-slide.png" },
-];
-
-const FLUID_PALETTE_PRESETS = [
+const CAMPAIGN_PRESET_IMAGES = [
   {
-    name: "Signature Flame",
-    accent: "#ff6600",
-    accentSecondary: "#ff9933",
-    upper: "#141416",
-    toeCap: "#222226",
-    laces: "#ffffff",
-    midsole: "#f4f4f6",
-    midsoleAccent: "#ff6600",
-    outsole: "#0f0f12",
+    label: "Bronze Double Bow Slide",
+    tag: "Campaign Slide 1",
+    path: "/images/hero-bronze-slide.jpg",
   },
   {
-    name: "Royal Velvet",
-    accent: "#a855f7",
-    accentSecondary: "#c084fc",
-    upper: "#120919",
-    toeCap: "#1d1226",
-    laces: "#ffffff",
-    midsole: "#faf5ff",
-    midsoleAccent: "#a855f7",
-    outsole: "#0a040f",
+    label: "Crystal Rhinestone Wedge",
+    tag: "Campaign Slide 2",
+    path: "/images/hero-wedge-rhinestone.jpg",
   },
   {
-    name: "Oceanic Azure",
-    accent: "#06b6d4",
-    accentSecondary: "#38bdf8",
-    upper: "#08131d",
-    toeCap: "#0e1f30",
-    laces: "#ffffff",
-    midsole: "#ecfeff",
-    midsoleAccent: "#06b6d4",
-    outsole: "#040b12",
+    label: "Resort Script Bow Slide",
+    tag: "Campaign Slide 3",
+    path: "/images/hero-script-bow.jpg",
   },
   {
-    name: "Golden Sun",
-    accent: "#eab308",
-    accentSecondary: "#fde047",
-    upper: "#18140c",
-    toeCap: "#262013",
-    laces: "#ffffff",
-    midsole: "#fefce8",
-    midsoleAccent: "#eab308",
-    outsole: "#0e0b04",
+    label: "Footbed Product Modeling",
+    tag: "Editorial",
+    path: "/images/mocs-lifestyle-model.jpg",
   },
   {
-    name: "Emerald Luxe",
-    accent: "#10b981",
-    accentSecondary: "#34d399",
-    upper: "#08160f",
-    toeCap: "#0e2419",
-    laces: "#ffffff",
-    midsole: "#ecfdf5",
-    midsoleAccent: "#10b981",
-    outsole: "#030e07",
+    label: "Urban Architecture Editorial",
+    tag: "Lifestyle",
+    path: "/images/mocs-model-editorial.jpg",
   },
   {
-    name: "Monochrome Dark",
-    accent: "#94a3b8",
-    accentSecondary: "#cbd5e1",
-    upper: "#121214",
-    toeCap: "#1e1e24",
-    laces: "#ffffff",
-    midsole: "#f8fafc",
-    midsoleAccent: "#94a3b8",
-    outsole: "#09090b",
+    label: "Signature Silk Luxury",
+    tag: "Studio",
+    path: "/images/mocs-comfort-silk.jpg",
+  },
+  {
+    label: "Minimalist Pedestal Showcase",
+    tag: "Architecture",
+    path: "/images/mocs-sustainable-hero.jpg",
   },
 ];
 
@@ -126,6 +88,8 @@ export function HeroSectionConfig({
   getImageUrl,
   availableProducts = [],
 }: HeroSectionConfigProps): React.JSX.Element {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   // Modal state for "Add from Catalog"
   const [isCatalogModalOpen, setIsCatalogModalOpen] = useState(false);
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -135,18 +99,17 @@ export function HeroSectionConfig({
   const [linkSearchQuery, setLinkSearchQuery] = useState("");
   const [isLinkDropdownOpen, setIsLinkDropdownOpen] = useState(false);
 
-  // Shader palette accordion
-  const [showColorEditor, setShowColorEditor] = useState(false);
-
-  const currentProduct: HeroProduct = heroProducts[selectedProductIdx] || {
-    id: "new-hero-product",
-    name: "NEW HERO MODEL",
-    tagline: "Comfort engineered for every step.",
+  const safeIdx = Math.max(0, Math.min(selectedProductIdx, heroProducts.length - 1));
+  const currentProduct: HeroProduct = heroProducts[safeIdx] || {
+    id: "hero-slide-default",
+    name: "NEW HERO SLIDE",
+    eyebrow: "YOUR WORLD UPGRADED",
+    title: "SCULPTED LUXURY FOR EVERYDAY STRIDE",
+    tagline: "Handcrafted silhouette on an anatomical PU footbed, engineered to stay plush from sunrise to sunset.",
     price: "₹399",
-    category: "SIGNATURE SLIDE",
-    to: "/shop",
-    image: "/about-products/trans_mocs-sandal-buckle.png",
-    colors: FLUID_PALETTE_PRESETS[0],
+    category: "Women",
+    to: "/shop?category=Women",
+    image: "/images/hero-bronze-slide.jpg",
   };
 
   // Distinct categories from available products
@@ -195,48 +158,35 @@ export function HeroSectionConfig({
     }).slice(0, 10);
   }, [availableProducts, linkSearchQuery]);
 
-  // Find currently linked product in catalog
-  const linkedCatalogProduct = useMemo(() => {
-    const toPath = currentProduct.to || "";
-    return availableProducts.find((p) => {
-      const id = p._id || p.id;
-      const slug = p.slug;
-      return (
-        toPath === `/product/${id}` ||
-        (slug && toPath === `/product/${slug}`) ||
-        currentProduct.productId === id
-      );
-    });
-  }, [availableProducts, currentProduct.to, currentProduct.productId]);
-
   // Helper to link a product from catalog to current hero product
   const handleLinkProduct = (prod: any, autoFillAll = false) => {
     const targetSlug = prod.slug || prod._id || prod.id;
     const path = `/product/${targetSlug}`;
-    updateProductField(selectedProductIdx, "to", path);
-    updateProductField(selectedProductIdx, "productId", prod._id || prod.id);
+    updateProductField(safeIdx, "to", path);
+    updateProductField(safeIdx, "productId", prod._id || prod.id);
 
     if (autoFillAll) {
       if (prod.name) {
-        updateProductField(selectedProductIdx, "name", prod.name.toUpperCase());
+        updateProductField(safeIdx, "title", prod.name.toUpperCase());
+        updateProductField(safeIdx, "name", prod.name.toUpperCase());
       }
       if (prod.price) {
-        updateProductField(selectedProductIdx, "price", `₹${prod.price}`);
+        updateProductField(safeIdx, "price", `₹${prod.price}`);
       }
       const catName = typeof prod.category === "string" ? prod.category : prod.category?.name;
       if (catName) {
-        updateProductField(selectedProductIdx, "category", catName.toUpperCase());
+        updateProductField(safeIdx, "category", catName.toUpperCase());
+        updateProductField(safeIdx, "eyebrow", `SIGNATURE ${catName.toUpperCase()} COLLECTION`);
       }
       if (prod.description) {
-        const shortDesc = prod.description.slice(0, 95).trim() + (prod.description.length > 95 ? "..." : "");
-        updateProductField(selectedProductIdx, "tagline", shortDesc);
+        const shortDesc = prod.description.slice(0, 110).trim() + (prod.description.length > 110 ? "..." : "");
+        updateProductField(safeIdx, "tagline", shortDesc);
       }
-      // If product has an image and current product image is empty or default, suggest it
       const prodImg = (prod.images && prod.images[0]) || prod.image;
       if (prodImg && (!currentProduct.image || currentProduct.image.includes("trans_mocs-sandal-buckle"))) {
-        updateProductField(selectedProductIdx, "image", prodImg);
+        updateProductField(safeIdx, "image", prodImg);
       }
-      toast.success(`Linked & auto-filled details from "${prod.name}"`);
+      toast.success(`Linked & auto-filled slide from "${prod.name}"`);
     } else {
       toast.success(`Destination linked to "/product/${targetSlug}"`);
     }
@@ -245,62 +195,63 @@ export function HeroSectionConfig({
     setLinkSearchQuery("");
   };
 
-  // Helper to add a new model directly from a catalog product
+  // Helper to add a new slide directly from a catalog product
   const handleCreateFromCatalog = (prod: any) => {
     const targetSlug = prod.slug || prod._id || prod.id;
     const catName = typeof prod.category === "string" ? prod.category : prod.category?.name;
-    const prodImg = (prod.images && prod.images[0]) || prod.image || PRESET_SHOE_IMAGES[0].path;
+    const prodImg = (prod.images && prod.images[0]) || prod.image || CAMPAIGN_PRESET_IMAGES[0].path;
 
     const shortDesc = prod.description
-      ? prod.description.slice(0, 90).trim() + (prod.description.length > 90 ? "..." : "")
-      : "Comfort engineered for every step with lightweight construction.";
+      ? prod.description.slice(0, 110).trim() + (prod.description.length > 110 ? "..." : "")
+      : "Handcrafted silhouette on an anatomical PU footbed, engineered to stay plush from sunrise to sunset.";
 
     addProduct({
-      name: (prod.name || "NEW MOCS MODEL").toUpperCase(),
+      id: `hero-slide-${Date.now()}`,
+      name: (prod.name || "NEW HERO SLIDE").toUpperCase(),
+      eyebrow: `SIGNATURE ${(catName || "WOMEN").toUpperCase()} EDIT`,
+      title: (prod.name || "SCULPTED LUXURY FOR EVERYDAY STRIDE").toUpperCase(),
       price: `₹${prod.price || 399}`,
-      category: (catName || "SIGNATURE SLIDE").toUpperCase(),
+      category: (catName || "Women").toUpperCase(),
       tagline: shortDesc,
       to: `/product/${targetSlug}`,
       productId: prod._id || prod.id,
       image: prodImg,
-      colors: FLUID_PALETTE_PRESETS[heroProducts.length % FLUID_PALETTE_PRESETS.length],
     });
 
     setIsCatalogModalOpen(false);
-    toast.success(`Created Hero Model for "${prod.name}"`);
+    toast.success(`Created Hero Slide for "${prod.name}"`);
   };
 
-  // Helper to update colors
-  const handleColorChange = (colorKey: string, hex: string) => {
-    const prevColors = currentProduct.colors || FLUID_PALETTE_PRESETS[0];
-    updateProductField(selectedProductIdx, "colors", {
-      ...prevColors,
-      [colorKey]: hex,
+  const handleAddNewBlank = () => {
+    addProduct({
+      id: `hero-slide-${Date.now()}`,
+      name: "NEW HERO SLIDE",
+      eyebrow: "YOUR WORLD UPGRADED",
+      title: "SCULPTED LUXURY FOR EVERYDAY STRIDE",
+      tagline: "Handcrafted double-bow silhouette on an anatomical PU footbed, engineered for effortless comfort.",
+      price: "₹399",
+      category: "Women",
+      to: "/shop",
+      image: CAMPAIGN_PRESET_IMAGES[heroProducts.length % CAMPAIGN_PRESET_IMAGES.length].path,
     });
+    toast.success("Added new blank hero slide");
   };
-
-  // Helper to apply preset colors
-  const applyPalettePreset = (preset: typeof FLUID_PALETTE_PRESETS[0]) => {
-    updateProductField(selectedProductIdx, "colors", { ...preset });
-    toast.success(`Applied "${preset.name}" fluid palette`);
-  };
-
-  const accentColor = currentProduct.colors?.accent || "#ff6600";
 
   return (
     <div id="hero-models" className="space-y-6 pt-6 border-t border-border scroll-mt-24 font-sans text-left">
-      {/* Header bar */}
+      
+      {/* ── Section Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-orange-500/10 text-orange-400 text-xs font-semibold mb-1">
             <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-            <span>WebGL 3D Fluid Carousel</span>
+            <span>Homepage Hero Carousel</span>
           </div>
           <h2 className="font-display text-lg sm:text-xl font-bold text-foreground">
-            Hero Section Models
+            Hero Section Slides & Content
           </h2>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-            Full CRUD: customize hero models, cutout shoes, fluid shader colors, and easily link each model directly to its product detail page.
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 max-w-2xl">
+            Manage the full-bleed 16:9 hero carousel on the homepage. Upload high-res photography, edit headlines, descriptions, and link slides directly to products in your store.
           </p>
         </div>
 
@@ -310,7 +261,7 @@ export function HeroSectionConfig({
             type="button"
             onClick={() => setIsCatalogModalOpen(true)}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-amber-600 text-white text-xs font-bold hover:brightness-110 active:scale-95 transition-all shadow-sm cursor-pointer"
-            title="Browse your catalog and add a hero model in one click"
+            title="Browse your catalog and create a hero slide in one click"
           >
             <ShoppingBag className="w-4 h-4" />
             <span>+ Add from Catalog</span>
@@ -318,22 +269,22 @@ export function HeroSectionConfig({
 
           <button
             type="button"
-            onClick={() => addProduct()}
+            onClick={handleAddNewBlank}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-bold active:scale-95 transition-all shadow-xs cursor-pointer"
           >
             <Plus className="w-4 h-4 text-orange-500" />
-            <span>New Model</span>
+            <span>New Slide</span>
           </button>
         </div>
       </div>
 
-      {/* Model Tabs Bar with Reorder (< / >) & Duplicate */}
-      <div className="bg-card/60 backdrop-blur-sm border border-border/70 rounded-2xl p-2.5 space-y-2">
+      {/* ── Slide Tabs Strip with Reorder, Duplicate & Delete ── */}
+      <div className="bg-card/70 backdrop-blur-sm border border-border/80 rounded-2xl p-2.5 space-y-2">
         <div className="flex items-center justify-between px-2 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground flex items-center gap-1.5">
-            <span>Hero Models</span>
-            <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-orange-500/15 text-orange-400 font-bold">
-              {heroProducts.length}
+            <span>Hero Slides</span>
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-bold">
+              {heroProducts.length} Active
             </span>
           </span>
           <span className="text-[11px] text-muted-foreground hidden sm:inline">
@@ -343,40 +294,53 @@ export function HeroSectionConfig({
 
         <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none items-center">
           {heroProducts.map((prod, idx) => {
-            const isSelected = selectedProductIdx === idx;
-            const tabAccent = prod.colors?.accent || "#ff6600";
+            const isSelected = safeIdx === idx;
             return (
               <div
                 key={prod.id || `prod-${idx}`}
                 className={cn(
                   "flex items-center rounded-xl border transition-all shrink-0",
                   isSelected
-                    ? "bg-card border-orange-500/80 shadow-md ring-1 ring-orange-500/40"
+                    ? "bg-card border-orange-500 shadow-md ring-1 ring-orange-500/40"
                     : "bg-background/80 border-border/80 hover:bg-muted/40 text-muted-foreground"
                 )}
               >
-                {/* Select button */}
+                {/* Select button with image thumbnail */}
                 <button
                   type="button"
                   onClick={() => setSelectedProductIdx(idx)}
-                  className="px-3 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer"
+                  className="px-2.5 py-1.5 text-xs font-bold flex items-center gap-2.5 cursor-pointer"
                 >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs"
-                    style={{ backgroundColor: tabAccent }}
-                  />
-                  <span className="text-[10px] font-mono text-muted-foreground opacity-80">
-                    #{idx + 1}
-                  </span>
-                  <span className={cn("max-w-[140px] truncate", isSelected ? "text-foreground font-extrabold" : "")}>
-                    {prod.name || `Model #${idx + 1}`}
-                  </span>
-                  <span className="text-[10px] font-mono text-orange-400 font-semibold">
-                    {prod.price || "₹0"}
-                  </span>
+                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-stone-900 border border-white/10 shrink-0">
+                    {prod.image ? (
+                      <img
+                        src={getImageUrl(prod.image)}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-stone-500">
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono text-muted-foreground opacity-80">
+                        #{idx + 1}
+                      </span>
+                      <span className={cn("max-w-[130px] truncate text-xs", isSelected ? "text-foreground font-extrabold" : "")}>
+                        {prod.title || prod.name || `Slide #${idx + 1}`}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono text-orange-400 font-semibold block">
+                      {prod.price || "₹0"}
+                    </span>
+                  </div>
                 </button>
 
-                {/* Reorder and Quick Action Controls */}
+                {/* Reorder and Action Controls */}
                 <div className="flex items-center pr-1.5 gap-0.5 border-l border-border/50 pl-1">
                   {reorderProduct && (
                     <>
@@ -388,7 +352,7 @@ export function HeroSectionConfig({
                           reorderProduct(idx, idx - 1);
                         }}
                         className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
-                        title="Move Earlier in Hero Carousel"
+                        title="Move Earlier in Carousel"
                       >
                         <ChevronLeft className="w-3 h-3" />
                       </button>
@@ -400,7 +364,7 @@ export function HeroSectionConfig({
                           reorderProduct(idx, idx + 1);
                         }}
                         className="p-1 rounded hover:bg-muted text-muted-foreground disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
-                        title="Move Later in Hero Carousel"
+                        title="Move Later in Carousel"
                       >
                         <ChevronRight className="w-3 h-3" />
                       </button>
@@ -413,10 +377,10 @@ export function HeroSectionConfig({
                       onClick={(e) => {
                         e.stopPropagation();
                         duplicateProduct(idx);
-                        toast.success(`Duplicated "${prod.name}"`);
+                        toast.success(`Duplicated slide #${idx + 1}`);
                       }}
                       className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
-                      title="Duplicate Model"
+                      title="Duplicate Slide"
                     >
                       <Copy className="w-3 h-3" />
                     </button>
@@ -428,14 +392,14 @@ export function HeroSectionConfig({
                     onClick={(e) => {
                       e.stopPropagation();
                       if (heroProducts.length <= 1) {
-                        toast.warning("You must keep at least one hero model.");
+                        toast.warning("You must keep at least one hero slide.");
                         return;
                       }
                       removeProduct(idx);
-                      toast.info(`Removed model #${idx + 1}`);
+                      toast.info(`Removed slide #${idx + 1}`);
                     }}
                     className="p-1 rounded hover:bg-destructive/15 text-muted-foreground hover:text-destructive disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
-                    title={heroProducts.length <= 1 ? "At least one model required" : "Delete Model"}
+                    title={heroProducts.length <= 1 ? "At least one slide required" : "Delete Slide"}
                   >
                     <Trash2 className="w-3 h-3" />
                   </button>
@@ -446,738 +410,588 @@ export function HeroSectionConfig({
         </div>
       </div>
 
-      {/* Main Grid: Left = Realistic Storefront Simulation Box, Right = Edit Controls Form */}
+      {/* ── Main Two-Column Layout: Left = Exact 16:9 Storefront Preview, Right = Edit Controls ── */}
       <div className="grid gap-6 lg:grid-cols-12 items-start pt-1">
-        {/* Left Column: Live Hero Simulation Box */}
-        <div className="lg:col-span-5 rounded-3xl border border-border bg-[#050505] p-5 shadow-soft space-y-4 text-white">
+        
+        {/* ── Left Column: Live 16:9 Storefront Hero Simulation ── */}
+        <div className="lg:col-span-6 rounded-3xl border border-border bg-[#050505] p-5 shadow-soft space-y-4 text-white sticky top-24">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
               <Eye className="w-3.5 h-3.5" />
-              <span>Live Simulation</span>
+              <span>Exact Storefront Preview (16:9 Full Bleed)</span>
             </span>
             <span className="text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full font-mono">
-              Model {selectedProductIdx + 1} of {heroProducts.length}
+              Slide {safeIdx + 1} of {heroProducts.length}
             </span>
           </div>
 
-          {/* Interactive Simulation Frame */}
-          <div
-            className="relative overflow-hidden rounded-2xl border aspect-[4/3] flex flex-col justify-between p-5 transition-all duration-300"
-            style={{
-              backgroundColor: currentProduct.colors?.upper || "#0a0a0c",
-              borderColor: `${accentColor}40`,
-            }}
-          >
-            {/* Ambient dynamic fluid glow matching current accent */}
-            <div
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-52 h-52 rounded-full blur-3xl pointer-events-none transition-all duration-500 opacity-30"
-              style={{ backgroundColor: accentColor }}
-              aria-hidden="true"
-            />
-
-            {/* Top Category Badge */}
-            <div className="relative z-10 flex justify-center">
-              <span
-                className="inline-block text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full transition-colors border"
-                style={{
-                  backgroundColor: `${accentColor}25`,
-                  color: "#ffffff",
-                  borderColor: `${accentColor}50`,
-                }}
-              >
-                {currentProduct.category || "SIGNATURE MODEL"}
-              </span>
-            </div>
-
-            {/* Center Shoe Cutout Image */}
-            <div className="relative z-10 flex-1 flex items-center justify-center p-2 min-h-0">
+          {/* Interactive Simulation Frame Matching Hero.tsx */}
+          <div className="relative overflow-hidden rounded-2xl border border-white/10 aspect-[16/9] w-full flex flex-col justify-end p-5 select-none bg-black">
+            
+            {/* Background Lifestyle Image */}
+            <div className="absolute inset-0 w-full h-full overflow-hidden bg-black z-0 pointer-events-none">
               {currentProduct.image ? (
                 <img
                   src={getImageUrl(currentProduct.image)}
-                  alt={currentProduct.name}
-                  className="max-h-[145px] max-w-[85%] object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.9)] -rotate-3 transition-transform duration-300 hover:scale-105"
+                  alt={currentProduct.title || currentProduct.name}
+                  className="w-full h-full object-cover object-[center_78%] transition-all duration-500"
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center text-white/40 text-xs">
-                  <ImageIcon className="w-8 h-8 mb-1 stroke-1" />
-                  <span>No Shoe Image</span>
+                <div className="w-full h-full flex flex-col items-center justify-center text-white/30 text-xs">
+                  <ImageIcon className="w-10 h-10 mb-2 stroke-1" />
+                  <span>No Hero Image Uploaded</span>
                 </div>
               )}
             </div>
 
-            {/* Bottom Content Preview */}
-            <div className="relative z-10 text-center space-y-1 pt-2 border-t border-white/10">
-              <h4 className="font-['Unbounded',sans-serif] text-sm sm:text-base font-black uppercase tracking-tight text-white line-clamp-1">
-                {currentProduct.name || "MODEL NAME"}
-              </h4>
-              <p className="text-[11px] text-white/70 line-clamp-2 max-w-xs mx-auto leading-tight">
-                {currentProduct.tagline || "Product description tagline..."}
-              </p>
-              <div className="flex items-center justify-center gap-3 pt-2">
-                <span className="font-['Unbounded',sans-serif] text-xs font-bold text-white">
-                  {currentProduct.price || "₹0"}
-                </span>
-                <a
-                  href={currentProduct.to || "/shop"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-black font-bold text-[10px] px-3 py-1 rounded-full transition-transform active:scale-95 shadow-md"
-                  style={{ backgroundColor: accentColor }}
-                  title={`Test Link: ${currentProduct.to || "/shop"}`}
-                >
-                  <span>Shop now</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </a>
+            {/* Bottom Content Layer Matching Live Storefront */}
+            <div className="relative z-10 w-full flex items-end justify-between gap-4">
+              
+              {/* Left Text Block */}
+              <div className="max-w-[70%] text-left space-y-1">
+                {/* Eyebrow */}
+                <div className="inline-flex items-center gap-2 text-white font-['Space_Grotesk',sans-serif] text-[9px] font-semibold uppercase tracking-[0.2em] drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+                  <span className="w-4 h-[1px] bg-white/70" />
+                  <span>{currentProduct.eyebrow || "YOUR WORLD UPGRADED"}</span>
+                  <span className="w-4 h-[1px] bg-white/70" />
+                </div>
+
+                {/* Main Heading */}
+                <h3 className="font-['Plus_Jakarta_Sans',sans-serif] font-black text-sm sm:text-base md:text-lg uppercase text-white leading-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.95)] line-clamp-2">
+                  {currentProduct.title || currentProduct.name || "HEADLINE TITLE"}
+                </h3>
+
+                {/* Tagline */}
+                <p className="font-['Space_Grotesk',sans-serif] text-[10px] text-white/95 leading-tight line-clamp-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)] max-w-sm">
+                  {currentProduct.tagline || "Product description tagline goes here..."}
+                </p>
+
+                {/* Shop Now CTA Button */}
+                <div className="pt-2">
+                  <div className="inline-flex items-center gap-1.5 bg-white text-stone-950 font-['Space_Grotesk',sans-serif] font-bold text-[10px] uppercase px-4 py-1.5 rounded-full shadow-lg">
+                    <span>SHOP NOW</span>
+                    <ArrowRight className="w-3 h-3 text-stone-950" />
+                  </div>
+                </div>
               </div>
+
+              {/* Right Indicators & Arrows Simulation */}
+              <div className="flex items-center gap-2 self-end">
+                {/* Progress Dashes */}
+                <div className="flex items-center gap-1.5">
+                  {heroProducts.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSelectedProductIdx(i)}
+                      className={cn(
+                        "h-1 rounded-full transition-all cursor-pointer",
+                        safeIdx === i
+                          ? "w-6 bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+                          : "w-2.5 bg-white/40 hover:bg-white/70"
+                      )}
+                    />
+                  ))}
+                </div>
+
+                {/* Navigation Arrows */}
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProductIdx(safeIdx === 0 ? heroProducts.length - 1 : safeIdx - 1)}
+                    className="w-6 h-6 rounded-full border border-white/30 text-white bg-black/45 flex items-center justify-center cursor-pointer hover:bg-black/75 transition-all"
+                  >
+                    <ChevronLeft className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedProductIdx((safeIdx + 1) % heroProducts.length)}
+                    className="w-6 h-6 rounded-full border border-white/30 text-white bg-black/45 flex items-center justify-center cursor-pointer hover:bg-black/75 transition-all"
+                  >
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
             </div>
+
           </div>
 
-          {/* Destination URL Live Badge */}
-          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-xs space-y-1">
+          {/* Destination Link Information Bar */}
+          <div className="bg-white/5 rounded-xl p-3 border border-white/10 text-xs space-y-1.5">
             <div className="flex items-center justify-between text-white/60 text-[11px]">
               <span className="flex items-center gap-1 text-orange-400 font-semibold">
-                <Link2 className="w-3 h-3" />
-                <span>Shop Now Button Path:</span>
+                <Link2 className="w-3.5 h-3.5" />
+                <span>CTA Button Destination:</span>
               </span>
               <a
                 href={currentProduct.to || "/shop"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/80 hover:text-orange-300 inline-flex items-center gap-1 text-[10px] underline"
+                className="text-white/80 hover:text-orange-300 inline-flex items-center gap-1 text-[11px] underline"
               >
-                <span>Test Page</span>
+                <span>Test Link</span>
                 <ExternalLink className="w-2.5 h-2.5" />
               </a>
             </div>
-            <p className="font-mono text-white text-[11px] truncate bg-black/40 px-2 py-1 rounded border border-white/5">
+            <div className="font-mono text-[11px] text-white/90 bg-black/40 px-2.5 py-1 rounded border border-white/10 truncate">
               {currentProduct.to || "/shop"}
-            </p>
-            {linkedCatalogProduct && (
-              <p className="text-[10px] text-emerald-400 flex items-center gap-1 pt-0.5">
-                <Check className="w-3 h-3 shrink-0" />
-                <span>Matched to Catalog: &quot;{linkedCatalogProduct.name}&quot; (₹{linkedCatalogProduct.price})</span>
-              </p>
-            )}
+            </div>
           </div>
+
         </div>
 
-        {/* Right Column: Edit Controls Form */}
-        <div className="lg:col-span-7 rounded-3xl border border-border bg-card p-6 shadow-soft space-y-5">
-          <div className="flex items-center justify-between pb-3 border-b border-border/60">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-display text-sm font-bold text-foreground">
-                  Editing Model #{selectedProductIdx + 1}
-                </h3>
-                <span
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: accentColor }}
-                  title="Model Accent Color"
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Update content, link product detail path, and customize colors.
-              </p>
-            </div>
-
-            {heroProducts.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeProduct(selectedProductIdx)}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-destructive/30 text-destructive text-xs font-semibold hover:bg-destructive/10 transition-colors cursor-pointer"
-                title="Delete this hero product"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Delete</span>
-              </button>
-            )}
-          </div>
-
-          {/* Model Name */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-              Product Model Name
-            </label>
-            <input
-              type="text"
-              value={currentProduct.name}
-              onChange={(e) => updateProductField(selectedProductIdx, "name", e.target.value)}
-              placeholder="e.g. LADIES BUCKLE SLIDE"
-              className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
-            />
-          </div>
-
-          {/* Category Badge & Price Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                Category / Badge
-              </label>
-              <input
-                type="text"
-                value={currentProduct.category}
-                onChange={(e) => updateProductField(selectedProductIdx, "category", e.target.value)}
-                placeholder="e.g. SIGNATURE SLIDE"
-                className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-                Price Display
-              </label>
-              <input
-                type="text"
-                value={currentProduct.price}
-                onChange={(e) => updateProductField(selectedProductIdx, "price", e.target.value)}
-                placeholder="e.g. ₹399"
-                className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
-              />
-            </div>
-          </div>
-
-          {/* Tagline */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-              Tagline / Subtitle
-            </label>
-            <textarea
-              rows={2}
-              value={currentProduct.tagline}
-              onChange={(e) => updateProductField(selectedProductIdx, "tagline", e.target.value)}
-              placeholder="e.g. Contoured anatomical footbed with crystal-embellished buckle strap..."
-              className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-xs resize-none"
-            />
-          </div>
-
-          {/* =========================================================================
-              DESTINATION URL & INTERACTIVE PRODUCT DETAIL PATH PICKER
-              ========================================================================= */}
-          <div className="rounded-2xl border border-orange-500/30 bg-orange-500/5 p-4 space-y-3">
+        {/* ── Right Column: Edit Controls Form ── */}
+        <div className="lg:col-span-6 space-y-5">
+          
+          {/* Card 1: Image Upload & Presets */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Link2 className="w-4 h-4 text-orange-500" />
-                <label className="text-xs font-bold uppercase tracking-wider text-foreground block">
-                  Product Detail Page Path (`Shop now` link)
-                </label>
-              </div>
-              <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full">
-                Interactive Linker
+              <label className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                <ImageIcon className="w-4 h-4 text-orange-500" />
+                <span>Hero Slide Image (16:9 Landscape)</span>
+              </label>
+              <span className="text-[11px] text-muted-foreground">
+                High-res JPG / PNG / WebP
               </span>
             </div>
 
-            {/* Quick Catalog Product Search & Link */}
-            {availableProducts.length > 0 && (
-              <div className="space-y-2">
-                <div className="relative">
-                  <div className="relative flex items-center">
-                    <Search className="w-3.5 h-3.5 absolute left-3 text-muted-foreground pointer-events-none" />
-                    <input
-                      type="text"
-                      value={linkSearchQuery}
-                      onChange={(e) => {
-                        setLinkSearchQuery(e.target.value);
-                        setIsLinkDropdownOpen(true);
-                      }}
-                      onFocus={() => setIsLinkDropdownOpen(true)}
-                      placeholder="🔍 Search catalog products by name, art #, or category to link..."
-                      className="w-full rounded-xl border border-border bg-background pl-9 pr-8 py-2 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-xs"
-                    />
-                    {linkSearchQuery && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLinkSearchQuery("");
-                          setIsLinkDropdownOpen(false);
-                        }}
-                        className="absolute right-2.5 text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
+            {/* Drag & Drop File Upload Box */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleShoeFileUpload(e, safeIdx)}
+            />
 
-                  {/* Search Dropdown Results */}
-                  {isLinkDropdownOpen && inlineFilteredProducts.length > 0 && (
-                    <div className="absolute z-30 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-xl border border-border bg-card shadow-xl p-1 space-y-1">
-                      <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground flex items-center justify-between border-b border-border/50">
-                        <span>Click product to link path directly</span>
-                        <span>{inlineFilteredProducts.length} results</span>
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="group border-2 border-dashed border-border hover:border-orange-500 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4 cursor-pointer bg-muted/20 hover:bg-orange-500/5 transition-all text-center sm:text-left"
+            >
+              <div className="w-16 h-12 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <Upload className="w-6 h-6" />
+              </div>
+              <div className="space-y-0.5 flex-1">
+                <p className="text-xs font-bold text-foreground">
+                  Click or drag file to upload custom hero photo
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Direct upload via backend storage. Optimal resolution: 1920×1080.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="px-3.5 py-1.5 rounded-xl bg-orange-500 text-white text-xs font-bold shadow-xs hover:bg-orange-600 active:scale-95 transition-all pointer-events-none"
+              >
+                Browse File
+              </button>
+            </div>
+
+            {/* Direct Image URL Input */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-muted-foreground">
+                Or enter local / external image path:
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={currentProduct.image || ""}
+                  onChange={(e) => updateProductField(safeIdx, "image", e.target.value)}
+                  placeholder="/images/hero-bronze-slide.jpg or https://..."
+                  className="flex-1 px-3 py-2 rounded-xl border border-border bg-background text-xs font-mono focus:border-orange-500 focus:outline-none"
+                />
+                {currentProduct.image && (
+                  <button
+                    type="button"
+                    onClick={() => updateProductField(safeIdx, "image", "")}
+                    className="p-2 rounded-xl border border-border hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+                    title="Clear Image"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Campaign Presets Grid */}
+            <div className="space-y-2 pt-2 border-t border-border/70">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
+                  <FolderOpen className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Curated Lifestyle Campaign Presets</span>
+                </span>
+                <span className="text-[10px] text-muted-foreground">1-click select</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {CAMPAIGN_PRESET_IMAGES.map((preset) => {
+                  const isCurrent = currentProduct.image === preset.path;
+                  return (
+                    <button
+                      key={preset.path}
+                      type="button"
+                      onClick={() => {
+                        updateProductField(safeIdx, "image", preset.path);
+                        toast.success(`Selected preset: ${preset.label}`);
+                      }}
+                      className={cn(
+                        "relative p-1.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer",
+                        isCurrent
+                          ? "bg-orange-500/10 border-orange-500 ring-1 ring-orange-500/30"
+                          : "bg-background border-border hover:border-orange-400 hover:bg-muted/40"
+                      )}
+                    >
+                      <div className="w-8 h-8 rounded-lg overflow-hidden bg-stone-900 shrink-0">
+                        <img
+                          src={getImageUrl(preset.path)}
+                          alt={preset.label}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      {inlineFilteredProducts.map((p) => {
-                        const targetSlug = p.slug || p._id || p.id;
-                        const isCurrent = currentProduct.to === `/product/${targetSlug}`;
+                      <div className="min-w-0 flex-1">
+                        <span className="block text-[10px] font-bold text-foreground truncate">
+                          {preset.label}
+                        </span>
+                        <span className="block text-[9px] text-muted-foreground truncate">
+                          {preset.tag}
+                        </span>
+                      </div>
+                      {isCurrent && (
+                        <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Card 2: Typography & Content */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-orange-500" />
+              <span>Slide Headlines & Storytelling</span>
+            </h3>
+
+            {/* Eyebrow Tag */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-foreground">
+                Eyebrow Badge Text
+              </label>
+              <input
+                type="text"
+                value={currentProduct.eyebrow || ""}
+                onChange={(e) => updateProductField(safeIdx, "eyebrow", e.target.value.toUpperCase())}
+                placeholder="YOUR WORLD UPGRADED"
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs uppercase tracking-wider font-semibold focus:border-orange-500 focus:outline-none"
+              />
+              <span className="text-[10px] text-muted-foreground">
+                Displays above the main headline with decorative rule lines.
+              </span>
+            </div>
+
+            {/* Main Title / Headline */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-foreground">
+                Main Headline Title
+              </label>
+              <input
+                type="text"
+                value={currentProduct.title || currentProduct.name || ""}
+                onChange={(e) => {
+                  updateProductField(safeIdx, "title", e.target.value.toUpperCase());
+                  updateProductField(safeIdx, "name", e.target.value.toUpperCase());
+                }}
+                placeholder="SCULPTED LUXURY FOR EVERYDAY STRIDE"
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs uppercase font-extrabold tracking-tight focus:border-orange-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Tagline / Subtitle */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-foreground">
+                Subtitle Description
+              </label>
+              <textarea
+                rows={2}
+                value={currentProduct.tagline || ""}
+                onChange={(e) => updateProductField(safeIdx, "tagline", e.target.value)}
+                placeholder="Handcrafted double-bow silhouette on an anatomical PU footbed..."
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs leading-relaxed focus:border-orange-500 focus:outline-none resize-none"
+              />
+            </div>
+
+            {/* Secondary Metadata Badges (Category & Price) */}
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-foreground">
+                  Category Tag
+                </label>
+                <input
+                  type="text"
+                  value={currentProduct.category || ""}
+                  onChange={(e) => updateProductField(safeIdx, "category", e.target.value)}
+                  placeholder="Women"
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs focus:border-orange-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-foreground">
+                  Display Price
+                </label>
+                <input
+                  type="text"
+                  value={currentProduct.price || ""}
+                  onChange={(e) => updateProductField(safeIdx, "price", e.target.value)}
+                  placeholder="₹399"
+                  className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs font-mono focus:border-orange-500 focus:outline-none"
+                />
+              </div>
+            </div>
+
+          </div>
+
+          {/* Card 3: Destination URL & Quick Catalog Linker */}
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                <Link2 className="w-4 h-4 text-orange-500" />
+                <span>"Shop Now" Button Link Destination</span>
+              </h3>
+              {currentProduct.to && (
+                <a
+                  href={currentProduct.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] text-orange-500 hover:underline inline-flex items-center gap-1 font-semibold"
+                >
+                  <span>Test Link</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+
+            {/* Path Input */}
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-muted-foreground">
+                Target URL / Route:
+              </label>
+              <input
+                type="text"
+                value={currentProduct.to || ""}
+                onChange={(e) => updateProductField(safeIdx, "to", e.target.value)}
+                placeholder="/shop?category=Women or /product/comfort-wedge-slide"
+                className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs font-mono focus:border-orange-500 focus:outline-none"
+              />
+            </div>
+
+            {/* Quick Catalog Linker Dropdown */}
+            <div className="space-y-2 pt-2 border-t border-border/70">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
+                  <Search className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Link Directly to a Catalog Product</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsLinkDropdownOpen(!isLinkDropdownOpen)}
+                  className="text-[11px] text-orange-500 font-bold hover:underline cursor-pointer"
+                >
+                  {isLinkDropdownOpen ? "Hide Search" : "Search Products"}
+                </button>
+              </div>
+
+              {isLinkDropdownOpen && (
+                <div className="space-y-2 p-3 bg-muted/30 rounded-xl border border-border">
+                  <input
+                    type="text"
+                    value={linkSearchQuery}
+                    onChange={(e) => setLinkSearchQuery(e.target.value)}
+                    placeholder="Search by name, art number, or category..."
+                    className="w-full px-3 py-1.5 rounded-lg border border-border bg-background text-xs focus:border-orange-500 focus:outline-none"
+                    autoFocus
+                  />
+
+                  <div className="max-h-48 overflow-y-auto space-y-1 pr-1">
+                    {inlineFilteredProducts.length === 0 ? (
+                      <p className="text-[11px] text-muted-foreground py-2 text-center">
+                        No matching products found.
+                      </p>
+                    ) : (
+                      inlineFilteredProducts.map((p) => {
+                        const slug = p.slug || p._id || p.id;
+                        const targetPath = `/product/${slug}`;
+                        const isSelected = currentProduct.to === targetPath;
                         return (
                           <div
                             key={p._id || p.id}
                             className={cn(
-                              "flex items-center justify-between p-2 rounded-lg text-xs transition-colors hover:bg-muted/80 gap-2",
-                              isCurrent ? "bg-orange-500/10 border border-orange-500/30" : ""
+                              "flex items-center justify-between p-2 rounded-lg border text-xs transition-colors",
+                              isSelected
+                                ? "bg-orange-500/10 border-orange-500"
+                                : "bg-card border-border/70 hover:bg-muted"
                             )}
                           >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <img
-                                src={getImageUrl((p.images && p.images[0]) || p.image || "/placeholder.svg")}
-                                alt={p.name}
-                                className="w-8 h-8 rounded-md object-contain bg-muted/40 shrink-0"
-                              />
-                              <div className="min-w-0">
-                                <p className="font-bold text-foreground truncate text-xs">{p.name}</p>
-                                <p className="text-[10px] text-muted-foreground truncate">
-                                  {p.artNumber ? `Art: ${p.artNumber} • ` : ""}₹{p.price} • {typeof p.category === "string" ? p.category : p.category?.name || "Footwear"}
-                                </p>
-                              </div>
+                            <div className="min-w-0 flex-1 pr-2">
+                              <span className="font-bold text-foreground block truncate">
+                                {p.name}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground font-mono">
+                                {p.artNumber || "Art #"} • ₹{p.price}
+                              </span>
                             </div>
 
-                            <div className="flex items-center gap-1 shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0">
                               <button
                                 type="button"
                                 onClick={() => handleLinkProduct(p, false)}
-                                className="px-2 py-1 rounded bg-muted hover:bg-orange-500 hover:text-white text-[11px] font-semibold transition-colors cursor-pointer"
-                                title={`Set path to /product/${targetSlug}`}
+                                className="px-2.5 py-1 rounded bg-muted hover:bg-orange-500 hover:text-white text-[10px] font-bold transition-colors cursor-pointer"
                               >
-                                Link Path
+                                Link Only
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleLinkProduct(p, true)}
-                                className="px-2 py-1 rounded bg-orange-500 text-white hover:bg-orange-600 text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1"
-                                title="Link path AND auto-fill model name, price, category, tagline"
+                                className="px-2.5 py-1 rounded bg-orange-500 text-white hover:bg-orange-600 text-[10px] font-bold transition-colors cursor-pointer"
+                                title="Auto-fill Title, Tagline, Price and Link"
                               >
-                                <Wand2 className="w-2.5 h-2.5" />
-                                <span>Auto-fill All</span>
+                                Auto-Fill All
                               </button>
                             </div>
                           </div>
                         );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* Currently linked banner with Auto-Fill helper */}
-                {linkedCatalogProduct && (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2.5 rounded-xl bg-background border border-border text-xs">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-                      <div className="min-w-0">
-                        <span className="font-semibold text-foreground truncate block">
-                          Linked to: {linkedCatalogProduct.name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          ₹{linkedCatalogProduct.price} • {linkedCatalogProduct.artNumber || "In Stock"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => handleLinkProduct(linkedCatalogProduct, true)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/10 text-orange-400 hover:bg-orange-500/20 text-[11px] font-bold transition-all cursor-pointer"
-                        title="Re-sync Model Name, Price, and Category from this product"
-                      >
-                        <Wand2 className="w-3 h-3" />
-                        <span>Sync Content</span>
-                      </button>
-
-                      {linkedCatalogProduct.images?.[0] && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            updateProductField(selectedProductIdx, "image", linkedCatalogProduct.images[0]);
-                            toast.success("Applied product photo as cutout image");
-                          }}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted text-foreground hover:bg-muted/80 text-[11px] font-medium transition-all cursor-pointer"
-                          title="Use this product's first catalog photo as cutout image"
-                        >
-                          <ImageIcon className="w-3 h-3" />
-                          <span>Use Photo</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Manual Path Input */}
-            <div className="space-y-1">
-              <span className="text-[11px] font-semibold text-muted-foreground block">
-                Destination URL Path:
-              </span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={currentProduct.to || ""}
-                  onChange={(e) => updateProductField(selectedProductIdx, "to", e.target.value)}
-                  placeholder="e.g. /product/ladies-buckle-slide or /shop"
-                  className="flex-1 rounded-xl border border-input bg-background px-3.5 py-2 text-xs font-mono font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
-                />
-                <a
-                  href={currentProduct.to || "/shop"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-semibold shrink-0"
-                  title="Open destination URL in a new tab"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Test</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Quick URL Presets */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase">Presets:</span>
-              {[
-                { label: "All Products (/shop)", path: "/shop" },
-                { label: "Women Collection", path: "/shop?category=Women" },
-                { label: "Men Collection", path: "/shop?category=Men" },
-                { label: "New Arrivals", path: "/shop?sort=newest" },
-              ].map((p) => (
-                <button
-                  key={p.path}
-                  type="button"
-                  onClick={() => {
-                    updateProductField(selectedProductIdx, "to", p.path);
-                    toast.info(`Set path to ${p.path}`);
-                  }}
-                  className="px-2 py-0.5 rounded-md bg-muted/60 hover:bg-muted text-[10px] font-mono text-muted-foreground hover:text-foreground transition-colors cursor-pointer border border-border/50"
-                >
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Shoe Cutout Image Upload & Selector */}
-          <div className="space-y-2 pt-2 border-t border-border/60">
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block">
-              Shoe Cutout Image (Transparent PNG)
-            </label>
-
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
-              <input
-                type="text"
-                value={currentProduct.image}
-                onChange={(e) => updateProductField(selectedProductIdx, "image", e.target.value)}
-                placeholder="/about-products/... or image URL"
-                className="flex-1 rounded-xl border border-input bg-background px-3.5 py-2.5 text-xs font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
-              />
-
-              <label className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold cursor-pointer transition-all shadow-sm shrink-0">
-                <Upload className="w-3.5 h-3.5" />
-                <span>Upload PNG</span>
-                <input
-                  type="file"
-                  accept="image/png,image/webp,image/jpeg"
-                  className="hidden"
-                  onChange={(e) => handleShoeFileUpload(e, selectedProductIdx)}
-                />
-              </label>
-            </div>
-
-            {/* Presets selector */}
-            <div className="pt-1">
-              <span className="text-[11px] font-semibold text-muted-foreground block mb-1.5">
-                Quick Select MOCS Cutout Presets:
-              </span>
-              <div className="flex flex-wrap gap-2">
-                {PRESET_SHOE_IMAGES.map((preset) => (
-                  <button
-                    key={preset.path}
-                    type="button"
-                    onClick={() => updateProductField(selectedProductIdx, "image", preset.path)}
-                    className={cn(
-                      "px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all flex items-center gap-1.5 cursor-pointer",
-                      currentProduct.image === preset.path
-                        ? "bg-orange-500/15 border-orange-500 text-orange-400 font-bold"
-                        : "bg-muted/40 border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                      })
                     )}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
-                    <span>{preset.label}</span>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                </div>
+              )}
             </div>
+
           </div>
 
-          {/* =========================================================================
-              FLUID SHADER COLOR PALETTE CUSTOMIZER
-              ========================================================================= */}
-          <div className="space-y-3 pt-2 border-t border-border/60">
-            <button
-              type="button"
-              onClick={() => setShowColorEditor(!showColorEditor)}
-              className="w-full flex items-center justify-between text-left p-3 rounded-xl bg-muted/40 hover:bg-muted border border-border/70 transition-colors cursor-pointer"
-            >
-              <div className="flex items-center gap-2">
-                <Palette className="w-4 h-4 text-orange-500" />
-                <span className="text-xs font-bold uppercase tracking-wider text-foreground">
-                  WebGL 3D Fluid Colors & Shader Theme
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-full border border-white/20"
-                  style={{ backgroundColor: accentColor }}
-                />
-                <span className="text-xs text-muted-foreground">
-                  {showColorEditor ? "Hide" : "Customize"}
-                </span>
-              </div>
-            </button>
-
-            {showColorEditor && (
-              <div className="p-4 rounded-2xl bg-card border border-border space-y-4">
-                {/* 1-Click Palette Presets */}
-                <div>
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block mb-2">
-                    1-Click Shader Theme Presets:
-                  </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {FLUID_PALETTE_PRESETS.map((preset) => (
-                      <button
-                        key={preset.name}
-                        type="button"
-                        onClick={() => applyPalettePreset(preset)}
-                        className="flex items-center gap-2 p-2 rounded-xl border border-border hover:border-orange-500/50 bg-background hover:bg-muted/60 text-left transition-all cursor-pointer text-xs"
-                      >
-                        <div className="flex items-center -space-x-1 shrink-0">
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-background shadow-xs"
-                            style={{ backgroundColor: preset.accent }}
-                          />
-                          <span
-                            className="w-3.5 h-3.5 rounded-full border border-background shadow-xs"
-                            style={{ backgroundColor: preset.accentSecondary }}
-                          />
-                        </div>
-                        <span className="font-semibold text-foreground truncate text-[11px]">
-                          {preset.name}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Individual Color Controls */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-border/60">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block truncate">
-                      Primary Accent
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={currentProduct.colors?.accent || "#ff6600"}
-                        onChange={(e) => handleColorChange("accent", e.target.value)}
-                        className="w-8 h-8 rounded-lg cursor-pointer border border-border bg-transparent p-0.5"
-                      />
-                      <span className="text-[11px] font-mono text-muted-foreground">
-                        {currentProduct.colors?.accent || "#ff6600"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block truncate">
-                      Secondary Glow
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={currentProduct.colors?.accentSecondary || "#ff9933"}
-                        onChange={(e) => handleColorChange("accentSecondary", e.target.value)}
-                        className="w-8 h-8 rounded-lg cursor-pointer border border-border bg-transparent p-0.5"
-                      />
-                      <span className="text-[11px] font-mono text-muted-foreground">
-                        {currentProduct.colors?.accentSecondary || "#ff9933"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block truncate">
-                      Fluid Upper Base
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={currentProduct.colors?.upper || "#141416"}
-                        onChange={(e) => handleColorChange("upper", e.target.value)}
-                        className="w-8 h-8 rounded-lg cursor-pointer border border-border bg-transparent p-0.5"
-                      />
-                      <span className="text-[11px] font-mono text-muted-foreground">
-                        {currentProduct.colors?.upper || "#141416"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block truncate">
-                      Midsole Crest
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="color"
-                        value={currentProduct.colors?.midsole || "#f4f4f6"}
-                        onChange={(e) => handleColorChange("midsole", e.target.value)}
-                        className="w-8 h-8 rounded-lg cursor-pointer border border-border bg-transparent p-0.5"
-                      />
-                      <span className="text-[11px] font-mono text-muted-foreground">
-                        {currentProduct.colors?.midsole || "#f4f4f6"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
+
       </div>
 
-      {/* =========================================================================
-          MODAL: ADD HERO MODEL FROM PRODUCT CATALOG
-          ========================================================================= */}
+      {/* ── Catalog Browser Modal ("Add from Catalog") ── */}
       {isCatalogModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-card border border-border rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-3xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden text-left">
+            
             {/* Modal Header */}
-            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/20">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-orange-500/15 flex items-center justify-center text-orange-500">
-                  <ShoppingBag className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="font-display text-base font-bold text-foreground">
-                    Add Hero Model from Catalog
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Choose a product to instantly create a new Hero Model with its name, price, and product page link.
-                  </p>
-                </div>
+            <div className="p-5 border-b border-border flex items-center justify-between">
+              <div>
+                <h3 className="font-display font-bold text-base sm:text-lg text-foreground flex items-center gap-2">
+                  <ShoppingBag className="w-5 h-5 text-orange-500" />
+                  <span>Add New Hero Slide from Catalog</span>
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Select any product from your store to automatically create a dedicated hero slide.
+                </p>
               </div>
-
               <button
                 type="button"
                 onClick={() => setIsCatalogModalOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Modal Search & Filters */}
-            <div className="p-4 border-b border-border space-y-3 bg-background">
-              <div className="relative">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            {/* Filter Bar */}
+            <div className="p-4 border-b border-border/80 bg-muted/20 flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={catalogSearch}
                   onChange={(e) => setCatalogSearch(e.target.value)}
-                  placeholder="Search products by title, SKU / Art #, or category..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-input bg-card text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  placeholder="Search products by name or art number..."
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-border bg-background text-xs focus:border-orange-500 focus:outline-none"
                   autoFocus
                 />
               </div>
 
-              {/* Category Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              <select
+                value={catalogCategoryFilter}
+                onChange={(e) => setCatalogCategoryFilter(e.target.value)}
+                className="px-3 py-2 rounded-xl border border-border bg-background text-xs font-semibold focus:border-orange-500 focus:outline-none"
+              >
                 {productCategories.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setCatalogCategoryFilter(cat)}
-                    className={cn(
-                      "px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer",
-                      catalogCategoryFilter === cat
-                        ? "bg-orange-500 text-white shadow-xs"
-                        : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
-                    )}
-                  >
+                  <option key={cat} value={cat}>
                     {cat}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
 
-            {/* Modal Product List */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+            {/* Product List */}
+            <div className="p-4 overflow-y-auto space-y-2 flex-1">
               {filteredCatalogProducts.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <ShoppingBag className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                  <p className="text-sm font-semibold">No catalog products found</p>
-                  <p className="text-xs text-muted-foreground mt-1">Try adjusting your search query or category filter.</p>
+                <div className="py-12 text-center text-muted-foreground text-xs">
+                  No products found matching your search.
                 </div>
               ) : (
                 filteredCatalogProducts.map((p) => {
-                  const targetSlug = p.slug || p._id || p.id;
-                  const catName = typeof p.category === "string" ? p.category : p.category?.name || "Footwear";
-                  const thumb = (p.images && p.images[0]) || p.image || "/placeholder.svg";
-
+                  const prodImg = (p.images && p.images[0]) || p.image;
                   return (
                     <div
                       key={p._id || p.id}
-                      className="flex items-center justify-between p-3 rounded-2xl border border-border hover:border-orange-500/40 bg-card hover:bg-muted/40 transition-all gap-3"
+                      className="flex items-center justify-between p-3 rounded-2xl border border-border bg-card hover:bg-muted/40 transition-colors gap-3"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <img
-                          src={getImageUrl(thumb)}
-                          alt={p.name}
-                          className="w-12 h-12 rounded-xl object-contain bg-muted/60 p-1 shrink-0 border border-border/50"
-                        />
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-sm text-foreground truncate">{p.name}</h4>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                            <span className="font-mono text-orange-400 font-bold">₹{p.price}</span>
-                            <span>•</span>
-                            <span className="truncate">{catName}</span>
-                            {p.artNumber && (
-                              <>
-                                <span>•</span>
-                                <span className="font-mono text-[10px] bg-muted px-1.5 py-0.2 rounded">
-                                  Art: {p.artNumber}
-                                </span>
-                              </>
-                            )}
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-stone-900 border border-white/10 shrink-0">
+                        {prodImg ? (
+                          <img
+                            src={getImageUrl(prodImg)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-stone-500">
+                            <ImageIcon className="w-4 h-4" />
                           </div>
-                          <p className="text-[10px] font-mono text-muted-foreground/80 truncate mt-0.5">
-                            Path: /product/{targetSlug}
-                          </p>
-                        </div>
+                        )}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleCreateFromCatalog(p)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer shrink-0"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add to Hero</span>
-                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-foreground text-xs truncate">
+                            {p.name}
+                          </span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground font-mono">
+                            {p.artNumber || "Art #"}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                          {p.description || "No description available"}
+                        </p>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="font-mono text-xs font-bold text-orange-500 block">
+                          ₹{p.price}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCreateFromCatalog(p)}
+                          className="mt-1 px-3 py-1.5 rounded-xl bg-orange-500 text-white font-bold text-[11px] hover:bg-orange-600 active:scale-95 transition-all shadow-xs cursor-pointer"
+                        >
+                          + Create Slide
+                        </button>
+                      </div>
                     </div>
                   );
                 })
               )}
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-border bg-muted/20 flex items-center justify-between text-xs text-muted-foreground">
-              <span>Showing {filteredCatalogProducts.length} of {availableProducts.length} catalog products</span>
-              <button
-                type="button"
-                onClick={() => setIsCatalogModalOpen(false)}
-                className="px-4 py-2 rounded-xl border border-border bg-background hover:bg-muted text-foreground font-semibold cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

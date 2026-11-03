@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import logo from "@/assets/mocs-logo.png";
 
 const CRITICAL_ASSETS = [
-  "/hero-comfort-banner.jpg",
-  "/hero-lifestyle-1.jpg",
+  "/images/hero-bronze-slide.jpg",
+  "/images/hero-wedge-rhinestone.jpg",
+  "/images/hero-script-bow.jpg",
 ];
 
 export function PageLoader() {

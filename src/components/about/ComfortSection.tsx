@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-const lifestyleWomen = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800";
+const lifestyleWomen = "/images/hero-wedge-rhinestone.jpg";
 
 export function ComfortSection({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
 
-  const comfortProductImg = "/about-products/trans_mocs-wedge-slide.png";
+  const comfortProductImg = "/products/mocs-rhinestone-wedge-cream-9056.png";
 
   const { scrollYProgress } = useScroll({
     target: containerRef,

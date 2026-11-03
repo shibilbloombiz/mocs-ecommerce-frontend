@@ -7,7 +7,6 @@ import { apiClient, API_BASE_URL } from "@/lib/api";
 import { cn, getImageUrl } from "@/lib/utils";
 
 // Extracted Config subcomponents
-import { HeroSlidesConfig } from "@/components/admin/HeroSlidesConfig";
 import { HeroSectionConfig } from "@/components/admin/HeroSectionConfig";
 import { CategoryGalleryConfig } from "@/components/admin/CategoryGalleryConfig";
 import { CategoryBannersConfig } from "@/components/admin/CategoryBannersConfig";
@@ -235,7 +234,6 @@ function AdminSettingsPage() {
       "announcement-bar",
       "hero-models",
       "category-gallery-section",
-      "hero-slideshow",
       "promo-banner",
       "collections-banners",
       "promise-collage",
@@ -332,7 +330,7 @@ function AdminSettingsPage() {
         } else {
           const fallbacks = [
             {
-              bg: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1920",
+              bg: "/images/hero-bronze-slide.jpg",
               to: "/shop",
             }
           ];
@@ -346,9 +344,9 @@ function AdminSettingsPage() {
         }
 
         const defaultCollections = [
-          { key: "sports", title: "SPORTS", bg: "https://images.unsplash.com/photo-1517649763962-0c623066013b", to: "/shop", search: { collection: "Sports" } },
-          { key: "casual", title: "CASUAL", bg: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77", to: "/shop", search: { collection: "Casual" } },
-          { key: "formal", title: "FORMAL", bg: "https://images.unsplash.com/photo-1486308512493-ae6a625e368a", to: "/shop", search: { collection: "Formal" } }
+          { key: "sports", title: "SPORTS", bg: "/products/mocs-metal-bar-slide-navy.png", to: "/shop", search: { collection: "Sports" } },
+          { key: "casual", title: "CASUAL", bg: "/products/mocs-leather-comfort-sandal-brown-9057.png", to: "/shop", search: { collection: "Casual" } },
+          { key: "formal", title: "FORMAL", bg: "/products/mocs-woven-leather-shoe-brown-10001.png", to: "/shop", search: { collection: "Formal" } }
         ];
         if (collectionsRes && collectionsRes.value && Array.isArray(collectionsRes.value)) {
           setCollectionsBanners(collectionsRes.value);
@@ -363,7 +361,7 @@ function AdminSettingsPage() {
             key: "top-left",
             title: "Top Left Image",
             to: "/shop",
-            bg: "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=800"
+            bg: "/images/hero-wedge-rhinestone.jpg"
           },
           {
             key: "bottom-left",
@@ -372,13 +370,13 @@ function AdminSettingsPage() {
             desc: "Bold heels & elegant flats for the woman who leads.",
             cta: "Explore",
             to: "/shop",
-            bg: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800"
+            bg: "/images/hero-bronze-slide.jpg"
           },
           {
             key: "right",
             title: "Right Side Image",
             to: "/shop",
-            bg: "https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=800"
+            bg: "/images/hero-script-bow.jpg"
           }
         ];
         if (promiseRes && promiseRes.value && Array.isArray(promiseRes.value) && promiseRes.value.length > 0) {
@@ -705,7 +703,7 @@ function AdminSettingsPage() {
   const handleHeroShoeUpload = (e: React.ChangeEvent<HTMLInputElement>, idx: number) => {
     handleFileUpload(
       e,
-      "Uploading transparent shoe cutout...",
+      "Uploading hero slide image...",
       `shoe-upload-${idx}`,
       (url) => updateHeroProductField(idx, "image", url),
       "hero-product"
@@ -792,7 +790,7 @@ function AdminSettingsPage() {
               : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
         >
-          Hero Models
+          Hero Carousel
         </button>
         <button
           onClick={() => scrollToSection("category-gallery-section")}
@@ -804,17 +802,6 @@ function AdminSettingsPage() {
           )}
         >
           Bento Gallery
-        </button>
-        <button
-          onClick={() => scrollToSection("hero-slideshow")}
-          className={cn(
-            "flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold uppercase transition-all cursor-pointer whitespace-nowrap",
-            activeSection === "hero-slideshow"
-              ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20 scale-105"
-              : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-          )}
-        >
-          Hero Slideshow
         </button>
         <button
           onClick={() => scrollToSection("promo-banner")}
@@ -905,17 +892,6 @@ function AdminSettingsPage() {
           removeTile={removeCategoryGalleryTile}
           handleGalleryFileUpload={handleCategoryGalleryFileUpload}
           getImageUrl={getImageUrl}
-        />
-
-        <HeroSlidesConfig
-          heroSlides={heroSlides}
-          updateHeroSlideField={updateHeroSlideField}
-          addHeroSlide={addHeroSlide}
-          removeHeroSlide={removeHeroSlide}
-          handleHeroFileChange={handleHeroFileChange}
-          handleHeroMobileFileChange={handleHeroMobileFileChange}
-          openFocusIdx={openFocusIdx}
-          setOpenFocusIdx={setOpenFocusIdx}
         />
 
         <CategoryBannersConfig

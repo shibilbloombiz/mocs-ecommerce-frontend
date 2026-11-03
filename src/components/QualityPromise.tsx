@@ -5,12 +5,12 @@ import { getImageUrl as resolveImage } from "@/lib/utils";
 import { OptimizedImage } from "@/components/OptimizedImage";
 
 const DEFAULT_COLLAGE = [
-  { bg: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800" },
-  { bg: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800" },
-  { bg: "https://images.unsplash.com/photo-1556906781-9a412961c28c?q=80&w=800" },
-  { bg: "https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800" },
-  { bg: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=800" },
-  { bg: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800" },
+  { bg: "/images/hero-bronze-slide.jpg" },
+  { bg: "/images/hero-wedge-rhinestone.jpg" },
+  { bg: "/images/hero-script-bow.jpg" },
+  { bg: "/images/mocs-model-editorial.jpg" },
+  { bg: "/images/mocs-lifestyle-model.jpg" },
+  { bg: "/images/mocs-comfort-silk.jpg" },
 ];
 
 export function QualityPromise({ collage }: { collage?: any[] }) {

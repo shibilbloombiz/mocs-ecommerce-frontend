@@ -2,9 +2,9 @@ import { useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-const shoe1 = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800";
-const shoe2 = "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800";
-const shoe3 = "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800";
+const shoe1 = "/products/mocs-rhinestone-wedge-cream-9056.png";
+const shoe2 = "/products/mocs-double-buckle-slide-charcoal-9057.png";
+const shoe3 = "/products/mocs-velcro-casual-shoe-brown-1.png";
 
 export function ProductCategories({ products }: { products?: any[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -21,35 +21,35 @@ export function ProductCategories({ products }: { products?: any[] }) {
       num: "01",
       title: "LADIES BUCKLE SLIDE",
       desc: "Contoured anatomical footbed with crystal-embellished buckle strap and toe post.",
-      img: "/about-products/trans_mocs-sandal-buckle.png",
+      img: "/products/mocs-buckle-slide-mehandi-9058.png",
       rotation: "-rotate-1",
     },
     {
       num: "02",
       title: "CRYSTAL STRAP FLAT",
       desc: "Dual-band flat sandal with sparkling crystal rows and supportive toe loop.",
-      img: "/about-products/trans_mocs-sandal-rhinestone.png",
+      img: "/products/mocs-rhinestone-wedge-black-9056.png",
       rotation: "rotate-1",
     },
     {
       num: "03",
       title: "COMFORT WEDGE SLIDE",
       desc: "Shock-absorbing PU wedge with wood-textured grain and rhinestone square buckle.",
-      img: "/about-products/trans_mocs-wedge-slide.png",
+      img: "/products/mocs-checkered-heel-rose.png",
       rotation: "-rotate-1",
     },
     {
       num: "04",
       title: "PATENT CROSSOVER SLIDE",
       desc: "High-gloss crossover straps engineered with lightweight arch contouring.",
-      img: "/about-products/trans_mocs-cross-slide.png",
+      img: "/products/mocs-bronze-double-bow-slide.png",
       rotation: "rotate-1",
     },
     {
       num: "05",
       title: "ELEGANT BOW SLINGBACK",
       desc: "Sleek two-tone slingback flat embellished with a crystal bow ornament.",
-      img: "/about-products/trans_mocs-bow-sandal.png",
+      img: "/products/mocs-ankle-bow-black-silver.png",
       rotation: "-rotate-1",
     },
   ];

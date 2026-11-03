@@ -593,7 +593,7 @@ function AdminOrders() {
                             alt={item.name}
                             className="h-14 w-14 rounded-xl object-cover bg-stone-100 border border-stone-200/50 shadow-sm"
                             onError={(e) => {
-                              e.currentTarget.src = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=120";
+                              e.currentTarget.src = "/products/mocs-bronze-double-bow-slide.png";
                             }}
                           />
                           <div className="min-w-0 flex-1">

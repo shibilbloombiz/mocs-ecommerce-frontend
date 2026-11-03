@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-const heroShoe = "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800";
+const heroShoe = "/products/mocs-leather-comfort-sandal-brown-9057.png";
 
 const puSoleSpecs = [
   "Lightweight & flexible",
@@ -27,8 +27,8 @@ export function MaterialsSection({ products }: { products?: any[] }) {
 
   const currentSpecs = activeTab === "sole" ? puSoleSpecs : upperSpecs;
 
-  const soleImg = "/about-products/trans_mocs-sandal-buckle.png";
-  const upperImg = "/about-products/trans_mocs-cross-slide.png";
+  const soleImg = "/products/mocs-buckle-slide-mehandi-9058.png";
+  const upperImg = "/products/mocs-bronze-double-bow-slide.png";
   const currentImg = activeTab === "sole" ? soleImg : upperImg;
 
   return (

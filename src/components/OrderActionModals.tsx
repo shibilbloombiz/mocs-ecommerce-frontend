@@ -500,7 +500,7 @@ export function OrderActionModals({
                                 className="h-9 w-9 rounded-lg object-cover bg-white border border-stone-200/60 shrink-0"
                                 onError={(e) => {
                                   e.currentTarget.src =
-                                    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=120";
+                                    "/products/mocs-bronze-double-bow-slide.png";
                                 }}
                               />
                               <div className="flex-1 min-w-0">
