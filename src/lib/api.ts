@@ -1,10 +1,22 @@
 // Thin API client for the external MERN backend (see ./mern-reference).
 // Set VITE_API_BASE_URL in your env (defaults to http://localhost:5000).
 // Works both in Vite client (import.meta.env) and Nitro SSR (process.env).
-export const API_BASE_URL: string =
-  (typeof process !== "undefined" && (process.env as any)?.VITE_API_BASE_URL) ||
-  (import.meta as any)?.env?.VITE_API_BASE_URL ||
-  "http://localhost:5000";
+function getApiBaseUrl(): string {
+  const envUrl =
+    (typeof process !== "undefined" && (process.env as any)?.VITE_API_BASE_URL) ||
+    (import.meta as any)?.env?.VITE_API_BASE_URL;
+
+  // If in browser and running on live domain (e.g. www.mocs.in or any live HTTPS site), always use production API
+  if (typeof window !== "undefined") {
+    if (window.location.hostname.includes("mocs.in") || (window.location.protocol === "https:" && !window.location.hostname.includes("localhost") && !window.location.hostname.includes("127.0.0.1"))) {
+      return (envUrl && !envUrl.includes("localhost")) ? envUrl : "https://api.mocs.in";
+    }
+  }
+
+  return envUrl || "http://localhost:5000";
+}
+
+export const API_BASE_URL: string = getApiBaseUrl();
 
 const TOKEN_KEY = "mocs_token";
 
